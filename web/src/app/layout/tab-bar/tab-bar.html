@@ -1,0 +1,16 @@
+<nav class="bar lg" aria-label="ניווט ראשי">
+  @if (activeIndex() >= 0) {
+    <span class="lens lg" [style.--i]="activeIndex()" aria-hidden="true"></span>
+  }
+  @for (tab of tabs; track tab.path; let i = $index) {
+    <a
+      class="tab b press"
+      [routerLink]="tab.path"
+      [class.active]="i === activeIndex()"
+      [attr.aria-current]="i === activeIndex() ? 'page' : null"
+    >
+      <app-icon [name]="tab.icon" />
+      <span>{{ tab.label }}</span>
+    </a>
+  }
+</nav>

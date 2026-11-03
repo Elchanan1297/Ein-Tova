@@ -1,0 +1,50 @@
+@let g = greeting();
+
+@switch (g.kind) {
+  @case ('image') {
+    <div class="media">
+      <img
+        [src]="g.mediaUrl"
+        [attr.srcset]="srcset()"
+        sizes="(min-width: 744px) 680px, 100vw"
+        [alt]="'ברכה מ' + g.senderName"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  }
+  @case ('video') {
+    <div class="media video">
+      @if (playing() && embedUrl()) {
+        <iframe
+          [src]="embedUrl()"
+          [title]="'ברכה מ' + g.senderName"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowfullscreen
+        ></iframe>
+      } @else {
+        @if (thumb()) {
+          <img [src]="thumb()" alt="" loading="lazy" decoding="async" />
+        }
+        <button type="button" class="play b lg gs press" aria-label="ניגון הסרטון" (click)="playing.set(true)">
+          <app-icon name="play" />
+        </button>
+      }
+    </div>
+  }
+  @default {
+    <span class="quote" aria-hidden="true">”</span>
+  }
+}
+
+<div class="caption">
+  @if (g.body) {
+    <p class="body" [class.big]="g.kind === 'text'">{{ g.body }}</p>
+  }
+  <p class="from">
+    <strong>{{ g.senderName }}</strong>
+    @if (g.relation) {
+      <span>{{ g.relation }}</span>
+    }
+  </p>
+</div>

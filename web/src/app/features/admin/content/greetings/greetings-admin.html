@@ -1,0 +1,43 @@
+<div class="bar">
+  <p>בסדר הזה הן מופיעות בפיד. גוררים כדי לשנות.</p>
+  <button type="button" class="b lg gs press add" (click)="editing.set('new')"><app-icon name="plus" /> ברכה חדשה</button>
+</div>
+
+@if (items(); as list) {
+  <ol class="list" cdkDropList (cdkDropListDropped)="drop($event)" role="list">
+    @for (g of list; track g.greetingId) {
+      <li class="row lg" cdkDrag [class.off]="!g.isActive">
+        <button type="button" class="b grip" cdkDragHandle aria-label="גרירה לשינוי סדר"><app-icon name="grip" /></button>
+        <span class="thumb" [attr.data-kind]="g.kind">
+          @if (thumb(g); as src) {
+            <img [src]="src" alt="" loading="lazy" />
+          } @else {
+            <span aria-hidden="true">”</span>
+          }
+        </span>
+        <div class="main">
+          <p class="who"><strong>{{ g.senderName }}</strong> {{ g.relation }}</p>
+          <p class="body">{{ g.body || (g.kind === 'video' ? 'סרטון' : 'תמונה') }}</p>
+          @if (!g.isActive) { <span class="chip">מוסתרת</span> }
+        </div>
+        <div class="tools">
+          <button type="button" class="b tool" aria-label="עריכה" (click)="editing.set(g)"><app-icon name="pencil" /></button>
+          <button type="button" class="b tool danger" [attr.aria-label]="'מחיקת הברכה של ' + g.senderName" (click)="remove(g)">
+            @if (confirmDelete() === g.greetingId) { למחוק? } @else { <app-icon name="trash" /> }
+          </button>
+        </div>
+      </li>
+    } @empty {
+      <li class="empty">עוד אין ברכות.</li>
+    }
+  </ol>
+} @else {
+  <p class="note">טוען…</p>
+}
+
+@if (notice(); as n) {
+  <p class="toast lg" [class.error]="!n.ok" role="status">{{ n.text }}</p>
+}
+@if (editing(); as e) {
+  <app-greeting-editor [greeting]="e === 'new' ? null : e" (saved)="onSaved()" (closed)="editing.set(null)" />
+}

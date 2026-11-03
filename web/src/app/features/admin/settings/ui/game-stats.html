@@ -1,0 +1,42 @@
+@if (stats.value(); as s) {
+  <div class="tiles">
+    <div class="tile lg">
+      <span class="label">מצב המשחק</span>
+      <strong class="state" [class.open]="s.summary.isOpen">{{ s.summary.isOpen ? 'פתוח' : 'סגור' }}</strong>
+    </div>
+    <div class="tile lg"><span class="label">מוזמנים</span><strong>{{ s.summary.guests }}</strong></div>
+    <div class="tile lg"><span class="label">התחילו</span><strong>{{ s.summary.started }}</strong></div>
+    <div class="tile lg"><span class="label">סיימו</span><strong>{{ s.summary.finished }}</strong></div>
+    <div class="tile lg">
+      <span class="label">ציון ממוצע</span>
+      <strong>{{ s.summary.avgScore | number: '1.0-1' }}</strong>
+    </div>
+  </div>
+
+  <details class="questions lg">
+    <summary>תשובות לפי שאלה ({{ s.summary.activeQuestions }} פעילות)</summary>
+    <table>
+      <thead>
+        <tr><th>#</th><th>שאלה</th><th>ענו</th><th>הצלחה</th><th>נגמר הזמן</th></tr>
+      </thead>
+      <tbody>
+        @for (q of s.questions; track q.questionId; let i = $index) {
+          <tr>
+            <td class="num">{{ i + 1 }}</td>
+            <td class="body">{{ q.body }}</td>
+            <td class="num">{{ q.answered }}</td>
+            <td>
+              <span class="meter"><span [style.width.%]="pct(q.correct, q.answered)"></span></span>
+              <span class="num">{{ pct(q.correct, q.answered) }}%</span>
+            </td>
+            <td class="num">{{ q.timedOut }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </details>
+} @else if (stats.error()) {
+  <p class="note">לא הצלחנו לטעון את מצב המשחק.</p>
+} @else {
+  <p class="note">טוען…</p>
+}

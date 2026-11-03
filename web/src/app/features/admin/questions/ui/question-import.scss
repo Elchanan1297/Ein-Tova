@@ -1,0 +1,76 @@
+.sheet {
+  width: min(100% - 24px, 860px);
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  background: #22263b;
+  color: var(--color-cream);
+  overflow: auto;
+
+  &::backdrop { background: rgba(10, 12, 24, 0.6); backdrop-filter: blur(3px); }
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  h2 { margin: 0; font-size: 22px; }
+}
+
+.x { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; app-icon { width: 20px; height: 20px; } }
+
+.content { display: grid; gap: 12px; padding: 16px 20px 20px; }
+
+.how { margin: 0; line-height: 1.6; color: rgba(248, 243, 234, 0.85); }
+.cols { display: block; margin-block: 4px; color: var(--color-gold); font-weight: 700; }
+
+.tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+.file {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  &::after { content: none; }
+  app-icon { width: 18px; height: 18px; }
+  input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+}
+
+.link { color: var(--color-gold); text-decoration: underline; font-weight: 600; }
+
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--color-cream);
+  font: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.summary { margin: 0; font-weight: 700; color: #9fdcb5; &.bad { color: #f4a493; } }
+
+.table-wrap { max-height: 260px; overflow: auto; border-radius: 12px; background: rgba(0, 0, 0, 0.15); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { position: sticky; top: 0; padding: 6px 8px; background: #2a2f47; text-align: start; }
+td { padding: 6px 8px; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+tr.bad td { background: rgba(232, 130, 111, 0.15); }
+.problem { color: #f4a493; white-space: nowrap; }
+
+.error { margin: 0; color: #f4a493; font-weight: 600; }
+
+.buttons {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+  button { padding: 10px 22px; border-radius: var(--radius-pill); font-weight: 700; }
+  button:disabled { opacity: 0.5; cursor: default; }
+}

@@ -1,0 +1,21 @@
+/* עין טובה: רכיבי זכוכית נוזלית (liquid glass). תלוי ב־tokens.css */
+
+.b { border:0; background:none; padding:0; margin:0; font:inherit; color:inherit; cursor:pointer; text-align:inherit; -webkit-tap-highlight-color:transparent; }
+.lg { position:relative; overflow:hidden; background: linear-gradient(135deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.05) 42%, rgba(255,255,255,.11) 100%); -webkit-backdrop-filter: blur(20px) saturate(175%); backdrop-filter: blur(20px) saturate(175%); border:1px solid rgba(255,255,255,.20); box-shadow: inset 0 1.5px 1px rgba(255,255,255,.55), inset 0 -1px 1px rgba(255,255,255,.14), inset 0 0 20px rgba(255,255,255,.05), 0 14px 34px rgba(3,10,25,.45); }
+.lg::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: radial-gradient(130% 90% at 12% -10%, rgba(255,255,255,.38), rgba(255,255,255,0) 46%), linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 30%); }
+.lg::after { content:""; position:absolute; top:-40%; bottom:-40%; width:46%; left:-60%; pointer-events:none; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.28), rgba(255,255,255,0)); transform: skewX(-18deg); animation: gl 7s ease-in-out infinite; }
+.gt { background-color: rgba(217,182,111,.22); }
+.gs { background-image: linear-gradient(135deg, rgba(242,214,152,.95), rgba(217,182,111,.92) 55%, rgba(176,138,72,.95)); border-color: rgba(255,236,190,.7); color:#1E2235; }
+.press { transition: transform .35s cubic-bezier(.34,1.6,.5,1), filter .2s; }
+.press:hover { filter: brightness(1.08); }
+.press:active { transform: scale(.955); transition-duration:.12s; }
+.rise { animation: rise .8s cubic-bezier(.2,.9,.3,1.15) both; animation-delay: var(--d, 0s); }
+.blob { position:absolute; border-radius:50%; filter: blur(42px); animation: drift 15s ease-in-out infinite alternate; pointer-events:none; }
+.sheen { position:relative; }
+.sheen::after { content:""; position:absolute; inset:0; pointer-events:none; background: linear-gradient(105deg, rgba(255,255,255,0) 38%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 62%); background-size: 260% 100%; background-position: 130% 0; mix-blend-mode: soft-light; -webkit-mask: url(/assets/logo/ein-tova-eye-dark.svg) center / contain no-repeat; mask: url(/assets/logo/ein-tova-eye-dark.svg) center / contain no-repeat; animation: sh 5.5s ease-in-out infinite; }
+.lens { transition: left .6s cubic-bezier(.34,1.5,.5,1); }
+@keyframes gl { 0% { left:-60%; } 55% { left:-60%; } 85% { left:130%; } 100% { left:130%; } }
+@keyframes sh { 0% { background-position:130% 0; } 55% { background-position:130% 0; } 90% { background-position:-30% 0; } 100% { background-position:-30% 0; } }
+@keyframes rise { from { opacity:0; transform: translateY(26px) scale(.95); filter: blur(6px); } to { opacity:1; transform:none; filter:none; } }
+@keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(34px,-26px) scale(1.15); } }
+@keyframes pulse { 0%, 100% { transform:scale(1); } 50% { transform:scale(1.07); } }

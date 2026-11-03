@@ -1,0 +1,67 @@
+<dialog #dialog class="sheet" (close)="closed.emit()" aria-labelledby="gre-title">
+  <header>
+    <h2 id="gre-title">{{ greeting() ? 'עריכת ברכה' : 'ברכה חדשה' }}</h2>
+    <button type="button" class="b x" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+  </header>
+
+  <form (submit)="$event.preventDefault(); save()">
+    <div class="row">
+      <label>ממי
+        <input type="text" maxlength="100" placeholder="דנה" [value]="senderName()" (input)="senderName.set($any($event.target).value)" />
+      </label>
+      <label>קרבה <small>לא חובה</small>
+        <input type="text" maxlength="100" placeholder="הבת" [value]="relation()" (input)="relation.set($any($event.target).value)" />
+      </label>
+    </div>
+
+    <div class="segmented" role="radiogroup" aria-label="סוג הברכה">
+      @for (k of kinds; track k[0]) {
+        <button type="button" role="radio" class="b" [attr.aria-checked]="kind() === k[0]" (click)="kind.set(k[0])">{{ k[1] }}</button>
+      }
+    </div>
+
+    @switch (kind()) {
+      @case ('image') {
+        <div class="media">
+          @if (imageUrl()) {
+            <img [src]="imageUrl()" alt="תצוגה מקדימה" />
+          }
+          <label class="b lg press upload">
+            <app-icon name="upload" />
+            {{ uploading() ? 'מעלה ומקטין…' : imageUrl() ? 'החלפת תמונה' : 'בחירת תמונה' }}
+            <input type="file" accept="image/*" [disabled]="uploading()" (change)="pickImage($event)" />
+          </label>
+          <small>התמונה מוקטנת אוטומטית ונשמרת בלי פרטי מיקום.</small>
+        </div>
+      }
+      @case ('video') {
+        <label>קישור לסרטון ב־YouTube <small>מומלץ "לא רשום" (Unlisted)</small>
+          <input type="url" dir="ltr" placeholder="https://youtu.be/..." [value]="videoUrl()" (input)="videoUrl.set($any($event.target).value)" />
+        </label>
+        @if (videoId(); as id) {
+          <img class="yt" [src]="'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg'" alt="תמונת הסרטון" />
+        } @else if (videoUrl()) {
+          <p class="error">זה לא נראה כמו קישור ל־YouTube.</p>
+        }
+      }
+    }
+
+    <label>{{ kind() === 'text' ? 'הברכה' : 'טקסט מתחת' }} @if (kind() !== 'text') { <small>לא חובה</small> }
+      <textarea rows="3" maxlength="2000" [value]="body()" (input)="body.set($any($event.target).value)"></textarea>
+    </label>
+
+    <label class="check">
+      <input type="checkbox" [checked]="isActive()" (change)="isActive.set($any($event.target).checked)" />
+      מוצגת בפיד
+    </label>
+
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <div class="buttons">
+      <button type="button" class="b press" (click)="close()">ביטול</button>
+      <button type="submit" class="b lg gs press" [disabled]="busy() || !canSave()">{{ busy() ? 'שומר…' : 'שמירה' }}</button>
+    </div>
+  </form>
+</dialog>

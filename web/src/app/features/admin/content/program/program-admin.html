@@ -1,0 +1,36 @@
+<p class="hint">הסדר נקבע לפי השעה. כל שורה נשמרת בנפרד.</p>
+
+@if (items(); as list) {
+  <ol class="list lg" role="list">
+    @for (it of list; track $index; let i = $index) {
+      <li [class.off]="!it.isActive">
+        <span class="badge"><app-icon [name]="iconOf(it.icon)" /></span>
+        <input class="time" type="time" [value]="it.timeText" aria-label="שעה" (input)="edit(i, 'timeText', $any($event.target).value)" />
+        <input class="title" type="text" maxlength="100" placeholder="שם הפריט" [value]="it.title" aria-label="שם הפריט"
+               (input)="edit(i, 'title', $any($event.target).value)" />
+        <select [value]="it.icon ?? 'clock'" aria-label="אייקון" (change)="edit(i, 'icon', $any($event.target).value)">
+          @for (ic of icons; track ic.value) {
+            <option [value]="ic.value" [selected]="(it.icon ?? 'clock') === ic.value">{{ ic.label }}</option>
+          }
+        </select>
+        <label class="check" title="מוצג בתוכנית">
+          <input type="checkbox" [checked]="it.isActive" (change)="edit(i, 'isActive', $any($event.target).checked)" /> מוצג
+        </label>
+        <div class="tools">
+          @if (dirty().has(i)) {
+            <button type="button" class="b lg gs press save" (click)="save(i)">שמירה</button>
+          }
+          <button type="button" class="b tool danger" aria-label="מחיקה" (click)="remove(i)">
+            @if (confirmDelete() !== null && confirmDelete() === it.itemId) { למחוק? } @else { <app-icon name="trash" /> }
+          </button>
+        </div>
+        @if (errors()[i]; as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+      </li>
+    }
+  </ol>
+  <button type="button" class="b add" (click)="add()"><app-icon name="plus" /> פריט חדש</button>
+} @else {
+  <p class="hint">טוען…</p>
+}

@@ -1,0 +1,92 @@
+:host {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  --column: 560px;
+  height: 100dvh;
+  padding-block: calc(28px + env(safe-area-inset-top)) calc(28px + env(safe-area-inset-bottom));
+  // הרקע ברוחב מלא, התוכן בעמודה
+  padding-inline: max(var(--spacing-gutter), calc((100% - var(--column)) / 2));
+  overflow: hidden;
+  // זוהר חם מאחורי ה־70, כמו בהדמיה
+  background:
+    radial-gradient(min(60%, 420px) 40% at 62% 28%, rgba(217, 182, 111, 0.16), transparent 70%),
+    var(--bg-app);
+}
+
+@media (min-width: 744px) {
+  :host { --column: 680px; }
+}
+
+// טלפון לרוחב: פחות ריווח כדי שאבא והלוגו לא יתכווצו
+@media (max-height: 500px) {
+  :host { padding-block: 10px calc(10px + env(safe-area-inset-bottom)); }
+  .start { margin-top: 8px; padding-block: 12px; }
+}
+
+.kicker {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--color-gold);
+}
+
+// כל המידות יחסיות לבמה (container units), כדי שהקומפוזיציה תישמר בכל מסך
+.stage {
+  position: relative;
+  container-type: size;
+  min-height: 0;
+}
+
+.seventy {
+  position: absolute;
+  inset-inline: 0;
+  top: 2cqh;
+  text-align: center;
+  font: 900 min(82cqw, 56cqh) / 0.9 var(--font-display);
+  letter-spacing: -0.04em;
+  background: linear-gradient(180deg, #f2d698 0%, var(--color-gold) 45%, var(--color-gold-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  user-select: none;
+}
+
+// ממורכז לפי הראש: מרכז הראש נמצא ב־~33.5% מרוחב התמונה
+.father {
+  --h: 96cqh;
+  position: absolute;
+  top: 8cqh;
+  left: calc(50cqw - var(--h) * 0.719 * 0.335);
+  width: auto;
+  height: var(--h);
+  -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 86%);
+  mask-image: linear-gradient(180deg, #000 50%, transparent 86%);
+}
+
+.logo {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: min(54cqw, 36cqh);
+  height: auto;
+  translate: -50% 0;
+  filter: drop-shadow(0 10px 24px rgba(10, 12, 24, 0.7));
+}
+
+.start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  justify-self: center;
+  width: min(100%, 440px);
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: var(--radius-pill);
+  font-size: 19px;
+  font-weight: 700;
+
+  app-icon { width: 20px; height: 20px; }
+}

@@ -1,0 +1,45 @@
+<p class="hint">
+  לכל אירוע אפשר להעלות כמה וריאציות, ובכל פעם מתנגנת אחת באקראי. התמלול מוצג על המסך יחד עם הסימון "קול שנוצר בבינה מלאכותית".
+</p>
+
+@if (clips()) {
+  @for (grp of groups(); track grp.type) {
+    <section class="event lg">
+      <header>
+        <div>
+          <h2>{{ grp.title }} <small>{{ grp.clips.length }}</small></h2>
+          <p>{{ grp.when }}</p>
+        </div>
+        <label class="b lg press upload">
+          <app-icon name="upload" /> {{ uploading() === grp.type ? 'מעלה…' : 'הוספת קליפ' }}
+          <input type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav" [disabled]="!!uploading()" (change)="upload($event, grp.type)" />
+        </label>
+      </header>
+
+      @for (c of grp.clips; track c.clipId ?? c.fileUrl) {
+        <div class="clip" [class.off]="!c.isActive">
+          <audio controls preload="none" [src]="c.fileUrl"></audio>
+          <input type="text" maxlength="300" placeholder="מה אבא אומר בקליפ (חובה)" [value]="c.transcript"
+                 aria-label="תמלול" (input)="edit(c, { transcript: $any($event.target).value })" />
+          <label class="check">
+            <input type="checkbox" [checked]="c.isActive" (change)="edit(c, { isActive: $any($event.target).checked })" /> פעיל
+          </label>
+          @if (dirty().has(c)) {
+            <button type="button" class="b lg gs press save" (click)="save(c)">שמירה</button>
+          }
+          <button type="button" class="b tool danger" aria-label="מחיקה" (click)="remove(c)">
+            @if (c.clipId !== null && confirmDelete() === c.clipId) { למחוק? } @else { <app-icon name="trash" /> }
+          </button>
+        </div>
+      } @empty {
+        <p class="none">אין קליפים. בלי קליפ, האירוע פשוט עובר בשקט.</p>
+      }
+    </section>
+  }
+} @else {
+  <p class="hint">טוען…</p>
+}
+
+@if (message(); as m) {
+  <p class="toast lg" [class.error]="!m.ok" role="status">{{ m.text }}</p>
+}

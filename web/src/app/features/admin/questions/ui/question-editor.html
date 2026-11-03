@@ -1,0 +1,90 @@
+<dialog #dialog class="sheet" (close)="closed.emit()" aria-labelledby="qe-title">
+  <header>
+    <h2 id="qe-title">{{ question() ? 'עריכת שאלה' : 'שאלה חדשה' }}</h2>
+    <button type="button" class="b x" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+  </header>
+
+  <div class="layout">
+    <form class="form" (submit)="$event.preventDefault(); save()">
+      @if (question()?.inUse) {
+        <p class="warn">השאלה כבר נענתה. שינוי התשובה הנכונה לא משנה ניקוד שכבר ניתן.</p>
+      }
+
+      <label>השאלה
+        <textarea rows="3" maxlength="500" [value]="body()" (input)="body.set($any($event.target).value)"></textarea>
+      </label>
+
+      <fieldset>
+        <legend>תשובות <small>מסמנים את הנכונה בעיגול</small></legend>
+        @for (o of options(); track $index; let i = $index) {
+          <div class="opt" [class.is-correct]="correct() === i">
+            <input type="radio" name="correct" [checked]="correct() === i" (change)="correct.set(i)"
+                   [attr.aria-label]="'תשובה ' + letters[i] + ' נכונה'" />
+            <span class="letter">{{ letters[i] }}</span>
+            <input type="text" maxlength="200" [value]="o.body" (input)="setOption(i, $any($event.target).value)"
+                   [attr.aria-label]="'תשובה ' + letters[i]" />
+            <button type="button" class="b del" [disabled]="options().length <= 2" aria-label="הסרת תשובה" (click)="removeOption(i)">
+              <app-icon name="x" />
+            </button>
+          </div>
+        }
+        @if (options().length < maxOptions) {
+          <button type="button" class="b add" (click)="addOption()"><app-icon name="plus" /> עוד תשובה</button>
+        }
+      </fieldset>
+
+      <label>עובדה שמופיעה אחרי המענה <small>לא חובה</small>
+        <textarea rows="2" maxlength="600" [value]="fact()" (input)="fact.set($any($event.target).value)"></textarea>
+      </label>
+
+      <div class="row">
+        <label>שניות לשאלה <small>ריק = ברירת המחדל</small>
+          <input type="number" min="5" max="300" inputmode="numeric" [value]="timeLimit()"
+                 (input)="timeLimit.set($any($event.target).value)" />
+        </label>
+        <label>קישור לתמונה <small>לא חובה</small>
+          <input type="url" dir="ltr" [value]="imageUrl()" (input)="imageUrl.set($any($event.target).value)" />
+        </label>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" [checked]="isActive()" (change)="isActive.set($any($event.target).checked)" />
+        שאלה פעילה (נכנסת למשחק)
+      </label>
+
+      @if (serverError() ?? (body() ? error() : null); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      <div class="buttons">
+        <button type="button" class="b press" (click)="close()">ביטול</button>
+        <button type="submit" class="b lg gs press" [disabled]="busy() || !!error()">{{ busy() ? 'שומר…' : 'שמירה' }}</button>
+      </div>
+    </form>
+
+    <!-- תצוגה מקדימה, בערך כמו במסך המשחק -->
+    <aside class="preview" aria-label="תצוגה מקדימה">
+      <div class="phone">
+        <div class="pq lg">
+          <span class="ring">{{ previewSeconds() }}</span>
+          @if (imageUrl()) {
+            <img [src]="imageUrl()" alt="" />
+          }
+          <p>{{ body() || 'כאן תופיע השאלה' }}</p>
+        </div>
+        @for (o of options(); track $index; let i = $index) {
+          <div class="po lg" [class.gs]="showAnswer() && correct() === i">
+            <span class="letter">{{ letters[i] }}</span>{{ o.body || '…' }}
+          </div>
+        }
+        @if (showAnswer() && fact()) {
+          <div class="pf lg"><strong>נכון!</strong>{{ fact() }}</div>
+        }
+      </div>
+      <label class="check small">
+        <input type="checkbox" [checked]="showAnswer()" (change)="showAnswer.set($any($event.target).checked)" />
+        להראות איך זה נראה אחרי מענה
+      </label>
+    </aside>
+  </div>
+</dialog>

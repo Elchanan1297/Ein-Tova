@@ -1,0 +1,59 @@
+@let s = state();
+@let r = result();
+
+<section class="progress lg rise">
+  <div class="row">
+    <span class="count">שאלה {{ s.q.position }} מתוך {{ s.q.total }}</span>
+    <span class="pct">{{ progress() }}%</span>
+  </div>
+  <div class="bar" aria-hidden="true"><span [style.width.%]="progress()"></span></div>
+</section>
+
+<article class="question lg rise" style="--d: 0.06s">
+  @if (!r) {
+    <app-timer-ring class="timer" [seconds]="secondsLeft()" [limit]="s.q.limitSec" />
+  }
+  @if (s.q.imageUrl) {
+    <img [src]="s.q.imageUrl" alt="" loading="lazy" />
+  }
+  <h2>{{ s.q.body }}</h2>
+</article>
+
+<ul class="options" role="list">
+  @for (o of s.options; track o.optionId; let i = $index) {
+    @let st = optionState(o.optionId);
+    <li class="rise" [style.--d.s]="0.12 + i * 0.05">
+      <button
+        type="button"
+        class="option b lg press"
+        [class.gs]="st === 'selected' || st === 'correct'"
+        [attr.data-state]="st"
+        [attr.aria-pressed]="st === 'selected'"
+        [disabled]="!!r || busy()"
+        (click)="select.emit(o.optionId)"
+      >
+        <span class="letter">{{ letters[i] }}</span>
+        <span class="text">{{ o.body }}</span>
+        @if (st === 'selected' || st === 'correct') {
+          <app-icon name="check" />
+        } @else if (st === 'wrong') {
+          <app-icon name="x" />
+        }
+      </button>
+    </li>
+  }
+</ul>
+
+@if (r) {
+  <section class="feedback lg rise" [attr.data-ok]="r.isCorrect" aria-live="polite">
+    <strong>{{ r.isCorrect ? 'נכון!' : r.timedOut ? 'נגמר הזמן' : 'לא הפעם' }}</strong>
+    @if (r.fact) {
+      <p>{{ r.fact }}</p>
+    }
+  </section>
+}
+
+<button type="button" class="continue b lg gs press" [disabled]="!canContinue()" (click)="continue.emit()">
+  {{ r?.isFinished ? 'לסיכום' : 'המשך' }}
+  <app-icon name="arrow-left" />
+</button>

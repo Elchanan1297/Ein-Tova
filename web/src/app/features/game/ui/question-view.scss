@@ -1,0 +1,158 @@
+:host {
+  --grow: 0.5s var(--motion-spring);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+
+.progress {
+  display: grid;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 22px;
+
+  .row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; }
+  .pct { color: var(--color-gold); }
+}
+
+.bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-gold-deep), #f2d698);
+    transition: width 0.6s var(--motion-spring);
+  }
+}
+
+.question {
+  display: grid;
+  gap: 12px;
+  // לפני מענה השאלה והתשובות מתמתחות לכל הגובה; אחרי מענה מתכווצות ומפנות מקום למשוב
+  flex: 1 0 auto;
+  min-height: 112px;
+  max-height: 300px;
+  align-content: center;
+  transition: flex-grow var(--grow);
+  padding: 22px 22px 22px 70px; // מקום לטיימר משמאל
+  border-radius: var(--radius-card);
+  background-color: rgba(96, 112, 190, 0.18);
+
+  h2 {
+    margin: 0;
+    font: 700 21px / 1.45 var(--font-display);
+    color: var(--color-cream);
+  }
+
+  img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 16px; }
+}
+
+.timer { position: absolute; top: 14px; left: 14px; }
+
+.options {
+  flex: 2 0 auto;
+  display: grid;
+  grid-auto-rows: minmax(54px, 1fr);
+  gap: 10px;
+  max-height: 440px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: flex-grow var(--grow);
+}
+
+:host(.revealed) {
+  .question, .options { flex-grow: 0; }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  min-height: 54px;
+  padding: 8px 10px 8px 18px;
+  border-radius: 20px;
+  font-size: 17px;
+  font-weight: 600;
+
+  .text { flex: 1; }
+  app-icon { width: 22px; height: 22px; }
+
+  &:disabled { cursor: default; }
+  &[data-state='idle']:disabled { opacity: 0.55; }
+  &[data-state='wrong'] {
+    background-color: rgba(232, 130, 111, 0.24);
+    border-color: rgba(244, 164, 147, 0.6);
+    app-icon { color: #f4a493; }
+  }
+}
+
+.letter {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-gold);
+
+  .gs & { background: var(--color-midnight); color: var(--color-gold); border-color: transparent; }
+}
+
+.feedback {
+  flex: 1 1 auto;
+  display: grid;
+  align-content: center;
+  max-height: 220px;
+  padding: 16px 20px;
+  border-radius: 22px;
+  text-align: center;
+
+  strong { font: 700 22px var(--font-display); color: #f4a493; }
+  &[data-ok='true'] strong { color: var(--color-gold); }
+  p { margin: 6px 0 0; line-height: 1.5; }
+}
+
+.continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  align-self: center;
+  width: min(100%, 300px);
+  margin-top: auto;
+  padding: 15px;
+  border-radius: var(--radius-pill);
+  font-size: 19px;
+  font-weight: 700;
+
+  app-icon { width: 20px; height: 20px; }
+  &:disabled { opacity: 0.45; cursor: default; }
+}
+
+@media (min-width: 744px) {
+  .question h2 { font-size: 25px; }
+  .option { min-height: 62px; font-size: 19px; }
+}
+
+// טלפון לרוחב: תשובות ב־2 עמודות כדי שהשאלה והטיימר יישארו בעין
+@media (max-height: 500px) and (orientation: landscape) {
+  :host { gap: 8px; }
+  .progress { padding: 8px 14px; gap: 6px; }
+  .question { min-height: 72px; padding-block: 12px; h2 { font-size: 19px; } }
+  .timer { top: 12px; }
+  .options { grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(46px, 1fr); gap: 8px; }
+  .option { min-height: 46px; font-size: 16px; }
+}

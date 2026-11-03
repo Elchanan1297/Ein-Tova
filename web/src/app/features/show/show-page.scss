@@ -1,0 +1,45 @@
+:host {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg-app);
+  cursor: none; // במקרן לא רוצים סמן עכבר
+}
+
+.stage { position: absolute; inset: 0; animation: fade 0.8s ease both; }
+
+@keyframes fade { from { opacity: 0; } }
+
+// בלובים עדינים ברקע (במסך גדול אין בעיית ביצועים)
+.blob { width: 50vw; height: 50vw; opacity: 0.22; filter: blur(9vw); }
+.gold { top: -20vw; right: -10vw; background: var(--color-gold-deep); }
+.blue { bottom: -25vw; left: -10vw; background: var(--color-midnight-light); animation-delay: -6s; }
+
+.status {
+  position: absolute;
+  bottom: 2vh;
+  left: 2vw;
+  margin: 0;
+  padding: 0.8vh 1.4vw;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.4);
+  font-size: 1.8vh;
+  color: rgba(248, 243, 234, 0.75);
+  &.error { color: #f4a493; }
+}
+
+.start {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2vh;
+  background: rgba(10, 12, 24, 0.75);
+  backdrop-filter: blur(6px);
+  cursor: default;
+
+  button { padding: 2.2vh 5vw; border-radius: 99px; font-size: 3.4vh; font-weight: 700; }
+  p { max-width: 60vw; margin: 0; text-align: center; font-size: 2vh; color: rgba(248, 243, 234, 0.75); }
+}

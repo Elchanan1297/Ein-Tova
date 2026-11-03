@@ -1,0 +1,97 @@
+<h1>הגדרות ומשחק</h1>
+
+<app-game-stats />
+
+@if (form(); as f) {
+  <section class="card lg">
+    <h2>פתיחת המשחק</h2>
+    <div class="now">
+      <button type="button" class="b lg gs press" [disabled]="busy()" (click)="setGameNow('Always')">פתח עכשיו</button>
+      <button type="button" class="b lg press" [disabled]="busy()" (click)="setGameNow('Closed')">סגור עכשיו</button>
+    </div>
+    <div class="segmented" role="radiogroup" aria-label="מצב המשחק">
+      @for (m of [['Always', 'פתוח תמיד'], ['Window', 'לפי חלון זמן'], ['Closed', 'סגור']]; track m[0]) {
+        <button
+          type="button"
+          role="radio"
+          class="b"
+          [attr.aria-checked]="f.gameMode === m[0]"
+          (click)="set('gameMode', $any(m[0]))"
+        >{{ m[1] }}</button>
+      }
+    </div>
+    @if (f.gameMode === 'Window') {
+      <div class="row">
+        <label>נפתח ב־
+          <input type="datetime-local" [value]="f.opensAt" (change)="set('opensAt', $any($event.target).value)" />
+        </label>
+        <label>נסגר ב־
+          <input type="datetime-local" [value]="f.closesAt" (change)="set('closesAt', $any($event.target).value)" />
+        </label>
+      </div>
+    }
+  </section>
+
+  <section class="card lg">
+    <h2>שאלות</h2>
+    <div class="row">
+      <label>שאלות במשחק
+        <input type="number" min="0" inputmode="numeric" [value]="f.questionCount"
+               (input)="set('questionCount', $any($event.target).valueAsNumber || 0)" />
+        <small>0 = כל השאלות הפעילות</small>
+      </label>
+      <label>המספר בכותרת
+        <input type="number" min="1" inputmode="numeric" placeholder="כמספר השאלות" [value]="f.factsLabelCount"
+               (input)="set('factsLabelCount', $any($event.target).value)" />
+        <small>"X עובדות שלא ידעתם על אבא"</small>
+      </label>
+      <label>שניות לשאלה
+        <input type="number" min="5" max="300" inputmode="numeric" [value]="f.secondsPerQuestion"
+               (input)="set('secondsPerQuestion', $any($event.target).valueAsNumber || 0)" />
+      </label>
+    </div>
+  </section>
+
+  <section class="card lg">
+    <h2>קולות ולוח תוצאות</h2>
+    <label>סיכוי לקול של אבא אחרי תשובה: <strong>{{ f.voicePct }}%</strong>
+      <input type="range" min="0" max="100" step="5" [value]="f.voicePct"
+             (input)="set('voicePct', $any($event.target).valueAsNumber)" />
+    </label>
+    <div class="field">
+      <span>דירוג המשפחות לפי</span>
+      <div class="segmented" role="radiogroup" aria-label="דירוג המשפחות">
+        @for (r of [['Total', 'סך הכול'], ['Average', 'ממוצע לשחקן']]; track r[0]) {
+          <button type="button" role="radio" class="b" [attr.aria-checked]="f.leaderboardRank === r[0]"
+                  (click)="set('leaderboardRank', $any(r[0]))">{{ r[1] }}</button>
+        }
+      </div>
+    </div>
+    <details>
+      <summary>מתקדם</summary>
+      <label>מרווח חסד לרשת (אלפיות שנייה)
+        <input type="number" min="0" inputmode="numeric" [value]="f.graceMs"
+               (input)="set('graceMs', $any($event.target).valueAsNumber || 0)" />
+        <small>זמן נוסף שמקבלת תשובה שנשלחה ברגע האחרון</small>
+      </label>
+    </details>
+  </section>
+
+  @if (dirty() || message()) {
+    <div class="savebar lg" role="status">
+      @if (message(); as m) {
+        <span [class.error]="!m.ok">{{ m.text }}</span>
+      } @else {
+        <span>יש שינויים שלא נשמרו</span>
+      }
+      @if (dirty()) {
+        <button type="button" class="b press" (click)="revert()">ביטול</button>
+        <button type="button" class="b lg gs press" [disabled]="busy()" (click)="save()">שמירה</button>
+      }
+    </div>
+  }
+} @else if (loadFailed()) {
+  <p class="note">לא הצלחנו לטעון את ההגדרות. <button type="button" class="b link" (click)="load()">נסו שוב</button></p>
+} @else {
+  <p class="note">טוען…</p>
+}

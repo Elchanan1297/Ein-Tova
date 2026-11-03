@@ -1,0 +1,92 @@
+:host { display: grid; gap: 12px; }
+
+.hint { margin: 0; color: rgba(248, 243, 234, 0.7); font-size: 14px; line-height: 1.5; }
+
+.event {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  &::after { content: none; }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    h2 { margin: 0; font-size: 19px; }
+    small { font-family: var(--font-body); font-size: 13px; color: rgba(248, 243, 234, 0.6); }
+    p { margin: 2px 0 0; font-size: 13px; color: rgba(248, 243, 234, 0.65); }
+  }
+}
+
+.upload {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 14px;
+  &::after { content: none; }
+  app-icon { width: 17px; height: 17px; }
+  input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+}
+
+.clip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  &.off { opacity: 0.55; }
+
+  audio { height: 36px; max-width: 220px; }
+  input[type='text'] {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-cream);
+    font: inherit;
+    font-size: 15px;
+  }
+}
+
+.check { display: flex; align-items: center; gap: 6px; font-size: 14px; input { width: 18px; height: 18px; accent-color: var(--color-gold); } }
+.save { padding: 7px 14px; border-radius: var(--radius-pill); font-weight: 700; &::after { content: none; } }
+
+.tool {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding-inline: 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  &.danger { color: #f4a493; }
+  app-icon { width: 17px; height: 17px; }
+}
+
+.none { margin: 0; font-size: 14px; color: rgba(248, 243, 234, 0.6); }
+
+.toast {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 50%;
+  translate: -50% 0;
+  z-index: 40;
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(30, 34, 53, 0.9);
+  font-weight: 600;
+  &::after { content: none; }
+  &.error { color: #f4a493; }
+}

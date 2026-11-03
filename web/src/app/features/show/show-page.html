@@ -1,0 +1,28 @@
+<div class="blob gold" aria-hidden="true"></div>
+<div class="blob blue" aria-hidden="true"></div>
+
+<!-- הסצנה מתחלפת עם אנימציית כניסה (המפתח מכריח יצירה מחדש) -->
+@for (scene of [show.scene()]; track scene) {
+  <section class="stage">
+    @switch (scene) {
+      @case ('leaderboard') { <app-leaderboard-scene [board]="show.board()" /> }
+      @case ('greetings') { <app-greetings-scene [greetings]="show.greetings()" /> }
+      @case ('winner') { <app-winner-scene [winner]="show.state()?.winner ?? null" /> }
+      @default { <app-welcome-scene /> }
+    }
+  </section>
+}
+
+@if (!show.connected()) {
+  <p class="status" role="status">מתחבר לשרת…</p>
+}
+@if (error(); as message) {
+  <p class="status error" role="alert">{{ message }}</p>
+}
+
+@if (!started()) {
+  <div class="start">
+    <button type="button" class="b lg gs press" (click)="start()">התחלת המצגת</button>
+    <p>מסך מלא וקול. שליטה מהניהול (מצגת), או מהמקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · W זוכה · F מסך מלא</p>
+  </div>
+}

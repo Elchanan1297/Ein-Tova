@@ -1,0 +1,96 @@
+:host { display: grid; gap: 12px; }
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  p { margin: 0; color: rgba(248, 243, 234, 0.7); font-size: 14px; }
+}
+
+.add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  &::after { content: none; }
+  app-icon { width: 18px; height: 18px; }
+}
+
+.list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  &::after { content: none; }
+  &.off { opacity: 0.55; }
+}
+
+.grip {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 40px;
+  color: rgba(248, 243, 234, 0.5);
+  cursor: grab;
+  touch-action: none;
+  app-icon { width: 20px; height: 20px; }
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(217, 182, 111, 0.15);
+  color: var(--color-gold);
+  font: 900 34px / 1 var(--font-display);
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.main { flex: 1; min-width: 0; }
+.who { margin: 0; font-size: 14px; color: rgba(248, 243, 234, 0.7); strong { color: var(--color-gold); font-size: 15px; } }
+.body { margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip { font-size: 12px; padding: 0 8px; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.1); }
+
+.tools { display: flex; gap: 4px; }
+
+.tool {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding-inline: 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  &:hover { background: rgba(255, 255, 255, 0.08); }
+  &.danger { color: #f4a493; }
+  app-icon { width: 17px; height: 17px; }
+}
+
+.empty, .note { color: rgba(248, 243, 234, 0.7); padding: 8px 0; }
+
+.toast {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 50%;
+  translate: -50% 0;
+  z-index: 40;
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(30, 34, 53, 0.9);
+  font-weight: 600;
+  &::after { content: none; }
+  &.error { color: #f4a493; }
+}

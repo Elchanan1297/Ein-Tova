@@ -1,0 +1,101 @@
+<header class="head">
+  <div>
+    <h1>מוזמנים</h1>
+    <p>{{ counts().total }} מוזמנים · {{ counts().seen }} נכנסו · {{ counts().finished }} סיימו את המשחק</p>
+  </div>
+  <div class="actions">
+    <button type="button" class="b lg press" (click)="exportLinks()">ייצוא קישורים</button>
+    <button type="button" class="b lg press" (click)="importing.set(true)"><app-icon name="upload" /> ייבוא</button>
+    <button type="button" class="b lg gs press" (click)="editing.set('new')"><app-icon name="plus" /> מוזמן חדש</button>
+  </div>
+</header>
+
+<details class="template lg">
+  <summary>נוסח הודעת הוואטסאפ</summary>
+  <p>אפשר לשנות. <b>{{ '{' }}שם{{ '}' }}</b> ו־<b>{{ '{' }}קישור{{ '}' }}</b> מתחלפים אוטומטית לכל מוזמן.</p>
+  <textarea rows="4" [value]="template()" (input)="setTemplate($any($event.target).value)"></textarea>
+  <button type="button" class="b link" (click)="resetTemplate()">חזרה לנוסח המקורי</button>
+</details>
+
+<input class="search" type="search" placeholder="חיפוש לפי שם או טלפון" [value]="search()" (input)="search.set($any($event.target).value)" />
+
+@if (data()) {
+  @for (grp of groups(); track grp.family.familyId) {
+    <section class="family lg">
+      <header>
+        @if (renaming() === grp.family.familyId) {
+          <input #name class="rename" [value]="grp.family.name" (keydown.enter)="renameFamily(grp.family, name.value)"
+                 (blur)="renameFamily(grp.family, name.value)" aria-label="שם המשפחה" />
+        } @else {
+          <h2>{{ grp.family.name }} <small>{{ grp.family.guests }}</small></h2>
+          <button type="button" class="b tool" aria-label="שינוי שם המשפחה" (click)="renaming.set(grp.family.familyId)">
+            <app-icon name="pencil" />
+          </button>
+          @if (!grp.family.guests) {
+            <button type="button" class="b tool danger" (click)="removeFamily(grp.family)">
+              @if (confirming() === 'family-' + grp.family.familyId) { למחוק? } @else { <app-icon name="trash" /> }
+            </button>
+          }
+        }
+      </header>
+
+      <ul role="list">
+        @for (g of grp.guests; track g.guestId) {
+          <li [class.off]="!g.isActive">
+            <div class="who">
+              <strong>{{ g.fullName }}</strong>
+              <span class="meta">
+                <span dir="ltr">{{ g.phone ?? 'אין טלפון' }}</span> · {{ lastSeen(g) }}
+                @if (!g.isActive) { · <span class="chip">לא פעיל/ה</span> }
+              </span>
+            </div>
+            <span class="state" [attr.data-state]="g.gameState">
+              @switch (g.gameState) {
+                @case ('Finished') { סיים/ה {{ g.score }}/{{ g.total }} }
+                @case ('Playing') { באמצע משחק }
+                @default { לא שיחק/ה }
+              }
+            </span>
+            <div class="tools">
+              @if (g.phone) {
+                <a class="b tool wa" [href]="whatsApp(g)" target="_blank" rel="noopener">וואטסאפ</a>
+              }
+              <button type="button" class="b tool" (click)="copyLink(g)">קישור</button>
+              @if (g.gameState !== 'None') {
+                <button type="button" class="b tool" (click)="reset(g)">
+                  {{ confirming() === 'reset-' + g.guestId ? 'לאפס?' : 'איפוס' }}
+                </button>
+              }
+              <button type="button" class="b tool" aria-label="עריכה" (click)="editing.set(g)"><app-icon name="pencil" /></button>
+              @if (g.gameState === 'None') {
+                <button type="button" class="b tool danger" [attr.aria-label]="'מחיקת ' + g.fullName" (click)="remove(g)">
+                  @if (confirming() === 'delete-' + g.guestId) { למחוק? } @else { <app-icon name="trash" /> }
+                </button>
+              }
+            </div>
+          </li>
+        } @empty {
+          <li class="none">אין מוזמנים במשפחה הזו.</li>
+        }
+      </ul>
+    </section>
+  } @empty {
+    <p class="note">{{ search() ? 'לא נמצאו מוזמנים.' : 'עוד אין משפחות. מתחילים ב"מוזמן חדש" או בייבוא מאקסל.' }}</p>
+  }
+} @else if (loadFailed()) {
+  <p class="note">לא הצלחנו לטעון את המוזמנים. <button type="button" class="b link" (click)="load()">נסו שוב</button></p>
+} @else {
+  <p class="note">טוען…</p>
+}
+
+@if (notice(); as n) {
+  <p class="toast lg" [class.error]="!n.ok" role="status">{{ n.text }}</p>
+}
+
+@if (editing(); as e) {
+  <app-guest-editor [guest]="e === 'new' ? null : e" [families]="data()?.families ?? []" [template]="template()"
+                    (saved)="onSaved($event)" (closed)="editing.set(null); load()" (notice)="say(true, $event)" />
+}
+@if (importing()) {
+  <app-guest-import (imported)="importing.set(false); onSaved($event)" (closed)="importing.set(false)" />
+}

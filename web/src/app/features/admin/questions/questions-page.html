@@ -1,0 +1,63 @@
+<header class="head">
+  <div>
+    <h1>שאלות</h1>
+    @if (questions(); as list) {
+      <p>{{ activeCount() }} פעילות מתוך {{ list.length }}. גוררים כדי לשנות סדר.</p>
+    }
+  </div>
+  <div class="actions">
+    <button type="button" class="b lg press" (click)="importing.set(true)"><app-icon name="upload" /> ייבוא</button>
+    <button type="button" class="b lg gs press" (click)="editing.set('new')"><app-icon name="plus" /> שאלה חדשה</button>
+  </div>
+</header>
+
+@if (questions(); as list) {
+  @if (!list.length) {
+    <section class="empty lg">
+      <p>עוד אין שאלות. אפשר להוסיף אחת, או לייבא הרבה בבת אחת מאקסל.</p>
+    </section>
+  }
+  <ol class="list" cdkDropList [cdkDropListData]="list" (cdkDropListDropped)="drop($event)" role="list">
+    @for (q of list; track q.questionId; let i = $index) {
+      <li class="row lg" cdkDrag [cdkDragData]="q" [class.off]="!q.isActive">
+        <button type="button" class="b grip" cdkDragHandle aria-label="גרירה לשינוי סדר"><app-icon name="grip" /></button>
+        <span class="num">{{ i + 1 }}</span>
+        <div class="main">
+          <p class="body">{{ q.body }}</p>
+          <p class="meta">
+            <span class="correct">✓ {{ correctOf(q) }}</span>
+            @if (!q.isActive) { <span class="chip">לא פעילה</span> }
+            @if (q.inUse) { <span class="chip">נענתה</span> }
+            @if (q.timeLimitSec) { <span class="chip">{{ q.timeLimitSec }} שניות</span> }
+          </p>
+        </div>
+        <div class="tools">
+          <button type="button" class="b press tool" (click)="toggleActive(q)">{{ q.isActive ? 'השבתה' : 'הפעלה' }}</button>
+          <button type="button" class="b press tool" aria-label="עריכה" (click)="editing.set(q)"><app-icon name="pencil" /></button>
+          @if (!q.inUse) {
+            <button type="button" class="b press tool danger" [attr.aria-label]="confirmDelete() === q.questionId ? 'אישור מחיקה' : 'מחיקה'"
+                    (click)="remove(q)">
+              @if (confirmDelete() === q.questionId) { למחוק? } @else { <app-icon name="trash" /> }
+            </button>
+          }
+        </div>
+        <div class="placeholder" *cdkDragPlaceholder></div>
+      </li>
+    }
+  </ol>
+} @else if (loadFailed()) {
+  <p class="note">לא הצלחנו לטעון את השאלות. <button type="button" class="b link" (click)="load()">נסו שוב</button></p>
+} @else {
+  <p class="note">טוען…</p>
+}
+
+@if (notice(); as n) {
+  <p class="toast lg" [class.error]="!n.ok" role="status">{{ n.text }}</p>
+}
+
+@if (editing(); as e) {
+  <app-question-editor [question]="e === 'new' ? null : e" (saved)="onSaved()" (closed)="editing.set(null)" />
+}
+@if (importing()) {
+  <app-question-import (imported)="onImported($event)" (closed)="importing.set(false)" />
+}

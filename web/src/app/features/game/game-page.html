@@ -1,0 +1,64 @@
+<h1 class="title rise">משחק {{ config()?.factsLabelCount }} עובדות</h1>
+
+@let s = game.state();
+@if (s.phase === 'question' || s.phase === 'revealed') {
+  <app-question-view
+    [state]="s"
+    [selectedId]="game.selectedId()"
+    [secondsLeft]="game.secondsLeft()"
+    [progress]="game.progress()"
+    [busy]="game.busy()"
+    (select)="game.select($event)"
+    (continue)="game.continue()"
+  />
+} @else {
+  <div class="center">
+    @switch (s.phase) {
+      @case ('finished') {
+        <app-game-summary [score]="s.score" [total]="s.total" />
+      }
+      @case ('intro') {
+        <section class="panel lg rise">
+          <span class="badge"><app-icon name="sparkles" /></span>
+          <h2>מה כבר ידעתם על אבא?</h2>
+          <p>ענו על השאלות וגלו כמה אתם באמת מכירים אותו</p>
+          @if (config(); as c) {
+            <div class="stats">
+              <div class="stat"><strong>{{ c.questionCount }}</strong><span>שאלות</span></div>
+              <div class="stat"><strong>{{ c.secondsPerQuestion }}</strong><span>שניות לשאלה</span></div>
+              <div class="stat"><strong>1</strong><span>ניסיון בלבד</span></div>
+            </div>
+          }
+          <p class="hint">הניקוד שלכם נכנס ללוח של המשפחה</p>
+          <button type="button" class="b lg gs press cta" [disabled]="game.busy()" (click)="game.start()">
+            מתחילים
+            <app-icon name="arrow-left" />
+          </button>
+        </section>
+      }
+      @case ('closed') {
+        <section class="panel lg rise">
+          <h2>המשחק סגור כרגע</h2>
+          <p>הוא ייפתח בזמן האירוע. בינתיים אפשר להציץ בתוכנית ובברכות.</p>
+          <a class="b lg gs press cta" routerLink="/program">לתוכנית הערב</a>
+        </section>
+      }
+      @case ('noQuestions') {
+        <section class="panel lg rise">
+          <h2>עוד אין שאלות</h2>
+          <p>השאלות יעלו בקרוב. נסו שוב מאוחר יותר.</p>
+        </section>
+      }
+      @case ('error') {
+        <section class="panel lg rise">
+          <h2>אין חיבור</h2>
+          <p>המשחק צריך אינטרנט. בדקו את החיבור ונסו שוב.</p>
+          <button type="button" class="b lg gs press cta" (click)="game.load()">נסו שוב</button>
+        </section>
+      }
+      @default {
+        <p class="note" aria-busy="true">טוען…</p>
+      }
+    }
+  </div>
+}

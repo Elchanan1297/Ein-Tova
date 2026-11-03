@@ -1,0 +1,38 @@
+{
+  "color": {
+    "midnight": "#1E2235",
+    "midnight-light": "#2F3659",
+    "gold": "#D9B66F",
+    "gold-deep": "#BE9550",
+    "gold-dark": "#9A7634",
+    "cream": "#F8F3EA",
+    "white": "#FFFFFF"
+  },
+  "font": {
+    "display": "'Frank Ruhl Libre', serif",
+    "body": "'Assistant', 'Heebo', Arial, sans-serif"
+  },
+  "radius": {
+    "card": "26px",
+    "tile": "26px",
+    "pill": "999px",
+    "phone": "54px"
+  },
+  "spacing": {
+    "gutter": "20px",
+    "gap": "12px"
+  },
+  "motion": {
+    "spring": "cubic-bezier(.34,1.5,.5,1)",
+    "ease-out": "cubic-bezier(.2,.9,.3,1.15)"
+  },
+  "glass": {
+    "blur": "20px",
+    "saturate": "175%",
+    "border": "rgba(255,255,255,.20)"
+  },
+  "breakpoint": {
+    "tablet": "744px",
+    "desktop": "1100px"
+  }
+}

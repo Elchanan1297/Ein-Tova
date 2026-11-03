@@ -1,0 +1,63 @@
+<header class="hero">
+  <span class="badge rise"><app-icon name="trophy" /></span>
+  <h1 class="rise" style="--d: 0.05s">לוח תוצאות</h1>
+  <p class="rise" style="--d: 0.1s">
+    <span class="live" aria-hidden="true"></span>
+    מתעדכן חי. {{ board.finishedCount() }} סיימו את המשחק
+  </p>
+</header>
+
+@if (board.failed()) {
+  <section class="panel lg">
+    <p>אין חיבור כרגע.</p>
+    <button type="button" class="b lg gs press retry" (click)="board.reload()">נסו שוב</button>
+  </section>
+} @else if (!board.data()) {
+  <p class="note" aria-busy="true">טוען…</p>
+} @else {
+  <ol class="families" role="list">
+    @for (f of board.families(); track f.familyId; let i = $index) {
+      <li
+        class="family lg rise"
+        [style.--d.s]="0.14 + i * 0.06"
+        [attr.data-rank]="f.rnk <= 3 ? f.rnk : null"
+        [class.mine]="f.familyId === myFamilyId"
+      >
+        <span class="rank">{{ f.rnk }}</span>
+        <span class="who">
+          <span class="name">{{ f.name }}</span>
+          <span class="meta">
+            {{ f.players }} {{ f.players === 1 ? 'שחקן' : 'שחקנים' }}
+            @if (f.familyId === myFamilyId) {
+              <span class="chip">המשפחה שלכם</span>
+            }
+          </span>
+        </span>
+        <span class="score">
+          {{ f.displayScore | number: '1.0-1' }}
+          @if (board.byAverage()) {
+            <small>ממוצע</small>
+          }
+        </span>
+      </li>
+    }
+  </ol>
+
+  @if (board.top().length) {
+    <section class="top rise" style="--d: 0.4s">
+      <h2>השחקנים המובילים</h2>
+      <ol role="list">
+        @for (p of board.top(); track $index) {
+          <li>
+            <span class="pos">{{ $index + 1 }}</span>
+            <span class="who">
+              <span class="name">{{ p.fullName }}</span>
+              <span class="meta">{{ p.familyName }}</span>
+            </span>
+            <span class="pts">{{ p.score }}/{{ p.total }}</span>
+          </li>
+        }
+      </ol>
+    </section>
+  }
+}

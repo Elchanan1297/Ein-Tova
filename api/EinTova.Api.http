@@ -1,0 +1,29 @@
+@host = http://localhost:5080
+
+### הגדרות ציבוריות
+GET {{host}}/api/config
+
+### כניסה בקוד
+# @name login
+POST {{host}}/api/login/code
+Content-Type: application/json
+
+{ "code": "YOSI2024" }
+
+### התחלת משחק
+POST {{host}}/api/game/start
+Authorization: Bearer {{login.response.body.$.token}}
+
+### השאלה הבאה
+GET {{host}}/api/game/next
+Authorization: Bearer {{login.response.body.$.token}}
+
+### שליחת תשובה (החלף את optionId במזהה מתוך התשובה הקודמת)
+POST {{host}}/api/game/answer
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{ "optionId": 1 }
+
+### לוח תוצאות
+GET {{host}}/api/leaderboard

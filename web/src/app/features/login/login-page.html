@@ -1,0 +1,23 @@
+<section class="page">
+  <h1 class="rise">כניסה</h1>
+
+  <form class="card lg rise" style="--d: 0.08s" (submit)="submitPhone($event)">
+    <label for="phone">מספר טלפון</label>
+    <input
+      id="phone"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      dir="ltr"
+      placeholder="050-000-0000"
+      [value]="phone()"
+      (input)="phone.set($any($event.target).value)"
+    />
+    <button class="b lg gs press submit" type="submit" [disabled]="busy()">
+      {{ busy() ? 'מתחבר…' : 'כניסה' }}
+    </button>
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </form>
+</section>

@@ -1,0 +1,43 @@
+<header class="hero">
+  <h1 class="rise">ברכות</h1>
+  <p class="rise" style="--d: 0.05s">מהמשפחה לאבא, באהבה</p>
+</header>
+
+@if (greetings.error() && !greetings.value().length) {
+  <section class="empty lg">
+    <p>אין חיבור כרגע.</p>
+    <button type="button" class="b lg gs press retry" (click)="greetings.reload()">נסו שוב</button>
+  </section>
+} @else if (greetings.isLoading() && !greetings.value().length) {
+  <p class="note" aria-busy="true">טוען…</p>
+} @else if (!greetings.value().length) {
+  <section class="empty lg"><p>הברכות יעלו בקרוב.</p></section>
+} @else {
+  <nav class="chips rise" style="--d: 0.1s" aria-label="מעבר בין ברכות">
+    @for (g of greetings.value(); track g.greetingId) {
+      <button
+        #chip
+        type="button"
+        class="chip b lg press"
+        [class.gs]="g.greetingId === activeId()"
+        [attr.data-id]="g.greetingId"
+        [attr.aria-current]="g.greetingId === activeId() ? 'true' : null"
+        (click)="jumpTo(g.greetingId)"
+      >
+        {{ g.senderName }}
+      </button>
+    }
+  </nav>
+
+  <div class="feed">
+    @for (g of greetings.value(); track g.greetingId; let i = $index) {
+      <app-greeting-card
+        class="lg rise"
+        [style.--d.s]="0.15 + i * 0.06"
+        [id]="'greeting-' + g.greetingId"
+        [attr.data-id]="g.greetingId"
+        [greeting]="g"
+      />
+    }
+  </div>
+}

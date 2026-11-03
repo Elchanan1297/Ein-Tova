@@ -1,0 +1,33 @@
+<p class="kicker rise">
+  @if (factsCount(); as count) {
+    {{ count }}
+  }
+  עובדות שלא ידעתם על אבא
+</p>
+
+<div class="stage">
+  <span class="seventy rise" style="--d: 0.05s" aria-hidden="true">70</span>
+  <img
+    class="father rise"
+    style="--d: 0.15s"
+    ngSrc="assets/father-full.png"
+    width="900"
+    height="1252"
+    priority
+    alt="אבא"
+  />
+  <img
+    class="logo rise"
+    style="--d: 0.3s"
+    ngSrc="assets/logo/ein-tova-eye-dark.svg"
+    width="2607"
+    height="2393"
+    priority
+    alt="עין טובה"
+  />
+</div>
+
+<button class="start b lg gs press rise" style="--d: 0.42s" type="button" (click)="start()">
+  בואו נתחיל
+  <app-icon name="arrow-left" />
+</button>

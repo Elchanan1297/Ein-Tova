@@ -1,0 +1,37 @@
+<header class="head">
+  <h1>מצגת</h1>
+  <a class="b lg press open" href="/show" target="_blank" rel="noopener">פתיחת מסך המצגת</a>
+</header>
+
+<p class="hint">
+  את מסך המצגת פותחים במחשב שמחובר למקרן, לוחצים "התחלת המצגת", ומכאן (גם מהטלפון) בוחרים מה מוצג.
+</p>
+
+<section class="card lg">
+  <h2>מוצג עכשיו: <span class="now">{{ currentLabel() }}</span></h2>
+  <div class="scenes">
+    @for (s of scenes; track s.scene) {
+      <button type="button" class="b lg press scene" [class.gs]="state()?.scene === s.scene" [disabled]="busy()" (click)="setScene(s.scene)">
+        <app-icon [name]="s.icon" />
+        {{ s.label }}
+      </button>
+    }
+  </div>
+</section>
+
+<section class="card lg winner">
+  <h2>הכרזת זוכה</h2>
+  <p>מחשב את המשפחה המובילה ברגע הלחיצה, מציג אותה על המסך עם קונפטי, ומנגן את הקול של אבא (אם הועלה קליפ "הכרזת זוכה").</p>
+  <button type="button" class="b lg gs press big" [disabled]="busy()" (click)="announce()">
+    <app-icon name="trophy" /> {{ confirmWinner() ? 'בטוח? לחצו שוב להכרזה' : 'הכרזת זוכה' }}
+  </button>
+  @if (winnerNames(); as names) {
+    <p class="result">הוכרז: <b>{{ names }}</b></p>
+  }
+</section>
+
+@if (message(); as m) {
+  <p class="error" role="alert">{{ m.text }}</p>
+}
+
+<p class="hint">במחשב של המצגת אפשר גם במקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · W זוכה · F מסך מלא</p>

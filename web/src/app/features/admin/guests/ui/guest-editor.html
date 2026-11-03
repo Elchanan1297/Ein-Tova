@@ -1,0 +1,58 @@
+<dialog #dialog class="sheet" (close)="closed.emit()" aria-labelledby="ge-title">
+  <header>
+    <h2 id="ge-title">{{ guest() ? guest()!.fullName : 'מוזמן חדש' }}</h2>
+    <button type="button" class="b x" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+  </header>
+
+  <form (submit)="$event.preventDefault(); save()">
+    <label>שם
+      <input type="text" maxlength="100" autocomplete="off" [value]="fullName()" (input)="fullName.set($any($event.target).value)" />
+    </label>
+
+    <label>משפחה
+      <select [value]="familyId()" (change)="familyId.set($any($event.target).value === 'new' ? 'new' : +$any($event.target).value)">
+        @for (f of families(); track f.familyId) {
+          <option [value]="f.familyId" [selected]="familyId() === f.familyId">{{ f.name }}</option>
+        }
+        <option value="new" [selected]="familyId() === 'new'">+ משפחה חדשה…</option>
+      </select>
+    </label>
+    @if (familyId() === 'new') {
+      <label>שם המשפחה החדשה
+        <input type="text" maxlength="100" placeholder="למשל: משפחת כהן" [value]="newFamily()" (input)="newFamily.set($any($event.target).value)" />
+      </label>
+    }
+
+    <label>טלפון <small>לכניסה בלי קישור, ולשליחה בוואטסאפ</small>
+      <input type="tel" dir="ltr" inputmode="tel" placeholder="050-000-0000" [value]="phone()" (input)="phone.set($any($event.target).value)" />
+    </label>
+
+    <label class="check">
+      <input type="checkbox" [checked]="isActive()" (change)="isActive.set($any($event.target).checked)" />
+      פעיל/ה (יכול/ה להיכנס)
+    </label>
+
+    @if (link(); as l) {
+      <div class="link-box">
+        <span class="label">קישור אישי</span>
+        <code dir="ltr">{{ l }}</code>
+        <div class="link-tools">
+          <button type="button" class="b press tool" (click)="copy()">העתקה</button>
+          @if (waUrl(); as wa) {
+            <a class="b press tool wa" [href]="wa" target="_blank" rel="noopener">שליחה בוואטסאפ</a>
+          }
+          <button type="button" class="b press tool" (click)="newCode()">{{ confirmNewCode() ? 'בטוח? הקישור הישן יפסיק לעבוד' : 'קוד חדש' }}</button>
+        </div>
+      </div>
+    }
+
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <div class="buttons">
+      <button type="button" class="b press" (click)="close()">ביטול</button>
+      <button type="submit" class="b lg gs press" [disabled]="busy() || !canSave()">{{ busy() ? 'שומר…' : 'שמירה' }}</button>
+    </div>
+  </form>
+</dialog>

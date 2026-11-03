@@ -1,0 +1,38 @@
+:host { display: grid; min-height: 100dvh; background: var(--bg-app); }
+
+.page { display: grid; align-content: center; gap: 24px; text-align: center; }
+
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border-radius: var(--radius-card);
+  text-align: start;
+}
+
+label { font-weight: 600; }
+
+input {
+  padding: 14px 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-cream);
+  font: inherit;
+  font-size: 18px; // 16px+ מונע זום אוטומטי באייפון
+  text-align: center;
+
+  &:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+}
+
+.submit {
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+
+  &:disabled { opacity: 0.6; }
+}
+
+.error { margin: 0; color: #f3a6a6; text-align: center; }

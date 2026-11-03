@@ -1,0 +1,59 @@
+:host { display: grid; gap: 20px; align-content: start; }
+
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+
+  h1 { margin-top: 12px; }
+  p { margin: 0; font-size: 14px; color: rgba(248, 243, 234, 0.75); }
+}
+
+.note { text-align: center; color: rgba(248, 243, 234, 0.7); }
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-radius: var(--radius-card);
+  p { margin: 0; }
+}
+
+.retry { padding: 12px 32px; border-radius: var(--radius-pill); font-weight: 700; }
+
+// צ׳יפים בפס גלילה אופקי שנדבק למעלה
+.chips {
+  position: sticky;
+  top: env(safe-area-inset-top);
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  margin-inline: calc(var(--spacing-gutter) * -1);
+  padding: 10px var(--spacing-gutter);
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: linear-gradient(180deg, rgba(27, 31, 49, 0.95) 70%, transparent);
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.chip {
+  flex: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  // ברק הזכוכית מיותר על כפתורים קטנים
+  &::after { content: none; }
+}
+
+.feed { display: grid; gap: 18px; }
+
+app-greeting-card { scroll-margin-top: 76px; }
+
+@media (min-width: 744px) {
+  .feed { gap: 24px; }
+}

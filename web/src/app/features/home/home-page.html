@@ -1,0 +1,23 @@
+<span class="ghost-70" aria-hidden="true">70</span>
+
+<header class="hero">
+  <div class="logo sheen rise">
+    <img ngSrc="assets/logo/ein-tova-eye-dark.svg" width="2607" height="2393" priority alt="עין טובה" />
+  </div>
+  <h1 class="rise" style="--d: 0.08s">ברוכים הבאים</h1>
+  <p class="rise" style="--d: 0.14s">לאירוע יום ההולדת ה־70 של אבא היקר</p>
+</header>
+
+<nav class="tiles" aria-label="מסכים">
+  @for (tile of tiles(); track tile.path; let i = $index) {
+    <a
+      class="tile lg press rise"
+      [attr.data-tone]="tile.tone"
+      [style.--d.s]="0.22 + i * 0.07"
+      [routerLink]="tile.path"
+    >
+      <span class="badge"><app-icon [name]="tile.icon" /></span>
+      <span class="label">{{ tile.label }}</span>
+    </a>
+  }
+</nav>

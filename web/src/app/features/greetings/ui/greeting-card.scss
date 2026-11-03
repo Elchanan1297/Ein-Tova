@@ -1,0 +1,70 @@
+:host {
+  display: grid;
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+.media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(62dvh, 560px);
+  background: radial-gradient(80% 60% at 50% 70%, rgba(217, 182, 111, 0.25), transparent 70%), var(--color-midnight-light);
+
+  img, iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+    object-position: 50% 20%; // פנים בדרך כלל בחלק העליון
+  }
+
+  &.video { aspect-ratio: 16 / 9; }
+}
+
+.play {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+
+  app-icon { width: 26px; height: 26px; }
+}
+
+.quote {
+  display: block;
+  padding: 18px 22px 0;
+  font: 900 72px / 0.8 var(--font-display);
+  color: var(--color-gold);
+}
+
+.caption {
+  display: grid;
+  gap: 10px;
+  padding: 18px 22px 20px;
+
+  p { margin: 0; }
+}
+
+.body {
+  font-size: 16px;
+  line-height: 1.6;
+
+  &.big { font-size: 19px; font-weight: 600; }
+}
+
+.from {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+
+  strong { color: var(--color-gold); font-size: 17px; }
+  span { color: rgba(248, 243, 234, 0.65); }
+}

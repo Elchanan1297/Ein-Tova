@@ -1,0 +1,56 @@
+<dialog #dialog class="sheet" (close)="closed.emit()" aria-labelledby="gi-title">
+  <header>
+    <h2 id="gi-title">ייבוא מוזמנים</h2>
+    <button type="button" class="b x" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+  </header>
+
+  <div class="content">
+    <p class="how">
+      מעתיקים שורות מאקסל ומדביקים כאן, או בוחרים קובץ CSV. סדר העמודות:
+      <span class="cols">{{ header.join(' · ') }}</span>
+      טלפון לא חובה. משפחה שעוד לא קיימת תיווצר. לכל מוזמן נוצר קוד אישי.
+    </p>
+    <div class="tools">
+      <label class="b lg press file">
+        <app-icon name="upload" /> בחירת קובץ CSV
+        <input type="file" accept=".csv,.tsv,.txt,text/csv" (change)="pickFile($event)" />
+      </label>
+      <button type="button" class="b press link" (click)="downloadTemplate()">הורדת תבנית לאקסל</button>
+    </div>
+
+    <textarea rows="6" dir="auto" placeholder="מדביקים כאן…" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
+
+    @if (rows().length) {
+      <p class="summary" [class.bad]="problems()">
+        {{ rows().length }} מוזמנים ב־{{ familyCount() }} משפחות@if (problems() === 1) {, בשורה אחת יש בעיה} @else if (problems()) {, ב־{{ problems() }} שורות יש בעיה}
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>שורה</th><th>שם</th><th>משפחה</th><th>טלפון</th><th></th></tr></thead>
+          <tbody>
+            @for (r of rows(); track r.line) {
+              <tr [class.bad]="r.problem">
+                <td>{{ r.line }}</td>
+                <td>{{ r.row.fullName }}</td>
+                <td>{{ r.row.family }}</td>
+                <td dir="ltr">{{ r.row.phone }}</td>
+                <td class="problem">{{ r.problem }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (serverError(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <div class="buttons">
+      <button type="button" class="b press" (click)="close()">ביטול</button>
+      <button type="button" class="b lg gs press" [disabled]="busy() || !rows().length || problems() > 0" (click)="import()">
+        {{ busy() ? 'מייבא…' : 'ייבוא ' + rows().length + ' מוזמנים' }}
+      </button>
+    </div>
+  </div>
+</dialog>

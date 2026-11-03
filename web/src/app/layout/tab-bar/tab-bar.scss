@@ -1,0 +1,52 @@
+:host {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  padding-inline: 14px;
+  z-index: 10;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: 100%;
+  max-width: 520px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  // אנימציית הברק של .lg מיותרת על הסרגל הקבוע
+  &::after { content: none; }
+}
+
+.lens {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: calc((100% - 12px) / 5);
+  // RTL: הטאב הראשון בצד ימין
+  left: calc(6px + (4 - var(--i)) * (100% - 12px) / 5);
+  border-radius: var(--radius-pill);
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.tab {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding-block: 9px 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(248, 243, 234, 0.72);
+  text-decoration: none;
+
+  app-icon {
+    width: 21px;
+    height: 21px;
+    color: var(--color-gold);
+  }
+
+  &.active { color: var(--color-cream); }
+}

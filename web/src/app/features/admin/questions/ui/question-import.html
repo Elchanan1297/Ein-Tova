@@ -1,0 +1,56 @@
+<dialog #dialog class="sheet" (close)="closed.emit()" aria-labelledby="qi-title">
+  <header>
+    <h2 id="qi-title">ייבוא שאלות</h2>
+    <button type="button" class="b x" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+  </header>
+
+  <div class="content">
+    <p class="how">
+      מעתיקים שורות מאקסל ומדביקים כאן, או בוחרים קובץ CSV. סדר העמודות:
+      <span class="cols">{{ header.join(' · ') }}</span>
+      תשובות שגויות 2 ו־3, עובדה ושניות לא חובה. השאלות נוספות בסוף הרשימה.
+    </p>
+    <div class="tools">
+      <label class="b lg press file">
+        <app-icon name="upload" /> בחירת קובץ CSV
+        <input type="file" accept=".csv,.tsv,.txt,text/csv" (change)="pickFile($event)" />
+      </label>
+      <button type="button" class="b press link" (click)="downloadTemplate()">הורדת תבנית לאקסל</button>
+    </div>
+
+    <textarea rows="6" dir="auto" placeholder="מדביקים כאן…" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
+
+    @if (rows().length) {
+      <p class="summary" [class.bad]="problems()">
+        {{ rows().length }} שאלות@if (problems()) {, ב־{{ problems() }} מהן יש בעיה (מסומנות באדום)}
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>שורה</th><th>שאלה</th><th>נכונה</th><th>שגויות</th><th></th></tr></thead>
+          <tbody>
+            @for (r of rows(); track r.line) {
+              <tr [class.bad]="r.problem">
+                <td>{{ r.line }}</td>
+                <td>{{ r.row.body }}</td>
+                <td>{{ r.row.correct }}</td>
+                <td>{{ r.row.wrong.join(' / ') }}</td>
+                <td class="problem">{{ r.problem }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (serverError(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <div class="buttons">
+      <button type="button" class="b press" (click)="close()">ביטול</button>
+      <button type="button" class="b lg gs press" [disabled]="busy() || !rows().length || problems() > 0" (click)="import()">
+        {{ busy() ? 'מייבא…' : 'ייבוא ' + rows().length + ' שאלות' }}
+      </button>
+    </div>
+  </div>
+</dialog>

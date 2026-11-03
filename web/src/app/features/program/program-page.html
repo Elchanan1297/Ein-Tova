@@ -1,0 +1,25 @@
+<header class="hero">
+  <h1 class="rise">תוכנית הערב</h1>
+  <p class="rise" style="--d: 0.05s">מה מחכה לנו הערב</p>
+</header>
+
+@if (items.error() && !items.hasValue()) {
+  <section class="card lg empty">
+    <p>אין חיבור כרגע.</p>
+    <button type="button" class="b lg gs press retry" (click)="items.reload()">נסו שוב</button>
+  </section>
+} @else if (items.isLoading() && !items.value().length) {
+  <p class="note" aria-busy="true">טוען…</p>
+} @else if (!items.value().length) {
+  <section class="card lg empty"><p>התוכנית תעלה בקרוב.</p></section>
+} @else {
+  <ol class="card lg rise" style="--d: 0.1s" role="list">
+    @for (item of items.value(); track item.itemId) {
+      <li>
+        <span class="badge"><app-icon [name]="icon(item.icon)" /></span>
+        <span class="title">{{ item.title }}</span>
+        <time class="time">{{ item.timeText }}</time>
+      </li>
+    }
+  </ol>
+}
