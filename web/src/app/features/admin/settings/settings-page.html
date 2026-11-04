@@ -38,12 +38,18 @@
       <label>שאלות במשחק
         <input type="number" min="0" inputmode="numeric" [value]="f.questionCount"
                (input)="set('questionCount', $any($event.target).valueAsNumber || 0)" />
-        <small>0 = כל השאלות הפעילות</small>
+        @if (played() !== null) {
+          <small [class.warn]="f.questionCount > active()!">
+            יש {{ active() }} שאלות פעילות, אז ישוחקו {{ played() }}.
+          </small>
+        } @else {
+          <small>0 = כל השאלות הפעילות</small>
+        }
       </label>
       <label>המספר בכותרת
-        <input type="number" min="1" inputmode="numeric" placeholder="כמספר השאלות" [value]="f.factsLabelCount"
-               (input)="set('factsLabelCount', $any($event.target).value)" />
-        <small>"X עובדות שלא ידעתם על אבא"</small>
+        <input type="number" min="1" inputmode="numeric" [placeholder]="played() !== null ? played() + ' (כמו מספר השאלות)' : 'כמספר השאלות'"
+               [value]="f.factsLabelCount" (input)="set('factsLabelCount', $any($event.target).value)" />
+        <small>מה שיופיע ב"X עובדות שלא ידעתם על אבא". ריק = {{ played() ?? 'כמספר השאלות' }}</small>
       </label>
       <label>שניות לשאלה
         <input type="number" min="5" max="300" inputmode="numeric" [value]="f.secondsPerQuestion"
@@ -75,6 +81,24 @@
         <small>זמן נוסף שמקבלת תשובה שנשלחה ברגע האחרון</small>
       </label>
     </details>
+  </section>
+
+  <section class="card lg danger">
+    <h2>איפוס המשחק</h2>
+    <p>
+      מוחק את כל התוצאות ומאפס את לוח התוצאות, וכל המוזמנים יכולים לשחק מחדש. שימושי אחרי חזרה גנרלית.
+      @if (started()) { כרגע {{ started() }} התחילו לשחק. }
+      אי אפשר לבטל את זה.
+    </p>
+    <div class="reset">
+      <button type="button" class="b lg press" [class.armed]="confirmReset()" [disabled]="busy()" (click)="resetAll()">
+        {{ confirmReset() ? 'בטוח? לחצו שוב כדי למחוק את כל התוצאות' : 'איפוס המשחק לכולם' }}
+      </button>
+      @if (confirmReset()) {
+        <button type="button" class="b link" (click)="confirmReset.set(false)">ביטול</button>
+      }
+    </div>
+    <small>לאיפוס של מוזמן אחד בלבד: מוזמנים, "איפוס" בשורה שלו.</small>
   </section>
 
   @if (dirty() || message()) {

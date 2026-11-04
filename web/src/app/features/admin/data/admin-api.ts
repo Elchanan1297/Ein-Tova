@@ -33,6 +33,11 @@ export class AdminApi {
     return firstValueFrom(this.http.get<Settings>('/api/admin/settings'));
   }
 
+  /** מוחק את כל הניסיונות: כל המוזמנים יכולים לשחק שוב. מחזיר כמה אופסו */
+  resetAllAttempts(): Promise<{ reset: number }> {
+    return firstValueFrom(this.http.post<{ reset: number }>('/api/admin/game/reset-all', null));
+  }
+
   /** שולחים רק את מה שהשתנה; שגיאת אימות חוזרת כ־400 עם SaveError */
   saveSettings(changes: Partial<Settings>): Promise<unknown> {
     return firstValueFrom(this.http.put('/api/admin/settings', changes));

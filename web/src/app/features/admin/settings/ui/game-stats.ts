@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DOCUMENT, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DOCUMENT, DestroyRef, computed, inject } from '@angular/core';
 import { GameStats } from '../../data/admin-api';
 
 /** מצב המשחק בזמן אמת: כמה התחילו/סיימו, ואחוז הצלחה לכל שאלה. רענון כל 10 שניות. */
@@ -13,6 +13,10 @@ import { GameStats } from '../../data/admin-api';
 })
 export class GameStatsPanel {
   protected readonly stats = httpResource<GameStats>(() => '/api/admin/stats');
+  /** כמה שאלות פעילות יש עכשיו (למסך ההגדרות) */
+  readonly activeQuestions = computed(() => this.stats.value()?.summary.activeQuestions ?? null);
+  /** כמה כבר התחילו לשחק (לאיפוס המשחק) */
+  readonly started = computed(() => this.stats.value()?.summary.started ?? null);
 
   constructor() {
     const document = inject(DOCUMENT);

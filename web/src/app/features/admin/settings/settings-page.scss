@@ -56,6 +56,7 @@ label, .field {
   font-weight: 600;
 
   small { font-weight: 400; color: rgba(248, 243, 234, 0.6); }
+  small.warn { color: var(--color-gold); }
   strong { color: var(--color-gold); }
 }
 
@@ -96,6 +97,29 @@ details label { margin-top: 10px; }
   span { flex: 1; font-weight: 600; }
   .error { color: #f4a493; }
   button { padding: 9px 18px; border-radius: var(--radius-pill); font-weight: 700; }
+}
+
+.danger {
+  border-color: rgba(244, 164, 147, 0.35);
+  p { margin: 0; line-height: 1.5; color: rgba(248, 243, 234, 0.8); }
+  small { color: rgba(248, 243, 234, 0.6); }
+}
+
+.reset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  button:first-child {
+    padding: 11px 18px;
+    border-radius: var(--radius-pill);
+    color: #f4a493;
+    font-weight: 700;
+    &::after { content: none; }
+    &.armed { background-color: rgba(232, 130, 111, 0.3); color: #fff; }
+    &:disabled { opacity: 0.6; }
+  }
 }
 
 .note { color: rgba(248, 243, 234, 0.7); }

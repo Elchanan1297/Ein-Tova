@@ -58,8 +58,39 @@ export default class SettingsPage {
   });
   protected readonly dirty = computed(() => Object.keys(this.changes()).length > 0);
 
+  /** כמה שאלות ישוחקו בפועל לפי מה שבטופס: לא יותר ממה שפעיל */
+  protected readonly active = computed(() => this.statsPanel()?.activeQuestions() ?? null);
+  protected readonly played = computed(() => {
+    const active = this.active();
+    const wanted = this.form()?.questionCount ?? 0;
+    if (active === null) return null;
+    return wanted <= 0 || wanted > active ? active : wanted;
+  });
+
+  protected readonly started = computed(() => this.statsPanel()?.started() ?? null);
+  protected readonly confirmReset = signal(false);
+
   constructor() {
     void this.load();
+  }
+
+  /** איפוס המשחק לכולם: לחיצה ראשונה מבקשת אישור, שנייה מוחקת */
+  protected async resetAll(): Promise<void> {
+    if (!this.confirmReset()) {
+      this.confirmReset.set(true);
+      return;
+    }
+    this.confirmReset.set(false);
+    this.busy.set(true);
+    try {
+      const res = await this.api.resetAllAttempts();
+      this.message.set({ ok: true, text: `המשחק אופס (${res.reset} תוצאות נמחקו). כולם יכולים לשחק שוב.` });
+      this.statsPanel()?.reload();
+    } catch {
+      this.message.set({ ok: false, text: 'האיפוס נכשל. נסו שוב.' });
+    } finally {
+      this.busy.set(false);
+    }
   }
 
   protected async load(): Promise<void> {

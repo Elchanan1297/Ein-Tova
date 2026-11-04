@@ -49,6 +49,14 @@ static class AdminEndpoints
             return Results.Ok(new { summary, questions });
         });
 
+        // איפוס המשחק לכולם: כל אחד יכול לשחק שוב
+        admin.MapPost("/game/reset-all", async (SqlConnection db, IMemoryCache cache) =>
+        {
+            var res = await db.QueryFirstAsync("usp_AdminResetAllAttempts", commandType: Sp);
+            cache.Remove("leaderboard");
+            return Results.Ok(res);
+        });
+
         // ---------- שאלות ----------
         admin.MapGet("/questions", async (SqlConnection db) =>
         {
