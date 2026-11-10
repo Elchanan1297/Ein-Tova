@@ -1,0 +1,46 @@
+<header class="hero">
+  <h1 class="rise">מסע בזמן</h1>
+  <p class="rise" style="--d: 0.05s">אבא לאורך השנים</p>
+</header>
+
+@if (failed()) {
+  <section class="empty lg">
+    <p>אין חיבור כרגע.</p>
+    <button type="button" class="b lg gs press retry" (click)="load()">נסו שוב</button>
+  </section>
+} @else if (!photos()) {
+  <div class="loading"><app-eye-loader [size]="72" label="טוען תמונות" /></div>
+} @else if (!photos()!.length) {
+  <section class="empty lg">
+    <span class="eye-loader" style="--eye-size: 96px; animation: none" aria-hidden="true"></span>
+    <p>תמונות של אבא יתווספו בקרוב</p>
+  </section>
+} @else {
+  <nav class="decades" aria-label="מעבר לפי עשור">
+    @for (g of groups(); track g.label) {
+      <button type="button" class="b chip lg press" (click)="jump(g.decade)">{{ g.label }}</button>
+    }
+  </nav>
+
+  @for (g of groups(); track g.label) {
+    <section class="decade" [id]="'decade-' + (g.decade ?? 'none')">
+      <h2>{{ g.label }} <small>{{ g.photos.length }}</small></h2>
+      <ul class="grid" role="list">
+        @for (p of g.photos; track p.publicId; let i = $index) {
+          <li>
+            <button type="button" class="b tile" [style.aspect-ratio]="p.width + ' / ' + p.height"
+                    [attr.aria-label]="(p.caption || 'תמונה') + (p.yearTaken ? ', ' + p.yearTaken : '')" (click)="viewing.set(g.offset + i)">
+              <img [src]="p.thumbUrl" alt="" loading="lazy" decoding="async" [width]="p.width" [height]="p.height" />
+              @if (p.likes) { <span class="likes">♥ {{ p.likes }}</span> }
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  <p class="privacy">התמונות נראות רק לבני המשפחה באירוע</p>
+}
+
+@if (viewing() !== null && photos()) {
+  <app-photo-viewer [photos]="photos()!" [start]="viewing()!" (like)="like($event)" (closed)="viewing.set(null)" />
+}

@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth-store';
+import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
 
 /** כניסה: קוד מהקישור האישי (?code=...), ואם אין, מספר טלפון. */
 @Component({
   selector: 'app-login-page',
+  imports: [EyeLoader],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

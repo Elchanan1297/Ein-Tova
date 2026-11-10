@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { Icon } from '../../../shared/ui/icon/icon';
 import { GameState } from '../game-store';
 import { TimerRing } from './timer-ring';
+import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 
 type QuestionState = Extract<GameState, { phase: 'question' | 'revealed' }>;
 
@@ -10,7 +11,7 @@ const LETTERS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 /** שאלה: התקדמות, כרטיס שאלה וטיימר, תשובות, ואחרי מענה תוצאה ועובדה. */
 @Component({
   selector: 'app-question-view',
-  imports: [Icon, TimerRing],
+  imports: [EyeLoader, Icon, TimerRing],
   templateUrl: './question-view.html',
   styleUrl: './question-view.scss',
   host: { '[class.revealed]': 'result() !== null' },

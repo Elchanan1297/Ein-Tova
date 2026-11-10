@@ -15,6 +15,7 @@ import {
 import { ConfigStore } from '../../../../core/config/config-store';
 import { Icon } from '../../../../shared/ui/icon/icon';
 import { AdminError, AdminQuestion, QuestionsApi } from '../../data/questions-api';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
 interface OptionDraft {
   optionId: number | null;
@@ -35,7 +36,7 @@ const ERRORS: Record<string, string> = {
 /** עריכת שאלה בחלון, עם תצוגה מקדימה כמו בטלפון. */
 @Component({
   selector: 'app-question-editor',
-  imports: [Icon],
+  imports: [EyeLoader, Icon],
   templateUrl: './question-editor.html',
   styleUrl: './question-editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

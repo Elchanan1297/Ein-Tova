@@ -15,6 +15,7 @@ import {
 import { Icon } from '../../../../shared/ui/icon/icon';
 import { AdminFamily, AdminGuest, GuestsApi } from '../../data/guests-api';
 import { inviteText, personalLink, whatsAppUrl } from '../../data/invite';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
 const ERRORS: Record<string, string> = {
   fullName: 'צריך שם (עד 100 תווים).',
@@ -27,7 +28,7 @@ const ERRORS: Record<string, string> = {
 /** הוספה/עריכה של מוזמן, כולל משפחה חדשה, קישור אישי וקוד חדש. */
 @Component({
   selector: 'app-guest-editor',
-  imports: [Icon],
+  imports: [EyeLoader, Icon],
   templateUrl: './guest-editor.html',
   styleUrl: './guest-editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

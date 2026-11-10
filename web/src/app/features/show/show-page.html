@@ -14,7 +14,7 @@
 }
 
 @if (!show.connected()) {
-  <p class="status" role="status">מתחבר לשרת…</p>
+  <div class="eye-loader-screen waiting"><span class="eye-loader" style="--eye-size: 220px" role="status" aria-label="מתחבר לשרת"></span><p>מתחבר לשרת…</p></div>
 }
 @if (error(); as message) {
   <p class="status error" role="alert">{{ message }}</p>

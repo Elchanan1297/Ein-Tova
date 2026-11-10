@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Icon, IconName } from '../../../../shared/ui/icon/icon';
 import { AdminProgramItem, ContentApi } from '../../data/content-api';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
 /** אייקונים לתוכנית: הערך נשמר ב־DB, והאפליקציה ממפה אותו לאייקון */
 const ICONS: { value: string; icon: IconName; label: string }[] = [
@@ -21,7 +22,7 @@ const ERRORS: Record<string, string> = {
 /** תוכנית הערב: עריכה בשורה. הסדר נקבע לפי השעה. */
 @Component({
   selector: 'app-program-admin',
-  imports: [Icon],
+  imports: [EyeLoader, Icon],
   templateUrl: './program-admin.html',
   styleUrl: './program-admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

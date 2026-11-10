@@ -5,11 +5,12 @@ import { Icon } from '../../../shared/ui/icon/icon';
 import { AdminQuestion, QuestionsApi } from '../data/questions-api';
 import { QuestionEditor } from './ui/question-editor';
 import { QuestionImport } from './ui/question-import';
+import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 
 /** רשימת השאלות: גרירה לשינוי סדר, עריכה, השבתה/מחיקה, ייבוא. */
 @Component({
   selector: 'app-questions-page',
-  imports: [CdkDropList, CdkDrag, CdkDragHandle, CdkDragPlaceholder, Icon, QuestionEditor, QuestionImport],
+  imports: [EyeLoader, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPlaceholder, Icon, QuestionEditor, QuestionImport],
   templateUrl: './questions-page.html',
   styleUrl: './questions-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

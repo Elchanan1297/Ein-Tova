@@ -6,6 +6,7 @@ import { DEFAULT_TEMPLATE, inviteText, personalLink, readTemplate, saveTemplate,
 import { toCsv } from '../data/table-text';
 import { GuestEditor } from './ui/guest-editor';
 import { GuestImport } from './ui/guest-import';
+import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 
 interface FamilyGroup {
   family: AdminFamily;
@@ -15,7 +16,7 @@ interface FamilyGroup {
 /** מוזמנים לפי משפחות: קישור אישי, וואטסאפ, איפוס משחק, קוד חדש, ייבוא. */
 @Component({
   selector: 'app-guests-page',
-  imports: [Icon, GuestEditor, GuestImport],
+  imports: [EyeLoader, Icon, GuestEditor, GuestImport],
   templateUrl: './guests-page.html',
   styleUrl: './guests-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

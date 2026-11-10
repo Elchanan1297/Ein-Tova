@@ -22,6 +22,7 @@ export default [
           { path: 'voices', loadComponent: () => import('./content/voices/voices-admin') },
         ],
       },
+      { path: 'photos', loadComponent: () => import('./photos/photos-page') },
       { path: 'show', loadComponent: () => import('./show/show-control') },
     ],
   },

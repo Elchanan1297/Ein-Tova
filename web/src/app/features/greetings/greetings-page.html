@@ -9,7 +9,7 @@
     <button type="button" class="b lg gs press retry" (click)="greetings.reload()">נסו שוב</button>
   </section>
 } @else if (greetings.isLoading() && !greetings.value().length) {
-  <p class="note" aria-busy="true">טוען…</p>
+  <div class="note"><app-eye-loader [size]="72" label="טוען ברכות" /></div>
 } @else if (!greetings.value().length) {
   <section class="empty lg"><p>הברכות יעלו בקרוב.</p></section>
 } @else {

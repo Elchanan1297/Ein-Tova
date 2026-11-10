@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- רק קריאות לפרוצדורות (Dapper). כל הלוגיקה העסקית של המשחק נמצאת ב־SQL. -->
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EinTova.Models\EinTova.Models.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- ה־Repositories הם internal: רק שכבת ה־Business משתמשת בהם, ה־Api לא יכול -->
+    <InternalsVisibleTo Include="EinTova.Business" />
+  </ItemGroup>
+</Project>

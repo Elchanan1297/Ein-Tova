@@ -1,4 +1,4 @@
-<nav class="bar lg" aria-label="ניווט ראשי">
+<nav class="bar lg" aria-label="ניווט ראשי" [style.--n]="tabs.length">
   @if (activeIndex() >= 0) {
     <span class="lens lg" [style.--i]="activeIndex()" aria-hidden="true"></span>
   }

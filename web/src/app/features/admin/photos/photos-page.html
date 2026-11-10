@@ -1,0 +1,121 @@
+<header class="head">
+  <div>
+    <h1>מסע בזמן</h1>
+    @if (counts(); as c) {
+      <p>{{ c.drafts }} טיוטות · {{ c.published }} פורסמו · {{ c.hidden }} מוסתרות@if (c.noYear) { · <b>{{ c.noYear }} בלי שנה</b> }</p>
+    }
+  </div>
+  <label class="b lg gs press upload">
+    <app-icon name="upload" /> העלאה מהמכשיר
+    <input type="file" accept="image/jpeg,image/png,image/webp,.heic,.heif" multiple (change)="pick($event)" />
+  </label>
+</header>
+
+<div class="drop lg" [class.over]="dragOver()" (dragover)="$event.preventDefault(); dragOver.set(true)"
+     (dragleave)="dragOver.set(false)" (drop)="drop($event)">
+  אפשר גם לגרור לכאן תמונות מהמחשב. התמונות נשמרות באיכות מלאה, בלי פרטי מיקום.
+</div>
+
+@if (uploads().length) {
+  <section class="uploads lg">
+    <header>
+      @if (uploading()) {
+        <app-eye-loader [size]="40" label="מעלה" /> <b>מעלה תמונות…</b>
+      } @else {
+        <b>ההעלאה הסתיימה</b>
+        <button type="button" class="b link" (click)="clearUploads()">ניקוי</button>
+      }
+    </header>
+    <ul role="list">
+      @for (u of uploads(); track $index) {
+        <li [attr.data-state]="u.state">
+          <span class="name">{{ u.name }}</span>
+          <span class="state">
+            @switch (u.state) {
+              @case ('waiting') { ממתינה }
+              @case ('uploading') { מעלה… }
+              @case ('done') { ✓ הועלתה }
+              @case ('duplicate') { כבר קיימת }
+              @case ('error') { {{ u.message }} }
+            }
+          </span>
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<nav class="tabs" aria-label="סטטוס">
+  @for (t of tabs; track t.status) {
+    <button type="button" class="b" [class.active]="tab() === t.status" (click)="switchTab(t.status)">
+      {{ t.label }} <small>{{ countOf(t.status) }}</small>
+    </button>
+  }
+</nav>
+
+@if (photos(); as list) {
+  @if (list.length) {
+    <div class="tools">
+      <button type="button" class="b link" (click)="selectAll()">{{ selected().size === list.length ? 'ביטול הבחירה' : 'בחירת הכול' }}</button>
+      <button type="button" class="b link" (click)="tagging.set(0)">תיוג אחת־אחת</button>
+      <span class="hint">לחיצה על העיגול בוחרת, Shift בוחר טווח. לחיצה על התמונה פותחת תיוג.</span>
+    </div>
+    <ul class="grid" role="list">
+      @for (p of list; track p.publicId; let i = $index) {
+        <li class="cell" [class.sel]="selected().has(p.publicId)">
+          <button type="button" class="b open" (click)="tagging.set(i)" [attr.aria-label]="'תיוג ' + yearLabel(p)">
+            <img [src]="p.thumbUrl" alt="" loading="lazy" decoding="async" />
+          </button>
+          <button type="button" class="b pick" [attr.aria-pressed]="selected().has(p.publicId)" aria-label="בחירה" (click)="toggle(i, $event)">
+            @if (selected().has(p.publicId)) { <app-icon name="check" /> }
+          </button>
+          <span class="tags">
+            <span class="year" [class.none]="!p.yearTaken" [class.unsure]="p.yearSource === 3">
+              {{ yearLabel(p) }}@if (p.yearSource === 3) { <small>לא בטוח</small> }
+            </span>
+            @if (p.isFeatured) { <span class="star" title="מובחרת">★</span> }
+          </span>
+          @if (p.caption) { <span class="caption">{{ p.caption }}</span> }
+        </li>
+      }
+    </ul>
+  } @else {
+    <section class="empty lg">
+      <span class="eye-loader" style="--eye-size: 110px; animation: none" aria-hidden="true"></span>
+      <p>{{ tab() === 0 ? 'אין טיוטות. תמונות שמעלים נכנסות לכאן קודם, לתיוג ופרסום.' : tab() === 1 ? 'עוד לא פורסמו תמונות.' : 'אין תמונות מוסתרות.' }}</p>
+    </section>
+  }
+} @else {
+  <div class="loading"><app-eye-loader [size]="56" /></div>
+}
+
+<!-- פעולות בכמות על הבחירה -->
+@if (selected().size) {
+  <div class="bulk lg" role="toolbar" aria-label="פעולות על התמונות שנבחרו">
+    <b>{{ selected().size }} נבחרו</b>
+    <span class="group">
+      <input type="number" min="1940" max="2100" placeholder="שנה" [value]="bulkYear()" (input)="bulkYear.set($any($event.target).value)" />
+      <label class="approx"><input type="checkbox" [checked]="bulkApprox()" (change)="bulkApprox.set($any($event.target).checked)" /> בערך</label>
+      <button type="button" class="b act" [disabled]="busy()" (click)="setYear()">קבע שנה</button>
+    </span>
+    <span class="group">
+      <input type="text" maxlength="140" placeholder="כיתוב" [value]="bulkCaption()" (input)="bulkCaption.set($any($event.target).value)" />
+      <button type="button" class="b act" [disabled]="busy()" (click)="setCaption()">קבע כיתוב</button>
+    </span>
+    <span class="group">
+      @if (tab() !== 1) { <button type="button" class="b act pub" [disabled]="busy()" (click)="applyBulk({ status: 1 }, 'פורסמו')">פרסום</button> }
+      @if (tab() !== 2) { <button type="button" class="b act" [disabled]="busy()" (click)="applyBulk({ status: 2 }, 'הוסתרו')">הסתרה</button> }
+      @if (tab() !== 0) { <button type="button" class="b act" [disabled]="busy()" (click)="applyBulk({ status: 0 }, 'הוחזרו לטיוטות')">לטיוטות</button> }
+      <button type="button" class="b act danger" [disabled]="busy()" (click)="deleteSelected()">{{ confirmDelete() ? 'בטוח? למחוק' : 'מחיקה' }}</button>
+    </span>
+    <button type="button" class="b link" (click)="clearSelection()">ביטול</button>
+  </div>
+}
+
+@if (notice(); as n) {
+  <p class="toast lg" [class.error]="!n.ok" role="status">{{ n.text }}</p>
+}
+
+@if (tagging() !== null && photos()?.length) {
+  <app-photo-tagger [photos]="photos()!" [start]="tagging()!" (closed)="onTaggerClosed()" />
+}

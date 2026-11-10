@@ -1,6 +1,7 @@
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Icon, IconName } from '../../shared/ui/icon/icon';
+import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
 
 interface ProgramItem {
   itemId: number;
@@ -22,7 +23,7 @@ const ICONS: Record<string, IconName> = {
 /** תוכנית הערב: רשימת שעה, אייקון ושם. */
 @Component({
   selector: 'app-program-page',
-  imports: [Icon],
+  imports: [EyeLoader, Icon],
   templateUrl: './program-page.html',
   styleUrl: './program-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

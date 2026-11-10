@@ -22,11 +22,15 @@ const PATHS = {
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
   pencil: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
   upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',
+  image: 'M4 5h16v14H4zM4 16l4.5-4.5L13 16l2.5-2.5L20 18M15.5 9.5h.01',
+  heart: 'M12 20s-7.5-4.6-9.2-9.2C1.6 7.5 3.8 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.2 0 5.4 3 4.2 6.3C19.5 15.4 12 20 12 20z',
+  'chevron-left': 'M15 5l-7 7 7 7',
+  'chevron-right': 'M9 5l7 7-7 7',
 } as const;
 
 export type IconName = keyof typeof PATHS;
 
-/** אייקון קו (stroke) בצבע הנוכחי; הגודל נקבע מבחוץ דרך width/height. */
+/** אייקון קו (stroke) בצבע הנוכחי; הגודל נקבע מבחוץ דרך width/height. filled: ממולא (למשל ❤️ שסומן). */
 @Component({
   selector: 'app-icon',
   template: `<svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="path()" /></svg>`,
@@ -41,10 +45,13 @@ export type IconName = keyof typeof PATHS;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+    :host(.filled) svg { fill: currentColor; }
   `,
+  host: { '[class.filled]': 'filled()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Icon {
   readonly name = input.required<IconName>();
+  readonly filled = input(false);
   protected readonly path = computed(() => PATHS[this.name()]);
 }

@@ -1,0 +1,70 @@
+<dialog #dialog class="sheet" (close)="closed.emit()" (cancel)="$event.preventDefault(); close()" aria-label="תיוג תמונות">
+  @let p = photo();
+  <header>
+    <span class="pos">{{ index() + 1 }} / {{ items().length }}</span>
+    <span class="status" [attr.data-s]="p.status">{{ p.status === 1 ? 'פורסמה' : p.status === 2 ? 'מוסתרת' : 'טיוטה' }}</span>
+    <button type="button" class="b x" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+  </header>
+
+  <div class="layout">
+    <figure class="view">
+      @for (k of [p.publicId]; track k) {
+        <img [src]="p.displayUrl" [alt]="p.caption ?? ''" />
+      }
+      <a class="orig" [href]="p.origUrl" download>הורדת המקור</a>
+    </figure>
+
+    <form class="form" (submit)="$event.preventDefault(); go(1)">
+      <fieldset>
+        <legend>
+          שנה:
+          <b>{{ year() ? (approx() ? 'בערך ' : '') + year() : 'לא ידוע' }}</b>
+          @if (p.yearSource === 3 && year() === p.yearTaken) { <small class="unsure">לפי תאריך הקובץ, לא בטוח</small> }
+          @if (p.yearSource === 1 && year() === p.yearTaken) { <small>מהמצלמה (EXIF)</small> }
+        </legend>
+        <div class="chips">
+          @for (d of decades; track d) {
+            <button type="button" class="b chip" [class.on]="decade() === d" (click)="pickDecade(d)">{{ d }}</button>
+          }
+          <button type="button" class="b chip ghost" (click)="clearYear()">לא ידוע</button>
+        </div>
+        @if (years().length) {
+          <div class="chips years">
+            @for (y of years(); track y) {
+              <button type="button" class="b chip" [class.on]="year() === y && !approx()" (click)="pickYear(y)">{{ y }}</button>
+            }
+          </div>
+        }
+        <label class="check">
+          <input type="checkbox" [checked]="approx()" [disabled]="!year()" (change)="approx.set($any($event.target).checked)" /> בערך
+        </label>
+      </fieldset>
+
+      <label>כיתוב <small>{{ caption().length }}/140</small>
+        <input type="text" maxlength="140" placeholder="אבא בחתונה של דוד משה" [value]="caption()" (input)="caption.set($any($event.target).value)" />
+      </label>
+      <label>מי עוד בתמונה <small>לא חובה</small>
+        <input type="text" maxlength="200" placeholder="עם סבתא ודוד משה" [value]="whoElse()" (input)="whoElse.set($any($event.target).value)" />
+      </label>
+      <label class="check">
+        <input type="checkbox" [checked]="featured()" (change)="featured.set($any($event.target).checked)" /> ★ מובחרת (יותר זמן במצגת)
+      </label>
+
+      @if (error(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      <div class="status-actions">
+        @if (p.status !== 1) { <button type="button" class="b lg gs press" [disabled]="busy()" (click)="setStatus(1)">פרסום</button> }
+        @if (p.status !== 2) { <button type="button" class="b press" [disabled]="busy()" (click)="setStatus(2)">הסתרה</button> }
+        @if (p.status !== 0) { <button type="button" class="b press" [disabled]="busy()" (click)="setStatus(0)">לטיוטות</button> }
+      </div>
+
+      <div class="nav">
+        <button type="button" class="b press" [disabled]="busy() || index() === 0" (click)="go(-1)">הקודמת</button>
+        <span class="saved">{{ busy() ? 'שומר…' : dirty() ? 'יישמר במעבר' : '' }}</span>
+        <button type="submit" class="b lg press" [disabled]="busy() || index() === items().length - 1">הבאה ←</button>
+      </div>
+    </form>
+  </div>
+</dialog>

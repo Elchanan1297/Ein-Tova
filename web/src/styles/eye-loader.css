@@ -1,0 +1,74 @@
+/* ספינר "העין": העין מצמצת, ברק זהב עובר עליה, וזוהר עדין נושם.
+   שימוש: <app-eye-loader /> (או ישירות <span class="eye-loader" role="status" aria-label="טוען"></span>)
+   גודל: --eye-size. על רקע בהיר: .eye-loader--light */
+.eye-loader {
+  --eye-size: 96px;
+  --eye-src: url('/assets/logo/ein-tova-eye-symbol-dark.svg');
+  position: relative;
+  display: inline-block;
+  width: var(--eye-size);
+  height: calc(var(--eye-size) * 0.604); /* יחס הסמל 2607:1576 */
+  background: var(--eye-src) center / contain no-repeat;
+  transform-origin: 50% 50%;
+  animation:
+    eye-blink 2.6s cubic-bezier(0.34, 1.2, 0.5, 1) infinite,
+    eye-glow 2.6s ease-in-out infinite;
+}
+
+.eye-loader--light { --eye-src: url('/assets/logo/ein-tova-eye-symbol-light.svg'); }
+
+/* ברק: פס אור נע שנחתך לצורת הסמל עצמו */
+.eye-loader::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  -webkit-mask: var(--eye-src) center / contain no-repeat;
+  mask: var(--eye-src) center / contain no-repeat;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.85) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  animation: eye-sheen 2.6s ease-in-out infinite;
+}
+
+@keyframes eye-blink {
+  0%, 58%, 100% { transform: scaleY(1); }
+  66% { transform: scaleY(0.07); } /* עפעף סגור */
+  78% { transform: scaleY(1.06); } /* נפתח בקפיצה קטנה */
+  86% { transform: scaleY(1); }
+}
+
+@keyframes eye-sheen {
+  0%, 10% { background-position: 130% 0; }
+  52%, 100% { background-position: -30% 0; }
+}
+
+@keyframes eye-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(217, 182, 111, 0)); }
+  45% { filter: drop-shadow(0 0 14px rgba(217, 182, 111, 0.55)); }
+}
+
+/* מצב שמור־תנועה: בלי מצמוץ ובלי ברק, רק פעימת שקיפות.
+   (tokens.css מבטל אנימציות לגמרי במצב הזה; כאן משאירים פעימה עדינה כדי שיהיה ברור שמשהו נטען) */
+@media (prefers-reduced-motion: reduce) {
+  .eye-loader { animation: eye-pulse 1.8s ease-in-out infinite !important; }
+  .eye-loader::after { display: none; }
+  @keyframes eye-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+}
+
+/* מסך טעינה מלא */
+.eye-loader-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  background: radial-gradient(110% 70% at 80% 0%, #2f3659 0%, rgba(47, 54, 89, 0) 60%), #1e2235;
+  color: #f8f3ea;
+  font-family: Assistant, sans-serif;
+  direction: rtl;
+}
+
+.eye-loader-screen .eye-loader { --eye-size: 132px; }
+.eye-loader-screen p { margin: 0; opacity: 0.75; font-size: 15px; letter-spacing: 0.04em; }

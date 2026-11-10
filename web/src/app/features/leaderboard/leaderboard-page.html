@@ -13,7 +13,7 @@
     <button type="button" class="b lg gs press retry" (click)="board.reload()">נסו שוב</button>
   </section>
 } @else if (!board.data()) {
-  <p class="note" aria-busy="true">טוען…</p>
+  <div class="note"><app-eye-loader [size]="72" label="טוען את לוח התוצאות" /></div>
 } @else {
   <ol class="families" role="list">
     @for (f of board.families(); track f.familyId; let i = $index) {

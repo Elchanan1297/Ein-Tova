@@ -16,6 +16,8 @@
 
 .note { text-align: center; color: rgba(248, 243, 234, 0.7); }
 
+.preparing { display: grid; justify-items: center; gap: 10px; p { color: var(--color-gold); font-weight: 600; } }
+
 .panel {
   display: grid;
   gap: 14px;

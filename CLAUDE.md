@@ -6,8 +6,8 @@
 PWA בעברית (RTL) שכל מוזמן פותח בטלפון: משחק "70 עובדות שלא ידעתם על אבא" (חידון), לוח תוצאות חי לפי משפחות, ברכות מצולמות, תוכנית הערב, קולות של אבא (קליפים מוכנים), ומצגת למסך גדול. מסך ניהול דינמי. חייב לעבוד טוב בטלפון, ב־iPad mini ובטאבלטי סמסונג.
 
 ## סטאק
-- **DB:** SQL Server (גם Azure SQL בהמשך). לוגיקה עסקית בפרוצדורות. סקריפטים ב־`db/` (001 סכמה, 002 פרוצדורות, 003 נתוני דוגמה, 004 סגירת שאלה בזמן, 005 DisplayScore בלוח התוצאות, 006 תוכנית וברכות, 007 דוגמה לתוכנית וברכות, 008 קליפי קול לדוגמה, 009 ניהול: הגדרות וסטטיסטיקה, 010 ניהול שאלות, 011 ניהול מוזמנים, 012 ניהול תוכן, 013 איפוס המשחק לכולם). להריץ סקריפטים ב־sqlcmd רק עם `SET QUOTED_IDENTIFIER ON` בראש הקובץ (יש אינדקסים מסוננים). **רצים ועובדים.**
-- **API:** .NET 9 Minimal API + Dapper + JWT (`api/`). **רץ ועובד.** קורא רק לפרוצדורות.
+- **DB:** SQL Server (גם Azure SQL בהמשך). לוגיקה עסקית בפרוצדורות. סקריפטים ב־`db/` (001 סכמה, 002 פרוצדורות, 003 נתוני דוגמה, 004 סגירת שאלה בזמן, 005 DisplayScore בלוח התוצאות, 006 תוכנית וברכות, 007 דוגמה לתוכנית וברכות, 008 קליפי קול לדוגמה, 009 ניהול: הגדרות וסטטיסטיקה, 010 ניהול שאלות, 011 ניהול מוזמנים, 012 ניהול תוכן, 013 איפוס המשחק לכולם, 014 תמונות "מסע בזמן"). להריץ סקריפטים ב־sqlcmd רק עם `SET QUOTED_IDENTIFIER ON` בראש הקובץ (יש אינדקסים מסוננים). **רצים ועובדים.**
+- **API:** .NET 9 Minimal API + Dapper + JWT (`api/`, פתרון `EinTova.sln` בחמש שכבות, ראה "מבנה `api/`"). **רץ ועובד.** קורא רק לפרוצדורות.
 - **Web:** Angular 22 (zoneless, OnPush, Signals, standalone, lazy routes), PWA עם Service Worker (`web/`). קיימים: פתיחה, כניסה, בית, משחק, לוח תוצאות, ברכות, תוכנית, קולות (תמלול + השתקה), אופליין, ניהול, מצגת.
 - **אירוח:** יוחלט ברגע ההעלאה (Azure או VPS). לכן: הגדרות ממשתני סביבה, Docker, T-SQL שרץ גם ב־Express וגם ב־Azure SQL.
 
@@ -30,18 +30,29 @@ PWA בעברית (RTL) שכל מוזמן פותח בטלפון: משחק "70 ע�
 - פלטה: חצות `#1E2235`, חצות בהיר `#2F3659`, זהב `#D9B66F`, זהב עמוק `#BE9550`, זהב כהה `#9A7634`, שמנת `#F8F3EA`.
 - פונטים: Frank Ruhl Libre (כותרות, מספרים, שעות), Assistant (גוף וממשק). RTL.
 - זכוכית נוזלית (liquid glass): `web/src/styles/glass.css` + `tokens.css`. מעבר מרובע־אנימציה: ספרינג `cubic-bezier(.34,1.5,.5,1)`, עדשת זכוכית שנעה על סרגל הטאבים, `rise` מדורג בכניסה, כיבוד `prefers-reduced-motion`. `backdrop-filter` רק במקומות הכרחיים (ביצועים בטלפון ישן).
-- מסכים (הדמיות מדויקות ב־`design/reference/`): פתיחה (70 זהב + אבא + לוגו + "בואו נתחיל"), בית (4 אריחים), לוח תוצאות, ברכות, משחק (טיימר, 4 תשובות, "המשך"), תוכנית הערב. סרגל תחתון: בית · תוצאות · ברכות · משחק · תוכנית.
+- מסכים (הדמיות מדויקות ב־`design/reference/`): פתיחה (70 זהב + אבא + לוגו + "בואו נתחיל"), בית (4 אריחים), לוח תוצאות, ברכות, משחק (טיימר, 4 תשובות, "המשך"), תוכנית הערב. סרגל תחתון: בית · תוכנית · ברכות · תמונות · משחק · תוצאות.
 - פריסה: טלפון → עמודה עד 560px; ≥744px (iPad mini / טאבלט) עמודה מרכזית 680px ורשת אריחים; ≥1100px מצגת/מסך גדול. לבדוק גם אנכי וגם אופקי.
 - תמונת אבא ממורכזת **לפי הראש** (קובץ `father-bust.png`/`father-full.png`, גזירה שקופה). התמונה ברזולוציה נמוכה (900px) — להחליף במקור גבוה לפני הדפסה.
+
+## מבנה `api/` (שכבות, הפרדת אחריות)
+- `EinTova.Models` — DTOs, בקשות ותשובות. בלי תלויות.
+- `EinTova.DataAccess` — `Repositories/` (Dapper, רק פרוצדורות) + `StoredProcedures.cs` (כל שמות ה־usp). ה־Repositories הם `internal` ונראים רק ל־Business (`InternalsVisibleTo`): ה־Api לא יכול לגשת ל־DB.
+- `EinTova.Infrastructure` — `Options/` (JwtOptions, AdminOptions, MediaOptions, PhotosOptions) ו־`Storage/` (קבצים על דיסק).
+- `EinTova.Business` — שירות לכל תחום: ממשק ציבורי + מימוש `internal` (Auth, Game, Leaderboard, Content, Admin, Media, Photos, Show). מטמון, טוקנים, עיבוד תמונות. `BusinessRegistration.cs` רושם את השכבה ואת ה־Repositories. לא מכיר HTTP (המצגת דרך `IShowNotifier`).
+- `EinTova.Api` — רק HTTP. `Application/` (ApplicationServices, InfrastructureServices, ApplicationBusinessServices, ApplicationMiddleware, ApplicationMappings), `Mapping/` (קובץ לכל תחום, נקודות דקות), `Hubs/` (ShowHub), `Middleware/` (שגיאות במקום אחד). `Program.cs` כ־10 שורות.
+- הגדרות: סודות הפיתוח רק ב־`appsettings.Development.json`. בייצור השרת **לא עולה** אם חסר `ConnectionStrings__Db` / `Jwt__Key` / `Admin__Password`, או אם נשאר ערך פיתוח.
+- `/health` בודק שהשרת חי וה־DB עונה.
+- נקודה חדשה: Repository → שירות ב־Business (ממשק + מימוש, רישום ב־`BusinessRegistration`) → `Mapping/`.
 
 ## מבנה `web/` (גישת פיצ'רים)
 - `src/app/core/` — שירותים גלובליים (singleton): `auth/` (store, guard, interceptor, models), `config/` (הגדרות ציבוריות), `audio/` (קולות של אבא).
 - `src/app/layout/` — מעטפת (`shell`) וסרגל טאבים (`tab-bar`).
 - `src/app/features/<name>/` — פיצ'ר לכל מסך: `<name>-page.ts` (default export ל־lazy load), ובתוכו לפי צורך `data/` (API + models), `ui/` (רכיבים פנימיים), `<name>.routes.ts`.
-- `src/app/shared/ui/` — רק רכיבים שמשמשים ביותר מפיצ'ר אחד. קיים: `icon` (אייקוני קו לפי שם).
+- `src/app/shared/ui/` — רק רכיבים שמשמשים ביותר מפיצ'ר אחד. קיימים: `icon` (אייקוני קו לפי שם), `eye-loader` (ספינר העין שמצמצת, CSS ב־`styles/eye-loader.css`; כל טעינה באפליקציה משתמשת בו, לא בטקסט "טוען…").
 - `src/styles/` — `tokens.css`, `glass.css`. `public/assets/` — לוגו ותמונות.
-- ה־Service Worker פועל רק ב־build של production. לבדיקה: `dotnet run --project api --urls http://localhost:5080 -- --webroot <web/dist/eintova-web/browser>` (כך גם יעבוד באירוע: ה־API מגיש את האפליקציה). הדפדפן המובנה של Claude לא תומך ב־SW, לבדוק ב־Chrome.
-- קבצים שמועלים בניהול: `Media__Root` (ברירת מחדל `api/media/`, לא ב־git), מוגשים ב־`/media`. בפיתוח `proxy.conf.json` מעביר גם `/media` ו־`/hubs` (WebSocket) ל־5080. תמונות: SkiaSharp (לא ImageSharp: גרסה 4 דורשת רישיון ו־3.1 עם פגיעויות).
+- ה־Service Worker פועל רק ב־build של production. לבדיקה: `dotnet run --project api/EinTova.Api --urls http://localhost:5080 -- --webroot <web/dist/eintova-web/browser>` (כך גם יעבוד באירוע: ה־API מגיש את האפליקציה). הדפדפן המובנה של Claude לא תומך ב־SW, לבדוק ב־Chrome.
+- קבצים שמועלים בניהול: `Media__Root` (ברירת מחדל `api/EinTova.Api/media/`, לא ב־git), מוגשים ב־`/media`. בפיתוח `proxy.conf.json` מעביר גם `/media` ו־`/hubs` (WebSocket) ל־5080. תמונות: SkiaSharp (לא ImageSharp: גרסה 4 דורשת רישיון ו־3.1 עם פגיעויות).
+- תמונות "מסע בזמן" (`PhotoService`, `PhotoProcessor`, `PhotoUrls` ב־Business; `DiskPhotoStorage` ב־Infrastructure): בתיקייה `Photos__Root` (ברירת מחדל `api/EinTova.Api/photos-data/`, לא ב־git), **לא** תחת `/media`. מוגשות דרך `/api/photos/{id}/{size}` עם כתובת חתומה (HMAC, תוקף ~יומיים; `k=g` רק שפורסמו, `k=a` מנהל כולל מקור). כל קובץ מקודד מחדש (בלי EXIF/GPS). HEIC עוד לא נתמך (שלב ב׳).
 - כל רכיב `OnPush` + Signals, בלי zone.js. קריאות API יחסיות (`/api/...`); בפיתוח `proxy.conf.json` → `localhost:5080`.
 - שמות קבצים לפי מדריך הסגנון החדש: `login-page.ts` / `LoginPage`, `auth-store.ts` / `AuthStore`.
 

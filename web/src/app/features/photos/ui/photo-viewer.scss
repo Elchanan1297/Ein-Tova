@@ -1,0 +1,101 @@
+.viewer {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #0d0f1a;
+  color: var(--color-cream);
+  overflow: hidden;
+  &::backdrop { background: #0d0f1a; }
+}
+
+.top {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  inset-inline: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .pos { font-size: 13px; color: rgba(248, 243, 234, 0.7); }
+}
+
+.round {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(30, 34, 53, 0.7);
+  app-icon { width: 22px; height: 22px; }
+  &:disabled { opacity: 0.25; cursor: default; }
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  touch-action: none; // המחוות שלנו: החלקה וצביטה
+  user-select: none;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s var(--motion-ease-out);
+    animation: fade 0.35s ease both;
+    &.moving { transition: none; }
+  }
+}
+
+@keyframes fade { from { opacity: 0; } }
+
+.nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  &.prev { right: 12px; }
+  &.next { left: 12px; }
+}
+
+.info {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  padding: 40px 16px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(13, 15, 26, 0.92) 30%, transparent);
+  pointer-events: none;
+
+  .text { flex: 1; display: grid; gap: 2px; }
+  .year { font: 700 26px var(--font-display); color: var(--color-gold); }
+  p { margin: 0; }
+  .caption { font-size: 16px; font-weight: 600; }
+  .who { font-size: 14px; color: rgba(248, 243, 234, 0.7); }
+}
+
+.heart {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 52px;
+  padding: 6px;
+  color: rgba(248, 243, 234, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: auto;
+  app-icon { width: 30px; height: 30px; }
+  &.on { color: #f07a8a; }
+}
+
+@media (max-width: 600px) {
+  .nav { display: none; } // בטלפון מחליקים
+}

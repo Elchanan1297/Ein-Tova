@@ -5,11 +5,12 @@ import { Icon } from '../../shared/ui/icon/icon';
 import { GameStore } from './game-store';
 import { GameSummary } from './ui/game-summary';
 import { QuestionView } from './ui/question-view';
+import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
 
 /** משחק 70 עובדות: פתיחה → שאלות → סיכום. ה־store חי כל עוד הדף פתוח. */
 @Component({
   selector: 'app-game-page',
-  imports: [RouterLink, Icon, QuestionView, GameSummary],
+  imports: [EyeLoader, RouterLink, Icon, QuestionView, GameSummary],
   providers: [GameStore],
   templateUrl: './game-page.html',
   styleUrl: './game-page.scss',

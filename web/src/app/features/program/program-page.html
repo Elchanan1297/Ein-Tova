@@ -9,7 +9,7 @@
     <button type="button" class="b lg gs press retry" (click)="items.reload()">נסו שוב</button>
   </section>
 } @else if (items.isLoading() && !items.value().length) {
-  <p class="note" aria-busy="true">טוען…</p>
+  <div class="note"><app-eye-loader [size]="72" label="טוען את התוכנית" /></div>
 } @else if (!items.value().length) {
   <section class="card lg empty"><p>התוכנית תעלה בקרוב.</p></section>
 } @else {

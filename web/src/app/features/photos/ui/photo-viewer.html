@@ -1,0 +1,39 @@
+<dialog #dialog class="viewer" (close)="closed.emit()" aria-label="צפייה בתמונה">
+  @let p = photo();
+  <div class="top">
+    <button type="button" class="b round" aria-label="סגירה" (click)="close()"><app-icon name="x" /></button>
+    <span class="pos">{{ index() + 1 }} / {{ photos().length }}</span>
+  </div>
+
+  <div class="stage" (pointerdown)="down($event)" (pointermove)="move($event)" (pointerup)="up($event)" (pointercancel)="up($event)">
+    @for (k of [p.publicId]; track k) {
+      <img
+        [src]="p.displayUrl"
+        [alt]="p.caption ?? 'תמונה של אבא'"
+        draggable="false"
+        [style.transform]="'translate(' + (tx() + drag()) + 'px,' + ty() + 'px) scale(' + scale() + ')'"
+        [class.moving]="drag() !== 0 || scale() !== 1"
+      />
+    }
+  </div>
+
+  <button type="button" class="b round nav prev" aria-label="הקודמת" [disabled]="index() === 0" (click)="go(-1)">
+    <app-icon name="chevron-right" />
+  </button>
+  <button type="button" class="b round nav next" aria-label="הבאה" [disabled]="index() === photos().length - 1" (click)="go(1)">
+    <app-icon name="chevron-left" />
+  </button>
+
+  <div class="info">
+    <div class="text">
+      @if (year(); as y) { <strong class="year">{{ y }}</strong> }
+      @if (p.caption) { <p class="caption">{{ p.caption }}</p> }
+      @if (p.whoElse) { <p class="who">{{ p.whoElse }}</p> }
+    </div>
+    <button type="button" class="b heart press" [class.on]="p.likedByMe" [attr.aria-pressed]="p.likedByMe"
+            [attr.aria-label]="p.likedByMe ? 'ביטול אהבתי' : 'אהבתי'" (click)="like.emit(p.publicId)">
+      <app-icon name="heart" [filled]="p.likedByMe" />
+      <span>{{ p.likes || '' }}</span>
+    </button>
+  </div>
+</dialog>

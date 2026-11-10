@@ -52,7 +52,7 @@
 
     <div class="buttons">
       <button type="button" class="b press" (click)="close()">ביטול</button>
-      <button type="submit" class="b lg gs press" [disabled]="busy() || !canSave()">{{ busy() ? 'שומר…' : 'שמירה' }}</button>
+      <button type="submit" class="b lg gs press" [disabled]="busy() || !canSave()">@if (busy()) { <app-eye-loader [size]="22" label="שומר" /> } @else { שמירה }</button>
     </div>
   </form>
 </dialog>

@@ -1,3 +1,6 @@
+@if (busy() && code()) {
+  <app-eye-loader fullscreen label="נכנסים…" />
+}
 <section class="page">
   <h1 class="rise">כניסה</h1>
 
@@ -14,7 +17,7 @@
       (input)="phone.set($any($event.target).value)"
     />
     <button class="b lg gs press submit" type="submit" [disabled]="busy()">
-      {{ busy() ? 'מתחבר…' : 'כניסה' }}
+      @if (busy()) { <app-eye-loader [size]="22" label="מתחבר" /> } @else { כניסה }
     </button>
     @if (error(); as message) {
       <p class="error" role="alert">{{ message }}</p>

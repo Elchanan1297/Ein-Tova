@@ -2,10 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminSession } from '../../../core/auth/admin-session';
+import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 
 /** כניסה לניהול בסיסמה. */
 @Component({
   selector: 'app-admin-login-page',
+  imports: [EyeLoader],
   template: `
     <form class="card lg rise" (submit)="submit($event)">
       <img src="assets/logo/ein-tova-eye-symbol-dark.svg" alt="" width="72" height="66" />
@@ -20,7 +22,7 @@ import { AdminSession } from '../../../core/auth/admin-session';
         (input)="password.set($any($event.target).value)"
       />
       <button class="b lg gs press" type="submit" [disabled]="busy() || !password()">
-        {{ busy() ? 'נכנס…' : 'כניסה' }}
+        @if (busy()) { <app-eye-loader [size]="22" label="נכנס" /> } @else { כניסה }
       </button>
       @if (error(); as message) {
         <p class="error" role="alert">{{ message }}</p>

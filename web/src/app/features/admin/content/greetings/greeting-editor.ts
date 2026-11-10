@@ -15,6 +15,7 @@ import {
 import { Icon } from '../../../../shared/ui/icon/icon';
 import { youTubeId } from '../../../../shared/util/youtube';
 import { AdminGreeting, ContentApi, uploadError } from '../../data/content-api';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
 const ERRORS: Record<string, string> = {
   senderName: 'צריך שם של מי ששולח.',
@@ -25,7 +26,7 @@ const ERRORS: Record<string, string> = {
 /** עריכת ברכה: טקסט, תמונה (מועלית ומוקטנת ל־WebP בשרת) או סרטון YouTube. */
 @Component({
   selector: 'app-greeting-editor',
-  imports: [Icon],
+  imports: [EyeLoader, Icon],
   templateUrl: './greeting-editor.html',
   styleUrl: './greeting-editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

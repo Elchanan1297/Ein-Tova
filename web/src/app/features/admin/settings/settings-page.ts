@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild
 import { ConfigStore } from '../../../core/config/config-store';
 import { AdminApi, SaveError, Settings } from '../data/admin-api';
 import { GameStatsPanel } from './ui/game-stats';
+import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 
 /** ערכי הטופס בצורה נוחה לעריכה (מספרים, זמן מקומי, אחוזים) */
 interface Form {
@@ -30,7 +31,7 @@ const FIELD_ERRORS: Partial<Record<keyof Settings, string>> = {
 /** הגדרות המשחק ומצב בזמן אמת. השמירה שולחת רק את מה שהשתנה. */
 @Component({
   selector: 'app-settings-page',
-  imports: [GameStatsPanel],
+  imports: [EyeLoader, GameStatsPanel],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

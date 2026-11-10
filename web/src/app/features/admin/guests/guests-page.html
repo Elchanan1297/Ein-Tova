@@ -85,7 +85,7 @@
 } @else if (loadFailed()) {
   <p class="note">לא הצלחנו לטעון את המוזמנים. <button type="button" class="b link" (click)="load()">נסו שוב</button></p>
 } @else {
-  <p class="note">טוען…</p>
+  <div class="note"><app-eye-loader [size]="56" /></div>
 }
 
 @if (notice(); as n) {

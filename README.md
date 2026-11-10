@@ -2,6 +2,6 @@
 - `CLAUDE.md` — הקשר, החלטות וכללים לעבודה (נקרא אוטומטית ע״י Claude Code)
 - `docs/` — מפת דרכים ומפרט עיצוב
 - `db/` — סקריפטי SQL (001 סכמה, 002 פרוצדורות, 003 דוגמה)
-- `api/` — .NET 9 API (`dotnet run --urls http://localhost:5080`)
+- `api/` — .NET 9 API בשכבות (`dotnet run --project api/EinTova.Api --urls http://localhost:5080`), ראה `api/README.md`
 - `web/` — סגנון ונכסים; כאן תוקם אפליקציית Angular
 - `design/` — לוגו והדמיות מסכים

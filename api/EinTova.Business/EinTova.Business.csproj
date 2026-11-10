@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- לוגיקה שלא שייכת ל־SQL: טוקנים, מטמון, עיבוד תמונות, מצגת. לא מכיר HTTP. -->
+  <ItemGroup>
+    <PackageReference Include="MetadataExtractor" Version="2.9.3" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
+    <PackageReference Include="SkiaSharp" Version="4.154.0" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.154.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EinTova.Models\EinTova.Models.csproj" />
+    <ProjectReference Include="..\EinTova.Infrastructure\EinTova.Infrastructure.csproj" />
+    <ProjectReference Include="..\EinTova.DataAccess\EinTova.DataAccess.csproj" />
+  </ItemGroup>
+</Project>

@@ -54,6 +54,9 @@
 }
 
 <button type="button" class="continue b lg gs press" [disabled]="!canContinue()" (click)="continue.emit()">
+  @if (busy()) {
+    <app-eye-loader [size]="22" [delay]="250" label="טוען" />
+  }
   {{ r?.isFinished ? 'לסיכום' : 'המשך' }}
   <app-icon name="arrow-left" />
 </button>

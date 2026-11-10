@@ -2,11 +2,12 @@ import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, ElementRef, effect, signal, viewChildren } from '@angular/core';
 import { Greeting } from './data/greeting-models';
 import { GreetingCard } from './ui/greeting-card';
+import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
 
 /** ברכות: פיד אנכי, וצ׳יפים למעלה לקפיצה בין ברכות. הצ׳יפ של הברכה שעל המסך מודגש. */
 @Component({
   selector: 'app-greetings-page',
-  imports: [GreetingCard],
+  imports: [EyeLoader, GreetingCard],
   templateUrl: './greetings-page.html',
   styleUrl: './greetings-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Icon } from '../../../../shared/ui/icon/icon';
 import { AdminVoiceClip, ContentApi, VoiceEventType, uploadError } from '../../data/content-api';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
 const EVENTS: { type: VoiceEventType; title: string; when: string }[] = [
   { type: 'Welcome', title: 'ברוכים הבאים', when: 'בלחיצה על "בואו נתחיל"' },
@@ -15,7 +16,7 @@ const EVENTS: { type: VoiceEventType; title: string; when: string }[] = [
 /** קולות של אבא: כמה וריאציות לכל אירוע (אחת נבחרת באקראי). תמלול חובה. */
 @Component({
   selector: 'app-voices-admin',
-  imports: [Icon],
+  imports: [EyeLoader, Icon],
   templateUrl: './voices-admin.html',
   styleUrl: './voices-admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -4,11 +4,12 @@ import { Icon } from '../../../../shared/ui/icon/icon';
 import { youTubeId } from '../../../../shared/util/youtube';
 import { AdminGreeting, ContentApi } from '../../data/content-api';
 import { GreetingEditor } from './greeting-editor';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
 /** ברכות: רשימה בסדר הפיד (גרירה), עריכה ומחיקה. */
 @Component({
   selector: 'app-greetings-admin',
-  imports: [CdkDropList, CdkDrag, CdkDragHandle, Icon, GreetingEditor],
+  imports: [EyeLoader, CdkDropList, CdkDrag, CdkDragHandle, Icon, GreetingEditor],
   templateUrl: './greetings-admin.html',
   styleUrl: './greetings-admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

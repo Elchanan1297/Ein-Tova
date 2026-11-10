@@ -10,13 +10,14 @@ interface Tab {
   icon: IconName;
 }
 
-// סדר מימין לשמאל: בית · תוצאות · ברכות · משחק · תוכנית
+// סדר מימין לשמאל: בית · תוצאות · ברכות · תמונות · משחק · תוכנית
 const TABS: readonly Tab[] = [
   { path: '/home', label: 'בית', icon: 'home' },
-  { path: '/leaderboard', label: 'תוצאות', icon: 'trophy' },
-  { path: '/greetings', label: 'ברכות', icon: 'play' },
-  { path: '/game', label: 'משחק', icon: 'sparkles' },
   { path: '/program', label: 'תוכנית', icon: 'calendar' },
+  { path: '/greetings', label: 'ברכות', icon: 'play' },
+  { path: '/photos', label: 'תמונות', icon: 'image' },
+  { path: '/game', label: 'משחק', icon: 'sparkles' },
+  { path: '/leaderboard', label: 'תוצאות', icon: 'trophy' },
 ];
 
 @Component({

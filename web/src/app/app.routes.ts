@@ -16,6 +16,7 @@ export const routes: Routes = [
       { path: 'home', loadComponent: () => import('./features/home/home-page') },
       { path: 'leaderboard', loadComponent: () => import('./features/leaderboard/leaderboard-page') },
       { path: 'greetings', loadComponent: () => import('./features/greetings/greetings-page') },
+      { path: 'photos', loadComponent: () => import('./features/photos/photos-page') },
       { path: 'game', loadChildren: () => import('./features/game/game.routes') },
       { path: 'program', loadComponent: () => import('./features/program/program-page') },
     ],
