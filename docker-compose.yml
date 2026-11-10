@@ -1,0 +1,36 @@
+# עין טובה: SQL Server + האפליקציה. לבדיקה מקומית של גרסת הייצור, ולשרת VPS.
+# הסודות בקובץ .env ליד הקובץ הזה (לא ב־git). דוגמה: .env.example
+#   docker compose up -d --build
+#   ואז פעם אחת: בניית המסד (ראו docs/deploy.md)
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?SQL_SA_PASSWORD חסר ב־.env}
+    volumes:
+      - sqldata:/var/opt/mssql
+    # רק מהמחשב עצמו (להרצת db/setup.ps1), לא מבחוץ
+    ports:
+      - "127.0.0.1:14333:1433"
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      ConnectionStrings__Db: "Server=db;Database=EinTova;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      Jwt__Key: ${JWT_KEY:?JWT_KEY חסר ב־.env}
+      Admin__Password: ${ADMIN_PASSWORD:?ADMIN_PASSWORD חסר ב־.env}
+    volumes:
+      - appdata:/data
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    restart: unless-stopped
+
+volumes:
+  sqldata:
+  appdata:

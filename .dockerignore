@@ -1,0 +1,16 @@
+# לא נכנס לאימג': תוצרי build, תלויות, נתונים מקומיים וסודות
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/.angular
+**/.vs
+**/*.user
+api/EinTova.Api/media
+api/EinTova.Api/photos-data
+api/EinTova.Api/appsettings.Development.json
+.git
+.env
+docs
+design
+db

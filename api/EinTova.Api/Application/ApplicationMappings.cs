@@ -21,6 +21,8 @@ public static class ApplicationMappings
 
         app.MapHub<ShowHub>("/hubs/show");
 
+        // כתובת API שלא קיימת: 404 (ולא דף האפליקציה)
+        app.MapFallback("/api/{**rest}", () => Results.NotFound());
         // ניווט ישיר לכתובת באפליקציה (למשל /photos) מחזיר את Angular
         app.MapFallbackToFile("index.html");
         return app;

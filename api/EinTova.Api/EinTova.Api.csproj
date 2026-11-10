@@ -4,6 +4,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <!-- סודות הפיתוח לא יוצאים בשום פריסה -->
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\EinTova.Models\EinTova.Models.csproj" />
     <ProjectReference Include="..\EinTova.Infrastructure\EinTova.Infrastructure.csproj" />
     <ProjectReference Include="..\EinTova.Business\EinTova.Business.csproj" />

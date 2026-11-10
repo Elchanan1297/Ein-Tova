@@ -58,8 +58,9 @@ public static class ApplicationServices
         services.AddRateLimiter(o =>
         {
             o.RejectionStatusCode = 429;
-            // מגבלה נדיבה: כל האורחים באולם יושבים מאחורי אותה כתובת IP
-            o.AddFixedWindowLimiter(RateLimits.Login, c => { c.PermitLimit = 60; c.Window = TimeSpan.FromMinutes(1); c.QueueLimit = 0; });
+            // משותפת לכל השרת, ונדיבה: גם אם כל האולם נכנס באותה דקה, אף אחד לא נחסם.
+            // ניחוש קוד (6 תווים מתוך 31) לא מעשי גם בקצב הזה.
+            o.AddFixedWindowLimiter(RateLimits.Login, c => { c.PermitLimit = 300; c.Window = TimeSpan.FromMinutes(1); c.QueueLimit = 0; });
             o.AddFixedWindowLimiter(RateLimits.AdminLogin, c => { c.PermitLimit = 10; c.Window = TimeSpan.FromMinutes(1); c.QueueLimit = 0; });
         });
 

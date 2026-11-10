@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace EinTova.Business.Auth;
 
 /// <summary>
-/// טוקנים: מוזמן (gid, 3 ימים) ומנהל (role=admin, 12 שעות).
+/// טוקנים: מוזמן (gid, 7 ימים) ומנהל (role=admin, 12 שעות).
 /// אותו מפתח משמש לאימות ב־JwtBearer, ומפתח נגזר ממנו חותם את כתובות התמונות.
 /// </summary>
 public sealed class TokenService(IOptions<JwtOptions> options)
@@ -19,7 +19,8 @@ public sealed class TokenService(IOptions<JwtOptions> options)
 
     public SymmetricSecurityKey SigningKey { get; } = new(Encoding.UTF8.GetBytes(options.Value.Key));
 
-    public string GuestToken(int guestId) => Create(new Claim(GuestClaim, guestId.ToString()), TimeSpan.FromDays(3));
+    /// <summary>שבוע: הקישורים נשלחים לפני האירוע, ולא צריך להיכנס מחדש ביום עצמו</summary>
+    public string GuestToken(int guestId) => Create(new Claim(GuestClaim, guestId.ToString()), TimeSpan.FromDays(7));
 
     public string AdminToken() => Create(new Claim(RoleClaim, AdminRole), TimeSpan.FromHours(12));
 

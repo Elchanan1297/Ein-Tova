@@ -42,6 +42,7 @@ PWA בעברית (RTL) שכל מוזמן פותח בטלפון: משחק "70 ע�
 - `EinTova.Api` — רק HTTP. `Application/` (ApplicationServices, InfrastructureServices, ApplicationBusinessServices, ApplicationMiddleware, ApplicationMappings), `Mapping/` (קובץ לכל תחום, נקודות דקות), `Hubs/` (ShowHub), `Middleware/` (שגיאות במקום אחד). `Program.cs` כ־10 שורות.
 - הגדרות: סודות הפיתוח רק ב־`appsettings.Development.json`. בייצור השרת **לא עולה** אם חסר `ConnectionStrings__Db` / `Jwt__Key` / `Admin__Password`, או אם נשאר ערך פיתוח.
 - `/health` בודק שהשרת חי וה־DB עונה.
+- פריסה: `Dockerfile` (אימג' אחד, Angular ב־wwwroot, נתונים ב־`/data`), `docker-compose.yml` (SQL + אפליקציה, סודות ב־`.env`), `db/setup.ps1` (מסד מאפס, בלי דוגמה; `-Sample` לדוגמה). הוראות ב־`docs/deploy.md`.
 - נקודה חדשה: Repository → שירות ב־Business (ממשק + מימוש, רישום ב־`BusinessRegistration`) → `Mapping/`.
 
 ## מבנה `web/` (גישת פיצ'רים)
