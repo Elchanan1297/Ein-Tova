@@ -19,6 +19,7 @@ import { AdminSession } from '../../../core/auth/admin-session';
         <a routerLink="content" routerLinkActive="active">תוכן</a>
         <a routerLink="photos" routerLinkActive="active">מסע בזמן</a>
         <a routerLink="show" routerLinkActive="active">מצגת</a>
+        <a routerLink="save-the-date" routerLinkActive="active">Save the date</a>
       </nav>
       <button type="button" class="b press out" (click)="logout()">יציאה</button>
     </header>

@@ -1,0 +1,137 @@
+<div class="head">
+  <h1>Save the date</h1>
+  @if (status(); as st) {
+    <span class="badge" [class.on]="st.locked" role="status">{{ st.text }}</span>
+  }
+</div>
+
+@if (form(); as f) {
+  <section class="card lg master">
+    <div class="switch-row">
+      <div>
+        <h2>נעילת האפליקציה</h2>
+        <p>כשהנעילה דלוקה, מוזמנים רואים רק את מסך התאריך, גם מי שכבר מחובר. מנהלים ממשיכים כרגיל.</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        class="switch"
+        [attr.aria-checked]="settings()?.enabled"
+        aria-label="נעילת האפליקציה"
+        [disabled]="busy()"
+        (click)="askToggle()"
+      >
+        <span class="knob"></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="card lg">
+    <h2>מתי</h2>
+    <label>תאריך ושעה (שעון ישראל)
+      <input type="datetime-local" [value]="f.eventAt" (change)="set('eventAt', $any($event.target).value)" />
+    </label>
+    @if (dates(); as d) {
+      <div class="dates" aria-live="polite">
+        <div><small>לועזי</small><strong>{{ d.gregorian }}</strong></div>
+        <div><small>עברי{{ f.afterNightfall ? ' (אחרי השקיעה)' : '' }}</small><strong>{{ f.hebrewText.trim() || d.hebrew || 'לא חושב' }}</strong></div>
+        <div><small>שעה</small><strong>{{ d.time }}</strong></div>
+      </div>
+    }
+    <div class="field">
+      <span>איזה תאריך להציג</span>
+      <div class="segmented" role="radiogroup" aria-label="איזה תאריך להציג">
+        @for (o of displays; track o[0]) {
+          <button type="button" role="radio" class="b" [attr.aria-checked]="f.display === o[0]" (click)="set('display', o[0])">
+            {{ o[1] }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="card lg">
+    <h2>תאריך עברי</h2>
+    <label class="check">
+      <input type="checkbox" [checked]="f.afterNightfall" (change)="set('afterNightfall', $any($event.target).checked)" />
+      <span>האירוע אחרי השקיעה <small>(התאריך העברי של היום הבא)</small></span>
+    </label>
+    <label>נוסח ידני <small>(לא חובה. אם ממלאים, הוא מוצג במקום החישוב)</small>
+      <input type="text" maxlength="120" [value]="f.hebrewText" [placeholder]="dates()?.hebrew ?? ''"
+             (input)="set('hebrewText', $any($event.target).value)" />
+    </label>
+  </section>
+
+  <section class="card lg">
+    <h2>נוסח</h2>
+    <div class="row">
+      <label>כותרת
+        <input type="text" maxlength="120" dir="auto" [value]="f.headline" (input)="set('headline', $any($event.target).value)" />
+      </label>
+      <label>שורה עליונה
+        <input type="text" maxlength="120" [value]="f.subline" placeholder="70 · עין טובה" (input)="set('subline', $any($event.target).value)" />
+      </label>
+      <label>מקום <small>(לא חובה)</small>
+        <input type="text" maxlength="120" [value]="f.location" (input)="set('location', $any($event.target).value)" />
+      </label>
+    </div>
+    <label class="check">
+      <input type="checkbox" [checked]="f.showCountdown" (change)="set('showCountdown', $any($event.target).checked)" />
+      <span>ספירה לאחור (ימים, שעות, דקות, שניות)</span>
+    </label>
+  </section>
+
+  <section class="card lg">
+    <h2>פתיחה אוטומטית</h2>
+    <label class="check">
+      <input type="checkbox" [checked]="f.autoOpen" (change)="set('autoOpen', $any($event.target).checked)" />
+      <span>לפתוח את האפליקציה לבד בזמן מסוים</span>
+    </label>
+    @if (f.autoOpen) {
+      <label>נפתח ב־ (שעון ישראל)
+        <input type="datetime-local" [value]="f.autoOpenAt" (change)="set('autoOpenAt', $any($event.target).value)" />
+      </label>
+    }
+    <small class="note">מהרגע הזה כולם נכנסים, גם אם הנעילה נשארה דלוקה. למשל: בתחילת האירוע.</small>
+  </section>
+
+  <section class="card lg">
+    <h2>תצוגה מקדימה</h2>
+    <p class="note">המסך בדיוק כמו שהמוזמנים יראו, עם מה שבטופס עכשיו. לא משנה כלום אצל אף אחד.</p>
+    <button type="button" class="b lg press preview" (click)="preview()">תצוגה מקדימה</button>
+  </section>
+
+  @if (dirty() || message()) {
+    <div class="savebar lg" role="status">
+      @if (message(); as m) {
+        <span [class.error]="!m.ok">{{ m.text }}</span>
+      } @else {
+        <span>יש שינויים שלא נשמרו</span>
+      }
+      @if (dirty()) {
+        <button type="button" class="b press" (click)="revert()">ביטול</button>
+        <button type="button" class="b lg gs press" [disabled]="busy()" (click)="save()">שמירה</button>
+      }
+    </div>
+  }
+
+  <dialog #confirm class="lg" aria-labelledby="std-confirm-title" (cancel)="cancelToggle()">
+    @if (settings()?.enabled) {
+      <h2 id="std-confirm-title">לפתוח את האפליקציה?</h2>
+      <p>האפליקציה תיפתח לכולם. מי שמחזיק אותה פתוחה יחזור אליה לבד תוך כמה שניות.</p>
+    } @else {
+      <h2 id="std-confirm-title">לנעול את האפליקציה?</h2>
+      <p>האפליקציה תינעל לכל המשתמשים, כולל מחוברים. הם יראו רק את מסך התאריך. מנהלים ממשיכים כרגיל.</p>
+    }
+    <div class="actions">
+      <button type="button" class="b press" (click)="cancelToggle()">ביטול</button>
+      <button type="button" class="b lg gs press" (click)="confirmToggle()">
+        {{ settings()?.enabled ? 'לפתוח לכולם' : 'לנעול' }}
+      </button>
+    </div>
+  </dialog>
+} @else if (loadFailed()) {
+  <p class="note">לא הצלחנו לטעון. <button type="button" class="b link" (click)="load()">נסו שוב</button></p>
+} @else {
+  <div class="note"><app-eye-loader [size]="56" /></div>
+}

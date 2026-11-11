@@ -65,4 +65,8 @@ internal static class StoredProcedures
     public const string ListPublishedPhotos = "usp_ListPublishedPhotos";
     public const string TogglePhotoLike = "usp_TogglePhotoLike";
     public const string GetSlideshow = "usp_GetSlideshow";
+
+    // Save the date
+    public const string GetSaveTheDate = "usp_GetSaveTheDate";
+    public const string AdminSaveSaveTheDate = "usp_AdminSaveSaveTheDate";
 }

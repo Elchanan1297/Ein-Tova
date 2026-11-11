@@ -5,6 +5,9 @@ namespace EinTova.Business.Imaging;
 /// <summary>פעולות תמונה משותפות להעלאות התוכן ול"מסע בזמן"</summary>
 internal static class ImageTools
 {
+    public static bool NeedsRotation(SKEncodedOrigin origin) =>
+        origin is SKEncodedOrigin.RightTop or SKEncodedOrigin.BottomRight or SKEncodedOrigin.LeftBottom;
+
     /// <summary>סיבוב לפי כיוון הצילום (90/180/270). מצבי מראה נדירים נשארים כמו שהם.</summary>
     public static SKBitmap Orient(SKBitmap src, SKEncodedOrigin origin)
     {

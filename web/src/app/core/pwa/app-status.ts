@@ -23,6 +23,8 @@ export class AppStatus {
 
     const sw = inject(SwUpdate);
     if (sw.isEnabled) {
+      // בעלייה: לבדוק מיד אם יש גרסה חדשה (משתמשים עם האפליקציה המותקנת)
+      sw.checkForUpdate().catch(() => undefined);
       sw.versionUpdates
         .pipe(
           filter((e) => e.type === 'VERSION_READY'),

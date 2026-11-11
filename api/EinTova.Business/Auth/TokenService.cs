@@ -24,6 +24,17 @@ public sealed class TokenService(IOptions<JwtOptions> options)
 
     public string AdminToken() => Create(new Claim(RoleClaim, AdminRole), TimeSpan.FromHours(12));
 
+    /// <summary>טוקן מנהל תקף (חתימה ותוקף). משמש את נעילת Save the date כשהמנהל צופה באפליקציה עצמה</summary>
+    public async Task<bool> IsAdminTokenAsync(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return false;
+        var res = await new JsonWebTokenHandler().ValidateTokenAsync(token, new TokenValidationParameters
+        {
+            IssuerSigningKey = SigningKey, ValidateIssuer = false, ValidateAudience = false, ValidateLifetime = true,
+        });
+        return res.IsValid && res.Claims.TryGetValue(RoleClaim, out var role) && role as string == AdminRole;
+    }
+
     public static int GuestId(ClaimsPrincipal user) => int.Parse(user.FindFirst(GuestClaim)!.Value);
 
     string Create(Claim claim, TimeSpan life) => new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor

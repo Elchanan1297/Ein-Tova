@@ -5,6 +5,7 @@ using EinTova.Business.Game;
 using EinTova.Business.Leaderboard;
 using EinTova.Business.Media;
 using EinTova.Business.Photos;
+using EinTova.Business.SaveTheDate;
 using EinTova.Business.Show;
 using EinTova.DataAccess.Repositories;
 using Microsoft.Data.SqlClient;
@@ -31,6 +32,7 @@ public static class BusinessRegistration
         services.AddScoped<QuestionsRepository>();
         services.AddScoped<GuestsRepository>();
         services.AddScoped<PhotosRepository>();
+        services.AddScoped<SaveTheDateRepository>();
         return services;
     }
 
@@ -55,6 +57,11 @@ public static class BusinessRegistration
         services.AddSingleton<ShowState>();
         services.AddScoped<IShowService, ShowService>();
         services.AddHostedService<LeaderboardPusher>();
+
+        // Save the date: מצב הנעילה (מטמון 5 שניות) ושליחת שינויים ללקוחות. ILockNotifier נרשם ב־Api
+        services.AddSingleton<SaveTheDateGate>();
+        services.AddScoped<ISaveTheDateService, SaveTheDateService>();
+        services.AddHostedService<SaveTheDateWatcher>();
         return services;
     }
 }

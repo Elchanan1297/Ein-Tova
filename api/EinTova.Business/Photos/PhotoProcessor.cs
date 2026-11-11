@@ -19,6 +19,9 @@ public sealed class PhotoProcessor(IPhotoStorage storage)
     const long MaxPixels = 100_000_000;
     const int DisplaySide = 1600, ThumbSide = 400;
 
+    /// <summary>עיבוד אחד בכל רגע (PhotoProcessor הוא Singleton)</summary>
+    readonly SemaphoreSlim Gate = new(1, 1);
+
     /// <summary>סוג אמיתי לפי תחילת הקובץ, לא לפי סיומת</summary>
     public static string? DetectType(ReadOnlySpan<byte> h)
     {
@@ -41,22 +44,37 @@ public sealed class PhotoProcessor(IPhotoStorage storage)
         if (type == "image/heic") throw new PhotoException(PhotoException.BadType, "HEIC לא נתמך, יש להמיר ל־JPEG");
         if (type is null) throw new PhotoException(PhotoException.BadType, "הקובץ אינו תמונה (JPEG, PNG או WEBP)");
 
-        using var codec = SKCodec.Create(new MemoryStream(data))
-            ?? throw new PhotoException(PhotoException.BadType, "לא הצלחנו לקרוא את התמונה");
-        var info = codec.Info;
-        if (info.Width > MaxSide || info.Height > MaxSide || (long)info.Width * info.Height > MaxPixels)
-            throw new PhotoException(PhotoException.TooLarge, "התמונה גדולה מדי (מקסימום 12,000 פיקסלים לצלע)");
-
-        using var decoded = SKBitmap.Decode(codec) ?? throw new PhotoException(PhotoException.BadType, "לא הצלחנו לפענח את התמונה");
-        using var image = ImageTools.Orient(decoded, codec.EncodedOrigin);
-
         var (year, source) = SuggestYear(data, driveTime, fileCreated);
-
-        // המקור נשמר באיכות גבוהה מאוד, מקודד מחדש: בלי GPS ובלי שום EXIF. PNG נשאר PNG (שקיפות)
         var origPng = type == "image/png";
-        var orig = ImageTools.Encode(image, origPng ? SKEncodedImageFormat.Png : SKEncodedImageFormat.Jpeg, 95);
-        var display = ImageTools.Encode(ImageTools.Fit(image, DisplaySide), SKEncodedImageFormat.Webp, 82, dispose: true);
-        var thumb = ImageTools.Encode(ImageTools.Fit(image, ThumbSide), SKEncodedImageFormat.Webp, 75, dispose: true);
+
+        // תמונה של 48MP תופסת כ־200MB בזיכרון אחרי פענוח. כמה כאלה במקביל ממלאות שרת קטן (B1: 1.75GB)
+        // והוא נהרג (OOM). לכן מעבדים אחת בכל פעם; השאר ממתינות בתור כמה שניות.
+        byte[] orig, display, thumb;
+        int width, height;
+        await Gate.WaitAsync();
+        try
+        {
+            using var codec = SKCodec.Create(new MemoryStream(data))
+                ?? throw new PhotoException(PhotoException.BadType, "לא הצלחנו לקרוא את התמונה");
+            var info = codec.Info;
+            if (info.Width > MaxSide || info.Height > MaxSide || (long)info.Width * info.Height > MaxPixels)
+                throw new PhotoException(PhotoException.TooLarge, "התמונה גדולה מדי (מקסימום 12,000 פיקסלים לצלע)");
+
+            using var decoded = SKBitmap.Decode(codec) ?? throw new PhotoException(PhotoException.BadType, "לא הצלחנו לפענח את התמונה");
+            // עותק מסובב רק כשצריך לסובב: חוסך עוד עותק מלא בזיכרון
+            using var rotated = ImageTools.NeedsRotation(codec.EncodedOrigin) ? ImageTools.Orient(decoded, codec.EncodedOrigin) : null;
+            var image = rotated ?? decoded;
+            (width, height) = (image.Width, image.Height);
+
+            // המקור נשמר באיכות גבוהה מאוד, מקודד מחדש: בלי GPS ובלי שום EXIF. PNG נשאר PNG (שקיפות)
+            orig = ImageTools.Encode(image, origPng ? SKEncodedImageFormat.Png : SKEncodedImageFormat.Jpeg, 95);
+            display = ImageTools.Encode(ImageTools.Fit(image, DisplaySide), SKEncodedImageFormat.Webp, 82, dispose: true);
+            thumb = ImageTools.Encode(ImageTools.Fit(image, ThumbSide), SKEncodedImageFormat.Webp, 75, dispose: true);
+        }
+        finally
+        {
+            Gate.Release();
+        }
 
         var key = Guid.NewGuid().ToString("N");
         try
@@ -70,7 +88,7 @@ public sealed class PhotoProcessor(IPhotoStorage storage)
             await storage.DeleteAsync(key);
             throw;
         }
-        return new ProcessedPhoto(key, image.Width, image.Height, orig.Length + display.Length + thumb.Length,
+        return new ProcessedPhoto(key, width, height, orig.Length + display.Length + thumb.Length,
             origPng ? "image/png" : "image/jpeg", year, source);
     }
 

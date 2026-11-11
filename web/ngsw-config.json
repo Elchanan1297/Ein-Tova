@@ -40,7 +40,7 @@
   "dataGroups": [
     {
       "name": "content",
-      "urls": ["/api/config", "/api/program", "/api/greetings"],
+      "urls": ["/api/program", "/api/greetings"],
       "cacheConfig": { "strategy": "freshness", "timeout": "4s", "maxAge": "7d", "maxSize": 20 }
     },
     {

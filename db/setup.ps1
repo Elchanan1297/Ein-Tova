@@ -26,7 +26,7 @@ $scripts = @(
     '004_timeout.sql', '005_leaderboard_display.sql', '006_content_procs.sql',
     '007_seed_content_sample.sql', '008_seed_voice_sample.sql',
     '009_admin_settings.sql', '010_admin_questions.sql', '011_admin_guests.sql',
-    '012_admin_content.sql', '013_admin_reset_all.sql', '014_photos.sql'
+    '012_admin_content.sql', '013_admin_reset_all.sql', '014_photos.sql', '015_save_the_date.sql'
 )
 $sampleOnly = '003_seed_sample.sql', '007_seed_content_sample.sql', '008_seed_voice_sample.sql'
 

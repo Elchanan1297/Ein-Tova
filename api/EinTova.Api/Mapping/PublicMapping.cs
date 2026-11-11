@@ -2,6 +2,7 @@ using EinTova.Api.Application;
 using EinTova.Business.Admin;
 using EinTova.Business.Content;
 using EinTova.Business.Leaderboard;
+using EinTova.Business.SaveTheDate;
 
 namespace EinTova.Api.Mapping;
 
@@ -10,8 +11,16 @@ public static class PublicMapping
 {
     public static void MapPublicEndpoints(this WebApplication app)
     {
-        app.MapGet("/api/config", async (ISettingsService settings) =>
-            Results.Ok(await settings.GetPublicConfigAsync()));
+        // בלי מטמון בכלל: ממנו הלקוח יודע אם האפליקציה נעולה (Save the date)
+        app.MapGet("/api/config", async (HttpContext ctx, ISettingsService settings, ISaveTheDateService saveTheDate) =>
+        {
+            ctx.Response.Headers.CacheControl = "no-store";
+            var config = new Dictionary<string, object?>((IDictionary<string, object?>)await settings.GetPublicConfigAsync())
+            {
+                ["SaveTheDate"] = await saveTheDate.GetPublicAsync(),
+            };
+            return Results.Ok(config);
+        });
 
         // מטמון קצר: כל הטלפונים באולם מרעננים את הלוח כל כמה שניות
         app.MapGet("/api/leaderboard", async (ILeaderboardService leaderboard) =>

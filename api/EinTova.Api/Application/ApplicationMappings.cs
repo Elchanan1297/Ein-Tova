@@ -18,8 +18,10 @@ public static class ApplicationMappings
         app.MapContentEndpoints();
         app.MapPhotosEndpoints();
         app.MapShowEndpoints();
+        app.MapSaveTheDateEndpoints();
 
         app.MapHub<ShowHub>("/hubs/show");
+        app.MapHub<StateHub>("/hubs/state");
 
         // כתובת API שלא קיימת: 404 (ולא דף האפליקציה)
         app.MapFallback("/api/{**rest}", () => Results.NotFound());

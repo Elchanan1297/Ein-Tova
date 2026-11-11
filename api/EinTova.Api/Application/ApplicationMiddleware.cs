@@ -14,6 +14,8 @@ public static class ApplicationMiddleware
         app.UseCors();
         app.UseRateLimiter();
         app.UseAuthentication();
+        // Save the date: נעילה לפני ההרשאות והנקודות (צריך את המשתמש כדי לזהות מנהל)
+        app.UseMiddleware<SaveTheDateMiddleware>();
         app.UseAuthorization();
 
         // קבצים שהמנהל העלה: שמות ייחודיים, ולכן מטמון ארוך

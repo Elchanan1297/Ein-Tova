@@ -3,6 +3,12 @@ import { adminGuard } from '../../core/auth/admin-guard';
 
 export default [
   { path: 'login', loadComponent: () => import('./login/admin-login-page') },
+  // תצוגה מקדימה במסך מלא, בלי מעטפת הניהול
+  {
+    path: 'save-the-date/preview',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./save-the-date/save-the-date-preview'),
+  },
   {
     path: '',
     canActivate: [adminGuard],
@@ -24,6 +30,7 @@ export default [
       },
       { path: 'photos', loadComponent: () => import('./photos/photos-page') },
       { path: 'show', loadComponent: () => import('./show/show-control') },
+      { path: 'save-the-date', loadComponent: () => import('./save-the-date/save-the-date-admin') },
     ],
   },
 ] satisfies Routes;

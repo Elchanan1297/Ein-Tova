@@ -1,0 +1,224 @@
+// מהדמו ב־save-the-date-kit, כמעט אחד לאחד. --std-height מאפשר מסגרת טלפון בתצוגה המקדימה
+:host {
+  --navy2: #2f3659;
+  --gold: #d9b66f;
+  --cream: #f8f3ea;
+  --spring: cubic-bezier(0.34, 1.5, 0.5, 1);
+  display: block;
+  background: #14172a;
+}
+
+.std {
+  position: relative;
+  min-height: var(--std-height, 100dvh);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(28px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  color: var(--cream);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(120% 60% at 80% 0%, var(--navy2) 0%, rgba(47, 54, 89, 0) 60%),
+    radial-gradient(90% 40% at 10% 100%, rgba(190, 149, 80, 0.18), transparent 70%),
+    linear-gradient(180deg, #1e2235, #14172a);
+}
+
+.arcs {
+  position: absolute;
+  inset: auto 0 12% 0;
+  width: 100%;
+  opacity: 0.5;
+  pointer-events: none;
+  path { fill: none; stroke: var(--gold); stroke-opacity: 0.3; stroke-width: 0.8; }
+}
+
+.logo { width: 116px; margin-top: 4px; opacity: 0; animation: rise 0.8s 0.05s var(--spring) forwards; }
+
+// תמונת אבא בקשת, טבעת זהב וזוהר
+.arch {
+  position: relative;
+  width: 176px;
+  height: 204px;
+  margin-top: 8px;
+  border-radius: 88px 88px 14px 14px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2f3659 0%, #3b4a6b 55%, #c99a5c 120%);
+  box-shadow:
+    0 0 0 1.5px rgba(217, 182, 111, 0.9),
+    0 0 0 6px rgba(217, 182, 111, 0.18),
+    0 18px 50px rgba(0, 0, 0, 0.45),
+    0 0 60px rgba(217, 182, 111, 0.18);
+  opacity: 0;
+  animation: rise 0.9s 0.2s var(--spring) forwards;
+
+  img { position: absolute; left: 50%; bottom: 0; height: 112%; transform: translateX(-50%); }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, 0.22) 50%, transparent 60%);
+    background-size: 260% 100%;
+    animation: sheen 5s 1.2s ease-in-out infinite;
+  }
+}
+
+.eyebrow { margin-top: 16px; font: 600 12px var(--font-body); letter-spacing: 0.42em; color: var(--gold); opacity: 0.9; }
+
+h1 {
+  margin: 2px 0 0;
+  font: 900 46px/1.02 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-align: center;
+  background: linear-gradient(180deg, #f6dfa0, #d9b66f 55%, #b08a48);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0;
+  animation: rise 0.9s 0.35s var(--spring) forwards;
+}
+
+.date {
+  margin-top: 10px;
+  text-align: center;
+  opacity: 0;
+  animation: rise 0.9s 0.5s var(--spring) forwards;
+
+  b { display: block; font: 700 26px var(--font-display); color: var(--cream); }
+  span { display: block; margin-top: 2px; font: 400 16px var(--font-body); color: rgba(248, 243, 234, 0.78); }
+  .time { margin-top: 6px; font-weight: 600; color: var(--gold); }
+  .place { margin-top: 2px; font-size: 15px; }
+}
+
+// שעון החול: מחזור של 9 שניות. 0–72% החול יורד, 78–92% סיבוב של 180°, והסוף זהה להתחלה
+.hg {
+  margin-top: 14px;
+  width: 84px;
+  height: 132px;
+  filter: drop-shadow(0 0 14px rgba(217, 182, 111, 0.35));
+  opacity: 0;
+  animation: rise 0.9s 0.65s var(--spring) forwards;
+
+  svg { width: 100%; height: 100%; overflow: visible; transform-origin: 50% 50%; will-change: transform; animation: flip 9s infinite; }
+}
+.top { transform-origin: 60px 96px; animation: topsand 9s infinite; }
+.bot { transform-origin: 60px 168px; animation: botsand 9s infinite; }
+
+// הזרם: אחרי ההיפוך הגרגרים הראשונים יוצאים מהצוואר ומגיעים לתחתית בהדרגה (pour),
+// ובסוף השארית האחרונה מתנתקת מהצוואר ונופלת. המרקם בתוכו זז למטה כל הזמן
+.flow { transform-origin: 60px 94px; animation: pour 9s infinite; }
+.texture { animation: flow 0.3s infinite linear; }
+// כמה גרגרים זעירים שבורחים מהזרם, בשביל הניצוץ
+.grain { fill: #fff3cf; animation: grain 1s infinite linear; }
+// ראש הערימה עולה; הגרגרים קופצים ממנו
+.splash { animation: land 9s infinite linear, peak 9s infinite; }
+.splash circle { fill: #f6dfa0; animation: hop 0.9s infinite ease-out; }
+
+// הקצב כמו בשעון אמיתי: החלק הרחב למעלה יורד לאט, ליד הצוואר מהר.
+// למטה הערימה מתחילה רק כשהגרגרים הראשונים נוחתים, ועולה ברכות
+@keyframes topsand {
+  0%, 4% { transform: scaleY(1); animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.55); }
+  72%, 100% { transform: scaleY(0); }
+}
+@keyframes botsand {
+  0%, 8% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.3, 0.3, 0.6, 1); }
+  75%, 100% { transform: scaleY(1); }
+}
+@keyframes pour {
+  0%, 4% { transform: scaleY(0); opacity: 1; animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  8% { transform: scaleY(1); }
+  71% { transform: translateY(0); opacity: 1; animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  75% { transform: translateY(70px); opacity: 0; }
+  100% { transform: translateY(70px); opacity: 0; }
+}
+@keyframes land { 0%, 7.5% { opacity: 0; } 9%, 72% { opacity: 1; } 75%, 100% { opacity: 0; } }
+@keyframes flow { to { transform: translateY(6px); } }
+@keyframes grain {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 0.8; }
+  100% { transform: translateY(30px); opacity: 0; }
+}
+@keyframes peak {
+  0%, 8% { transform: translateY(166px); animation-timing-function: cubic-bezier(0.3, 0.3, 0.6, 1); }
+  75%, 100% { transform: translateY(128px); }
+}
+@keyframes hop {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.9; }
+  45% { transform: translate(calc(var(--dx) * 0.6), -3px); }
+  100% { transform: translate(var(--dx), 2px); opacity: 0; }
+}
+// ההיפוך רך (בלי קפיצה), כמו יד שהופכת את השעון
+@keyframes flip {
+  0%, 80% { transform: rotate(0); animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  95%, 100% { transform: rotate(180deg); }
+}
+
+// ספירה לאחור בכרטיסי זכוכית
+.count {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  // כמו שעון: ימים משמאל, שניות מימין
+  direction: ltr;
+  opacity: 0;
+  animation: rise 0.9s 0.8s var(--spring) forwards;
+
+  div {
+    min-width: 58px;
+    padding: 8px 6px 6px;
+    text-align: center;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(217, 182, 111, 0.28);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  b { display: block; font: 800 22px var(--font-display); color: var(--cream); font-variant-numeric: tabular-nums; }
+  i { display: block; font: normal 11px var(--font-body); color: var(--gold); margin-top: 1px; }
+}
+
+.today {
+  margin-top: 12px;
+  font: 900 34px var(--font-display);
+  color: var(--gold);
+  opacity: 0;
+  animation: rise 0.9s 0.8s var(--spring) forwards;
+}
+
+.foot { margin-top: auto; padding-top: 14px; font: 500 12px var(--font-body); letter-spacing: 0.08em; color: rgba(248, 243, 234, 0.55); }
+
+.spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0;
+  animation: spark 4s infinite;
+}
+
+@keyframes spark {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-60px) scale(1); }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(18px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes sheen { 0%, 20% { background-position: 130% 0; } 60%, 100% { background-position: -30% 0; } }
+
+@media (max-height: 700px) {
+  .arch { width: 150px; height: 174px; border-radius: 75px 75px 12px 12px; }
+  .hg { width: 64px; height: 100px; }
+  h1 { font-size: 38px; }
+  .logo { width: 90px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hg svg, .top, .bot, .flow, .texture, .grain, .splash, .arch::after, .spark { animation: none; }
+  .top, .bot { transform: scaleY(0.5); }
+  .flow, .splash { opacity: 0; }
+  * { animation-duration: 0.01s !important; }
+}
