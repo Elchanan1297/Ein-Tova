@@ -7,6 +7,7 @@
     @switch (scene) {
       @case ('leaderboard') { <app-leaderboard-scene [board]="show.board()" /> }
       @case ('greetings') { <app-greetings-scene [greetings]="show.greetings()" /> }
+      @case ('quiz') { <app-quiz-scene [quiz]="show.state()?.quiz ?? null" [clockOffset]="show.clockOffset()" /> }
       @case ('winner') { <app-winner-scene [winner]="show.state()?.winner ?? null" /> }
       @default { <app-welcome-scene /> }
     }
@@ -23,6 +24,6 @@
 @if (!started()) {
   <div class="start">
     <button type="button" class="b lg gs press" (click)="start()">התחלת המצגת</button>
-    <p>מסך מלא וקול. שליטה מהניהול (מצגת), או מהמקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · W זוכה · F מסך מלא</p>
+    <p>מסך מלא וקול. שליטה מהניהול (מצגת), או מהמקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · 4 חידון · W זוכה · F מסך מלא</p>
   </div>
 }

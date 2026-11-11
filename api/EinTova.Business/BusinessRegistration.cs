@@ -33,6 +33,7 @@ public static class BusinessRegistration
         services.AddScoped<GuestsRepository>();
         services.AddScoped<PhotosRepository>();
         services.AddScoped<SaveTheDateRepository>();
+        services.AddScoped<ShowRepository>();
         return services;
     }
 
@@ -57,6 +58,7 @@ public static class BusinessRegistration
         services.AddSingleton<ShowState>();
         services.AddScoped<IShowService, ShowService>();
         services.AddHostedService<LeaderboardPusher>();
+        services.AddHostedService<QuizTicker>();
 
         // Save the date: מצב הנעילה (מטמון 5 שניות) ושליחת שינויים ללקוחות. ILockNotifier נרשם ב־Api
         services.AddSingleton<SaveTheDateGate>();

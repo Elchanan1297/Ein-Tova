@@ -17,6 +17,7 @@ export class ShowStore {
   readonly board = signal<Leaderboard | null>(null);
   readonly greetings = signal<AdminGreeting[]>([]);
   readonly connected = signal(false);
+  readonly clockOffset = signal(0);
   readonly scene = computed(() => this.state()?.scene ?? 'welcome');
 
   private winnerClips: AdminVoiceClip[] = [];
@@ -29,7 +30,11 @@ export class ShowStore {
       .withUrl('/hubs/show', { accessTokenFactory: () => session.token() ?? '' })
       .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 3000 }) // באולם: מנסים שוב לנצח
       .build();
-    this.hub.on('state', (s: ShowState) => this.state.set(s));
+    this.hub.on('state', (s: ShowState) => {
+      // הפרש שעון השרת מהמחשב, כדי שהטיימר על המסך יתאים בדיוק לשרת
+      if (s.quiz) this.clockOffset.set(Date.parse(s.quiz.serverNow) - Date.now() || 0);
+      this.state.set(s);
+    });
     this.hub.on('leaderboard', (b: Leaderboard) => this.board.set(b));
     this.hub.onreconnecting(() => this.connected.set(false));
     this.hub.onreconnected(() => this.connected.set(true));

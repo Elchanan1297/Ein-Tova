@@ -69,4 +69,8 @@ internal static class StoredProcedures
     // Save the date
     public const string GetSaveTheDate = "usp_GetSaveTheDate";
     public const string AdminSaveSaveTheDate = "usp_AdminSaveSaveTheDate";
+
+    // חידון במצגת
+    public const string GetShowQuiz = "usp_GetShowQuiz";
+    public const string GetShowQuizStats = "usp_GetShowQuizStats";
 }

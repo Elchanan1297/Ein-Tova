@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { Icon, IconName } from '../../../shared/ui/icon/icon';
 import { Scene, ShowApi, ShowState } from '../../show/data/show-api';
 
+const PHASES = { question: 'השאלה על המסך', reveal: 'התשובה נחשפה', done: 'החידון הסתיים' } as const;
+
 const SCENES: { scene: Exclude<Scene, 'winner'>; label: string; icon: IconName }[] = [
   { scene: 'welcome', label: 'פתיחה', icon: 'home' },
   { scene: 'leaderboard', label: 'לוח תוצאות', icon: 'trophy' },
@@ -28,6 +30,7 @@ export default class ShowControl {
 
   protected readonly currentLabel = computed(() => {
     const scene = this.state()?.scene;
+    if (scene === 'quiz') return 'חידון';
     return scene === 'winner' ? 'הכרזת זוכה' : (SCENES.find((s) => s.scene === scene)?.label ?? '');
   });
   protected readonly winnerNames = computed(() => {
@@ -35,11 +38,33 @@ export default class ShowControl {
     return s?.scene === 'winner' && s.winner ? s.winner.families.map((f) => f.name).join(' ו') : null;
   });
 
+  protected readonly quiz = computed(() => this.state()?.quiz ?? null);
+  protected readonly quizOnScreen = computed(() => this.state()?.scene === 'quiz');
+  protected readonly phaseLabel = computed(() => {
+    const q = this.quiz();
+    return q ? PHASES[q.phase] : '';
+  });
+  /** אחרי החשיפה: התשובה הנכונה, כדי שהמנחה יוכל לדבר עליה */
+  protected readonly correctAnswer = computed(() => this.quiz()?.question?.options.find((o) => o.correct)?.body ?? null);
+
   constructor() {
     void this.refresh();
-    // אם מישהו אחר (או המקלדת במחשב של המצגת) החליף סצנה
-    const timer = setInterval(() => void this.refresh(), 5000);
+    // אם מישהו אחר (או המקלדת במחשב של המצגת, או הטיימר בחידון) שינה משהו
+    const timer = setInterval(() => void this.refresh(), 2000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+
+  /** חידון: start = מההתחלה, show = להציג (ממשיך מאיפה שעצרנו) */
+  protected async quizAction(action: 'start' | 'next' | 'prev' | 'reveal' | 'show'): Promise<void> {
+    await this.run(
+      () => (action === 'show' ? this.api.setScene('quiz') : this.api.quiz(action)),
+      'הפעולה נכשלה.',
+      'אין שאלות פעילות. מוסיפים בניהול, "שאלות".',
+    );
+  }
+
+  protected async toggleAuto(): Promise<void> {
+    await this.run(() => this.api.quizAuto(!this.quiz()?.auto));
   }
 
   protected async setScene(scene: Exclude<Scene, 'winner'>): Promise<void> {
@@ -63,14 +88,15 @@ export default class ShowControl {
     }
   }
 
-  private async run(action: () => Promise<ShowState>, noScores = 'הפעולה נכשלה.'): Promise<void> {
+  private async run(action: () => Promise<ShowState>, noScores = 'הפעולה נכשלה.', noQuestions = 'הפעולה נכשלה.'): Promise<void> {
     this.busy.set(true);
     try {
       this.state.set(await action());
       this.message.set(null);
     } catch (e) {
       const status = e instanceof HttpErrorResponse ? e.error?.status : null;
-      this.message.set({ ok: false, text: status === 'NoScores' ? noScores : 'הפעולה נכשלה.' });
+      const text = status === 'NoScores' ? noScores : status === 'NoQuestions' ? noQuestions : 'הפעולה נכשלה.';
+      this.message.set({ ok: false, text });
     } finally {
       this.busy.set(false);
     }

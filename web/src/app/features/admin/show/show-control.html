@@ -19,6 +19,46 @@
   </div>
 </section>
 
+<section class="card lg quiz">
+  <div class="quiz-head">
+    <h2>חידון על המסך</h2>
+    <button type="button" role="switch" class="switch" [attr.aria-checked]="quiz()?.auto ?? false"
+            aria-label="מצב אוטומטי" [disabled]="busy() || !quiz()" (click)="toggleAuto()">
+      <span class="knob"></span>
+    </button>
+    <span class="auto-label">אוטומטי</span>
+  </div>
+  <p>למי שאין סמארטפון: אותן שאלות, תשובות וזמנים כמו במשחק בטלפון. כשהזמן נגמר התשובה נחשפת לבד. במצב אוטומטי גם עוברים לשאלה הבאה לבד.</p>
+
+  @if (quiz(); as z) {
+    <div class="quiz-now" [class.live]="quizOnScreen()">
+      <strong>{{ z.phase === 'done' ? 'הסתיים' : 'שאלה ' + z.index + ' מתוך ' + z.total }}</strong>
+      <span>{{ quizOnScreen() ? phaseLabel() : 'לא מוצג כרגע' }}</span>
+      @if (z.question; as q) {
+        <p class="q">{{ q.body }}</p>
+      }
+      @if (correctAnswer(); as c) {
+        <p class="answer">התשובה: <b>{{ c }}</b></p>
+      }
+    </div>
+  }
+
+  @if (quizOnScreen()) {
+    <div class="quiz-nav">
+      <button type="button" class="b lg press" [disabled]="busy() || quiz()?.index === 1 && quiz()?.phase !== 'done'" (click)="quizAction('prev')">הקודמת</button>
+      <button type="button" class="b lg press" [disabled]="busy() || quiz()?.phase !== 'question'" (click)="quizAction('reveal')">חשיפת התשובה</button>
+      <button type="button" class="b lg gs press" [disabled]="busy() || quiz()?.phase === 'done'" (click)="quizAction('next')">הבאה</button>
+    </div>
+  } @else {
+    <button type="button" class="b lg gs press big" [disabled]="busy()" (click)="quizAction('show')">
+      <app-icon name="play" /> {{ quiz() ? 'המשך החידון על המסך' : 'התחלת החידון על המסך' }}
+    </button>
+  }
+  @if (quiz()) {
+    <button type="button" class="b link restart" [disabled]="busy()" (click)="quizAction('start')">להתחיל מהשאלה הראשונה</button>
+  }
+</section>
+
 <section class="card lg winner">
   <h2>הכרזת זוכה</h2>
   <p>מחשב את המשפחה המובילה ברגע הלחיצה, מציג אותה על המסך עם קונפטי, ומנגן את הקול של אבא (אם הועלה קליפ "הכרזת זוכה").</p>
@@ -34,4 +74,4 @@
   <p class="error" role="alert">{{ m.text }}</p>
 }
 
-<p class="hint">במחשב של המצגת אפשר גם במקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · W זוכה · F מסך מלא</p>
+<p class="hint">במחשב של המצגת אפשר גם במקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · 4 חידון · W זוכה · F מסך מלא. בחידון: ← הבאה · → הקודמת · Enter חשיפה · A אוטומטי</p>
