@@ -52,7 +52,8 @@
   opacity: 0;
   animation: rise 0.9s 0.2s var(--spring) forwards;
 
-  img { position: absolute; left: 50%; bottom: 0; height: 112%; transform: translateX(-50%); }
+  // ממרכזים לפי הפנים, לא לפי התמונה: הפנים ב־34% מרוחב הקובץ (הגוף פונה ימינה)
+  img { position: absolute; left: 50%; bottom: 0; height: 112%; transform: translateX(-34%); }
 
   &::after {
     content: '';
