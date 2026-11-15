@@ -52,6 +52,8 @@ h1 { font-size: 28px; }
 
 label, .field {
   display: grid;
+  // בשורה עם שדות שיש להם הסבר מתחת: הכותרת והשדה צמודים למעלה, בלי למתוח את השדה
+  align-content: start;
   gap: 6px;
   font-weight: 600;
 
