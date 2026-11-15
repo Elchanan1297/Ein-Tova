@@ -16,6 +16,7 @@ export default [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'settings' },
       { path: 'settings', loadComponent: () => import('./settings/settings-page') },
+      { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard-admin') },
       { path: 'questions', loadComponent: () => import('./questions/questions-page') },
       { path: 'guests', loadComponent: () => import('./guests/guests-page') },
       {

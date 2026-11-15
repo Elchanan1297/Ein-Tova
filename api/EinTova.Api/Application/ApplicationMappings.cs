@@ -20,6 +20,7 @@ public static class ApplicationMappings
         app.MapPhotosEndpoints();
         app.MapShowEndpoints();
         app.MapSaveTheDateEndpoints();
+        app.MapDashboardEndpoints();
 
         app.MapHub<ShowHub>("/hubs/show");
         app.MapHub<StateHub>("/hubs/state");

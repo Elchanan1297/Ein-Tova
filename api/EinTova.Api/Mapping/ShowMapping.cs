@@ -15,7 +15,7 @@ public static class ShowMapping
 
         show.MapPost("/scene", async (SceneRequest r, IShowService svc) =>
             await svc.SetSceneAsync(r.Scene) is { } snap ? Results.Ok(snap)
-                : Results.BadRequest(new { status = r.Scene == Scenes.Quiz ? "NoQuestions" : "BadValue" }));
+                : Results.BadRequest(new { status = r.Scene == Scenes.Quiz ? "NoQuestions" : r.Scene == Scenes.Stats ? "NotPublished" : "BadValue" }));
 
         // החידון על המסך (למי שאין סמארטפון): אותן שאלות וזמנים כמו במשחק
         var quiz = show.MapGroup("/quiz");

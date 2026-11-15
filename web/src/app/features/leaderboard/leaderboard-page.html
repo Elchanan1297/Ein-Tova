@@ -43,6 +43,10 @@
     }
   </ol>
 
+  @if (resultsPublished()) {
+    <a class="b lg gs press results-link rise" style="--d: 0.35s" routerLink="/results">כל התוצאות והסטטיסטיקות</a>
+  }
+
   @if (board.top().length) {
     <section class="top rise" style="--d: 0.4s">
       <h2>השחקנים המובילים</h2>

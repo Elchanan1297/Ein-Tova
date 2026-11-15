@@ -23,6 +23,8 @@ export const routes: Routes = [
     children: [
       { path: 'home', loadComponent: () => import('./features/home/home-page') },
       { path: 'leaderboard', loadComponent: () => import('./features/leaderboard/leaderboard-page') },
+      // תוצאות וסטטיסטיקות: הדף עצמו מציג "יפורסם בסוף" עד שהמנהל מסיים את המשחק
+      { path: 'results', loadComponent: () => import('./features/dashboard/results-page') },
       { path: 'greetings', loadComponent: () => import('./features/greetings/greetings-page') },
       { path: 'photos', loadComponent: () => import('./features/photos/photos-page') },
       { path: 'game', loadChildren: () => import('./features/game/game.routes') },

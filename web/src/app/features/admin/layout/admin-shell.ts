@@ -14,6 +14,7 @@ import { AdminSession } from '../../../core/auth/admin-session';
       </a>
       <nav aria-label="ניהול">
         <a routerLink="settings" routerLinkActive="active">הגדרות ומשחק</a>
+        <a routerLink="dashboard" routerLinkActive="active">דשבורד</a>
         <a routerLink="questions" routerLinkActive="active">שאלות</a>
         <a routerLink="guests" routerLinkActive="active">מוזמנים</a>
         <a routerLink="content" routerLinkActive="active">תוכן</a>

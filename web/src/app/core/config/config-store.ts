@@ -10,6 +10,8 @@ export interface PublicConfig {
   factsLabelCount: number;
   secondsPerQuestion: number;
   voiceChance: number;
+  /** המנהל סיים את המשחק: הדשבורדים גלויים לכולם */
+  resultsPublished?: boolean;
 }
 
 /**
@@ -22,6 +24,7 @@ export class ConfigStore {
 
   readonly config = computed(() => this.resource.value() ?? null);
   readonly factsLabelCount = computed(() => this.config()?.factsLabelCount ?? null);
+  readonly resultsPublished = computed(() => this.config()?.resultsPublished === true);
 
   constructor() {
     const document = inject(DOCUMENT);

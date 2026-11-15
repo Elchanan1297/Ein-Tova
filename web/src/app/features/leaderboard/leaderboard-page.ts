@@ -1,6 +1,8 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth-store';
+import { ConfigStore } from '../../core/config/config-store';
 import { Icon } from '../../shared/ui/icon/icon';
 import { LeaderboardStore } from './leaderboard-store';
 import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
@@ -8,7 +10,7 @@ import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
 /** לוח תוצאות חי לפי משפחות, ומתחתיו השחקנים המובילים. */
 @Component({
   selector: 'app-leaderboard-page',
-  imports: [EyeLoader, DecimalPipe, Icon],
+  imports: [EyeLoader, DecimalPipe, Icon, RouterLink],
   providers: [LeaderboardStore],
   templateUrl: './leaderboard-page.html',
   styleUrl: './leaderboard-page.scss',
@@ -17,4 +19,5 @@ import { EyeLoader } from '../../shared/ui/eye-loader/eye-loader';
 export default class LeaderboardPage {
   protected readonly board = inject(LeaderboardStore);
   protected readonly myFamilyId = inject(AuthStore).guest()?.familyId ?? null;
+  protected readonly resultsPublished = inject(ConfigStore).resultsPublished;
 }

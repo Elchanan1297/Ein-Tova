@@ -27,7 +27,7 @@ public interface IShowService
     Task QuizTickAsync();
 }
 
-internal sealed class ShowService(ShowState state, ILeaderboardService leaderboard, IShowNotifier notifier, ShowRepository repo)
+internal sealed class ShowService(ShowState state, ILeaderboardService leaderboard, IShowNotifier notifier, ShowRepository repo, SettingsRepository settings)
     : IShowService
 {
     public object Snapshot() => state.Snapshot();
@@ -35,6 +35,8 @@ internal sealed class ShowService(ShowState state, ILeaderboardService leaderboa
     public async Task<object?> SetSceneAsync(string scene)
     {
         if (!Scenes.All.Contains(scene) || scene == Scenes.Winner) return null;
+        // הדשבורד במסך הגדול: רק אחרי שהמנהל סיים את המשחק ופרסם
+        if (scene == Scenes.Stats && !(bool)(await settings.GetPublicConfigAsync()).ResultsPublished) return null;
         if (scene == Scenes.Quiz)
         {
             // חזרה לחידון: ממשיכים מאותה שאלה (עם טיימר חדש), או מתחילים אם עוד לא התחיל

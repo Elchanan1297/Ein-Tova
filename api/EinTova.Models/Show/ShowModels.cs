@@ -4,8 +4,8 @@ public record SceneRequest(string Scene);
 
 public static class Scenes
 {
-    public const string Welcome = "welcome", Leaderboard = "leaderboard", Greetings = "greetings", Winner = "winner", Quiz = "quiz";
-    public static readonly string[] All = { Welcome, Leaderboard, Greetings, Winner, Quiz };
+    public const string Welcome = "welcome", Leaderboard = "leaderboard", Greetings = "greetings", Winner = "winner", Quiz = "quiz", Stats = "stats";
+    public static readonly string[] All = { Welcome, Leaderboard, Greetings, Winner, Quiz, Stats };
 }
 
 /// <summary>שאלה בחידון של המצגת, עם התשובות והנכונה (רק בשרת; המסך מקבל את הנכונה רק בחשיפה)</summary>

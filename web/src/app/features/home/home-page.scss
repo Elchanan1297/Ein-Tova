@@ -98,3 +98,6 @@
   .tile { min-height: 100px; }
   .label { font-size: 14px; }
 }
+
+// אריח תוצאות (אחרי סיום המשחק): שורה שלמה
+.tile.wide { grid-column: 1 / -1; }

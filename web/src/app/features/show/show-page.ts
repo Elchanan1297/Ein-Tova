@@ -4,18 +4,19 @@ import { ShowApi } from './data/show-api';
 import { GreetingsScene } from './scenes/greetings-scene';
 import { LeaderboardScene } from './scenes/leaderboard-scene';
 import { QuizScene } from './scenes/quiz-scene';
+import { StatsScene } from './scenes/stats-scene';
 import { WelcomeScene } from './scenes/welcome-scene';
 import { WinnerScene } from './scenes/winner-scene';
 import { ShowStore } from './show-store';
 
 /**
  * מסך המצגת (מחשב מחובר למקרן/טלוויזיה). מה שמוצג נשלט מהניהול, או מהמקלדת:
- * 1 פתיחה · 2 לוח תוצאות · 3 ברכות · 4 חידון · W הכרזת זוכה · F מסך מלא
+ * 1 פתיחה · 2 לוח תוצאות · 3 ברכות · 4 חידון · 5 סטטיסטיקות (אחרי סיום המשחק) · W הכרזת זוכה · F מסך מלא
  * בחידון: ← השאלה הבאה · → הקודמת · Enter חשיפת התשובה · A אוטומטי
  */
 @Component({
   selector: 'app-show-page',
-  imports: [WelcomeScene, LeaderboardScene, GreetingsScene, WinnerScene, QuizScene],
+  imports: [WelcomeScene, LeaderboardScene, GreetingsScene, WinnerScene, QuizScene, StatsScene],
   providers: [ShowStore],
   templateUrl: './show-page.html',
   styleUrl: './show-page.scss',
@@ -63,6 +64,7 @@ export default class ShowPage {
         case 'Digit2': await this.api.setScene('leaderboard'); break;
         case 'Digit3': await this.api.setScene('greetings'); break;
         case 'Digit4': await this.api.setScene('quiz'); break;
+        case 'Digit5': await this.api.setScene('stats'); break;
         // RTL: שמאלה = קדימה
         case 'ArrowLeft': if (this.inQuiz()) await this.api.quiz('next'); else return; break;
         case 'ArrowRight': if (this.inQuiz()) await this.api.quiz('prev'); else return; break;
@@ -77,7 +79,7 @@ export default class ShowPage {
       }
       this.error.set(null);
     } catch {
-      this.error.set(e.code === 'KeyW' ? 'עוד אין משפחה שסיימה את המשחק.' : e.code === 'Digit4' ? 'אין שאלות פעילות.' : 'הפעולה נכשלה.');
+      this.error.set(e.code === 'KeyW' ? 'עוד אין משפחה שסיימה את המשחק.' : e.code === 'Digit4' ? 'אין שאלות פעילות.' : e.code === 'Digit5' ? 'הסטטיסטיקות יוצגו אחרי סיום המשחק בניהול.' : 'הפעולה נכשלה.');
       setTimeout(() => this.error.set(null), 3000);
     }
   }

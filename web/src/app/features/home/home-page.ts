@@ -9,6 +9,8 @@ interface Tile {
   label: string;
   icon: IconName;
   tone: 'gold' | 'blue' | 'plain';
+  /** לכל רוחב השורה */
+  wide?: boolean;
 }
 
 /** מסך בית: לוגו, ברכת פתיחה ו־4 אריחי זכוכית. */
@@ -20,7 +22,8 @@ interface Tile {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class HomePage {
-  private readonly factsCount = inject(ConfigStore).factsLabelCount;
+  private readonly config = inject(ConfigStore);
+  private readonly factsCount = this.config.factsLabelCount;
 
   // סדר ברשת RTL: משחק | תוכנית / ברכות | תוצאות
   protected readonly tiles = computed<Tile[]>(() => [
@@ -28,5 +31,9 @@ export default class HomePage {
     { path: '/program', label: 'תוכנית הערב', icon: 'calendar', tone: 'blue' },
     { path: '/greetings', label: 'ברכות', icon: 'play', tone: 'gold' },
     { path: '/leaderboard', label: 'משפחות ולוח תוצאות', icon: 'users', tone: 'plain' },
+    // אחרי סיום המשחק
+    ...(this.config.resultsPublished()
+      ? [{ path: '/results', label: 'תוצאות וסטטיסטיקות', icon: 'trophy', tone: 'gold', wide: true } satisfies Tile]
+      : []),
   ]);
 }

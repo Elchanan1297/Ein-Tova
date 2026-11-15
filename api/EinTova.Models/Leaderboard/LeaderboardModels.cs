@@ -11,6 +11,8 @@ public class FamilyScore
     public decimal AvgScore { get; init; }
     public decimal DisplayScore { get; init; }
     public string RankBy { get; init; } = "Total";
+    /// <summary>זמן מענה ממוצע בשניות (שובר שוויון). null = אין מדידה</summary>
+    public decimal? AvgSec { get; init; }
 }
 
 public class TopPlayer
@@ -19,6 +21,7 @@ public class TopPlayer
     public string FamilyName { get; init; } = "";
     public int Score { get; init; }
     public int Total { get; init; }
+    public decimal? AvgSec { get; init; }
 }
 
 public record LeaderboardData(List<FamilyScore> Families, List<TopPlayer> Top);

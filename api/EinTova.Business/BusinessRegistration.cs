@@ -1,6 +1,7 @@
 using EinTova.Business.Admin;
 using EinTova.Business.Auth;
 using EinTova.Business.Content;
+using EinTova.Business.Dashboard;
 using EinTova.Business.Game;
 using EinTova.Business.Leaderboard;
 using EinTova.Business.Media;
@@ -35,6 +36,7 @@ public static class BusinessRegistration
         services.AddScoped<PhotosRepository>();
         services.AddScoped<SaveTheDateRepository>();
         services.AddScoped<ShowRepository>();
+        services.AddScoped<DashboardRepository>();
         return services;
     }
 
@@ -46,6 +48,7 @@ public static class BusinessRegistration
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IPhoneGameService, PhoneGameService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
         services.AddScoped<IContentService, ContentService>();
         services.AddScoped<ISettingsService, SettingsService>();

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-export type Scene = 'welcome' | 'leaderboard' | 'greetings' | 'winner' | 'quiz';
+export type Scene = 'welcome' | 'leaderboard' | 'greetings' | 'winner' | 'quiz' | 'stats';
 
 export interface Winner {
   families: { name: string; displayScore: number; finished: number }[];

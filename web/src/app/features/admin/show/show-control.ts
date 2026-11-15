@@ -9,6 +9,7 @@ const SCENES: { scene: Exclude<Scene, 'winner'>; label: string; icon: IconName }
   { scene: 'welcome', label: 'פתיחה', icon: 'home' },
   { scene: 'leaderboard', label: 'לוח תוצאות', icon: 'trophy' },
   { scene: 'greetings', label: 'ברכות', icon: 'play' },
+  { scene: 'stats', label: 'סטטיסטיקות', icon: 'sparkles' },
 ];
 
 /** שלט למצגת: מה מוצג עכשיו במסך הגדול, והכרזת זוכה. עובד גם מהטלפון. */
@@ -95,7 +96,11 @@ export default class ShowControl {
       this.message.set(null);
     } catch (e) {
       const status = e instanceof HttpErrorResponse ? e.error?.status : null;
-      const text = status === 'NoScores' ? noScores : status === 'NoQuestions' ? noQuestions : 'הפעולה נכשלה.';
+      const text =
+        status === 'NoScores' ? noScores
+        : status === 'NoQuestions' ? noQuestions
+        : status === 'NotPublished' ? 'הסטטיסטיקות יוצגו אחרי סיום המשחק (ניהול → דשבורד).'
+        : 'הפעולה נכשלה.';
       this.message.set({ ok: false, text });
     } finally {
       this.busy.set(false);

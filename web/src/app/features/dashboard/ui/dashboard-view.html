@@ -1,0 +1,232 @@
+<div class="segmented tabs" role="tablist" aria-label="תצוגה">
+  @for (t of tabs; track t.id) {
+    <button type="button" role="tab" class="b" [attr.aria-selected]="tab() === t.id" [attr.aria-checked]="tab() === t.id" (click)="tab.set(t.id)">
+      {{ t.label }}
+    </button>
+  }
+</div>
+
+@switch (tab()) {
+  <!-- ===== סיכום ===== -->
+  @case ('summary') {
+    <section class="kpis">
+      <div class="kpi lg">
+        <b>{{ s().started }}<small> מתוך {{ s().guests }}</small></b>
+        <span>התחילו לשחק</span>
+        <i class="bar"><i [style.width.%]="startedPct()"></i></i>
+      </div>
+      <div class="kpi lg">
+        <b>{{ s().finished }}</b>
+        <span>סיימו ({{ finishedPct() }}%)</span>
+        <i class="bar"><i [style.width.%]="finishedPct()"></i></i>
+      </div>
+      <div class="kpi lg">
+        <b>{{ s().correctPct | number: '1.0-0' }}%</b>
+        <span>תשובות נכונות</span>
+      </div>
+      <div class="kpi lg">
+        <b>{{ s().avgSec !== null ? (s().avgSec | number: '1.1-1') : '-' }}</b>
+        <span>שניות בממוצע לתשובה</span>
+      </div>
+    </section>
+
+    <section class="card lg">
+      <h2>המשפחות</h2>
+      <ol class="bars" role="list">
+        @for (f of families(); track f.familyId) {
+          <li [class.mine]="f.familyId === myFamilyId()">
+            <button type="button" class="row" (click)="showFamily(f.familyId)" [attr.aria-label]="'השחקנים של ' + f.name">
+              <span class="rank">{{ f.rnk }}</span>
+              <span class="name">{{ f.name }}</span>
+              <span class="track"><i [style.width.%]="(100 * f.displayScore) / maxScore()"></i></span>
+              <span class="num">{{ f.displayScore | number: '1.0-1' }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+      <p class="hint">
+        {{ byAverage() ? 'לפי ממוצע לשחקן' : 'לפי סך הנקודות' }}. בשוויון, המשפחה שענתה מהר יותר עולה. לחיצה על משפחה מציגה את השחקנים שלה.
+      </p>
+    </section>
+
+    <div class="two">
+      <section class="card lg">
+        <h2>הכי מהירים</h2>
+        @if (fastest().length) {
+          <ol class="podium" role="list">
+            @for (p of fastest(); track p.guestId; let i = $index) {
+              <li>
+                <span class="medal" [attr.data-place]="i + 1">{{ i + 1 }}</span>
+                <span class="who">{{ p.fullName }}<small>{{ p.familyName }} · {{ p.score }}/{{ p.total }}</small></span>
+                <span class="sec">{{ p.avgSec | number: '1.1-1' }} ש׳</span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="empty">עוד אין מי שסיים.</p>
+        }
+      </section>
+
+      <section class="card lg">
+        <h2>השאלות</h2>
+        @if (hardest(); as q) {
+          <div class="q-note">
+            <small>הכי קשה</small>
+            <p>{{ q.body }}</p>
+            <span>{{ q.correctPct | number: '1.0-0' }}% צדקו</span>
+          </div>
+        }
+        @if (easiest(); as q) {
+          <div class="q-note">
+            <small>הכי קלה</small>
+            <p>{{ q.body }}</p>
+            <span>{{ q.correctPct | number: '1.0-0' }}% צדקו</span>
+          </div>
+        }
+        @if (!hardest()) {
+          <p class="empty">עוד אין תשובות.</p>
+        }
+      </section>
+    </div>
+
+    @if (admin() && playingNow().length) {
+      <section class="card lg">
+        <h2><span class="live" aria-hidden="true"></span> משחקים עכשיו ({{ playingNow().length }})</h2>
+        <ul class="now" role="list">
+          @for (p of playingNow(); track p.guestId) {
+            <li>
+              <span class="who">{{ p.fullName }}<small>{{ p.familyName }}@if (p.viaPhone) { · טלפון כשר }</small></span>
+              <span class="track"><i [style.width.%]="progress(p)"></i></span>
+              <span class="num">{{ p.answered }}/{{ p.total }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+
+  <!-- ===== משפחות ===== -->
+  @case ('families') {
+    <section class="card lg">
+      <div class="table" role="table" aria-label="משפחות">
+        <div class="tr th" role="row">
+          <span role="columnheader">#</span>
+          <span role="columnheader">משפחה</span>
+          <span role="columnheader">שיחקו</span>
+          <span role="columnheader">{{ byAverage() ? 'ממוצע' : 'נקודות' }}</span>
+          <span role="columnheader">נכונות</span>
+          <span role="columnheader">מהירות</span>
+        </div>
+        @for (f of families(); track f.familyId) {
+          <button type="button" class="tr" role="row" [class.mine]="f.familyId === myFamilyId()" (click)="showFamily(f.familyId)">
+            <span role="cell" class="rank">{{ f.rnk }}</span>
+            <span role="cell" class="name">{{ f.name }}</span>
+            <span role="cell">
+              {{ f.players }}@if (admin()) {<small>/{{ f.guests }}</small>}
+              <i class="bar"><i [style.width.%]="f.guests ? (100 * f.finished) / f.guests : 0"></i></i>
+            </span>
+            <span role="cell" class="num">{{ f.displayScore | number: '1.0-1' }}</span>
+            <span role="cell">{{ f.correctPct | number: '1.0-0' }}%</span>
+            <span role="cell">{{ f.avgSec !== null ? (f.avgSec | number: '1.1-1') + ' ש׳' : '-' }}</span>
+          </button>
+        }
+      </div>
+      <p class="hint">הפס מתחת ל"שיחקו": כמה מבני המשפחה סיימו. לחיצה על משפחה מציגה את השחקנים שלה.</p>
+    </section>
+  }
+
+  <!-- ===== שחקנים ===== -->
+  @case ('players') {
+    <section class="card lg">
+      <div class="chips" role="group" aria-label="סינון לפי משפחה">
+        <button type="button" class="chip" [class.on]="familyId() === null" (click)="familyId.set(null)">כל המשפחות</button>
+        @for (f of families(); track f.familyId) {
+          <button type="button" class="chip" [class.on]="familyId() === f.familyId" (click)="toggleFamily(f.familyId)">{{ f.name }}</button>
+        }
+      </div>
+
+      <div class="tools">
+        <input type="search" placeholder="חיפוש שם" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="חיפוש שם" />
+        <select [value]="playerSort()" (change)="playerSort.set($any($event.target).value)" aria-label="מיון">
+          <option value="rank">לפי דירוג</option>
+          <option value="speed">הכי מהירים</option>
+          <option value="progress">לפי התקדמות</option>
+          <option value="name">לפי שם</option>
+        </select>
+        @if (admin()) {
+          <select [value]="status()" (change)="status.set($any($event.target).value)" aria-label="מצב">
+            <option value="all">כל המצבים</option>
+            <option value="playing">משחקים עכשיו</option>
+            <option value="done">סיימו</option>
+            <option value="none">לא התחילו</option>
+          </select>
+        }
+      </div>
+
+      @if (selectedFamily(); as f) {
+        <p class="family-line">
+          <b>{{ f.name }}</b>: מקום {{ f.rnk }} · {{ f.players }} שיחקו · {{ f.correctPct | number: '1.0-0' }}% נכונות
+          @if (f.avgSec !== null) { · {{ f.avgSec | number: '1.1-1' }} שניות לתשובה }
+        </p>
+      }
+
+      <ul class="players" role="list">
+        @for (p of players(); track p.guestId) {
+          <li [class.mine]="p.familyId === myFamilyId()" [attr.data-status]="p.status">
+            <span class="rank">{{ p.rnk ?? '' }}</span>
+            <span class="who">
+              {{ p.fullName }}
+              <small>
+                {{ p.familyName }}
+                @if (p.viaPhone) { · טלפון כשר }
+                @if (admin()) { · {{ statusLabel(p.status) }} }
+              </small>
+            </span>
+            <span class="track" [attr.aria-label]="p.answered + ' מתוך ' + p.total"><i [style.width.%]="progress(p)"></i></span>
+            <span class="num">{{ p.score }}<small>/{{ p.total }}</small></span>
+            <span class="sec">{{ p.avgSec !== null ? (p.avgSec | number: '1.1-1') + ' ש׳' : '-' }}</span>
+          </li>
+        } @empty {
+          <li class="empty">אין שחקנים להצגה.</li>
+        }
+      </ul>
+      <p class="hint">הפס: כמה שאלות ענו. השניות: זמן ממוצע לתשובה (בטלפון כשר לא נמדד).</p>
+    </section>
+  }
+
+  <!-- ===== שאלות ===== -->
+  @case ('questions') {
+    <section class="card lg">
+      <div class="tools">
+        <select [value]="questionSort()" (change)="questionSort.set($any($event.target).value)" aria-label="מיון">
+          <option value="order">לפי הסדר</option>
+          <option value="hard">הכי קשות</option>
+          <option value="easy">הכי קלות</option>
+          <option value="slow">הכי איטיות</option>
+        </select>
+      </div>
+      <ol class="questions" role="list">
+        @for (q of questions(); track q.questionId) {
+          <li>
+            <p class="body">{{ q.body }}</p>
+            <div class="meters">
+              <span class="meter">
+                <span class="track ok"><i [style.width.%]="q.correctPct"></i></span>
+                <span>{{ q.answered ? (q.correctPct | number: '1.0-0') + '% צדקו' : 'עוד לא נענתה' }}</span>
+              </span>
+              @if (q.avgSec !== null) {
+                <span class="meter">
+                  <span class="track time"><i [style.width.%]="(100 * q.avgSec) / maxQuestionSec()"></i></span>
+                  <span>{{ q.avgSec | number: '1.1-1' }} שניות בממוצע</span>
+                </span>
+              }
+            </div>
+            @if (q.fastestName) {
+              <p class="first">⚡ ענה נכון הכי מהר: <b>{{ q.fastestName }}</b> ({{ q.fastestFamily }}), {{ q.fastestSec | number: '1.1-1' }} שניות</p>
+            }
+          </li>
+        }
+      </ol>
+    </section>
+  }
+}

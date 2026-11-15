@@ -9,6 +9,7 @@
       @case ('greetings') { <app-greetings-scene [greetings]="show.greetings()" /> }
       @case ('quiz') { <app-quiz-scene [quiz]="show.state()?.quiz ?? null" [clockOffset]="show.clockOffset()" /> }
       @case ('winner') { <app-winner-scene [winner]="show.state()?.winner ?? null" /> }
+      @case ('stats') { <app-stats-scene /> }
       @default { <app-welcome-scene /> }
     }
   </section>
@@ -24,6 +25,6 @@
 @if (!started()) {
   <div class="start">
     <button type="button" class="b lg gs press" (click)="start()">התחלת המצגת</button>
-    <p>מסך מלא וקול. שליטה מהניהול (מצגת), או מהמקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · 4 חידון · W זוכה · F מסך מלא</p>
+    <p>מסך מלא וקול. שליטה מהניהול (מצגת), או מהמקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · 4 חידון · 5 סטטיסטיקות · W זוכה · F מסך מלא</p>
   </div>
 }
