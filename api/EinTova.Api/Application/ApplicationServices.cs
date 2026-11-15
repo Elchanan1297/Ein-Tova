@@ -27,6 +27,11 @@ public static class ApplicationServices
                 "Admin__Password בייצור: לא סיסמת הפיתוח, ולפחות 10 תווים")
             .ValidateOnStart();
 
+        // קו הטלפון: לא חובה (ריק = כבוי), אבל אם מוגדר, לפחות 16 תווים
+        services.AddOptions<IvrOptions>().Bind(config.GetSection(IvrOptions.Section))
+            .Validate(o => o.Key.Length == 0 || o.Key.Length >= 16, "Ivr__Key קצר מ־16 תווים")
+            .ValidateOnStart();
+
         services.ConfigureHttpJsonOptions(o => o.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase);
 
         // ---------- JWT ----------

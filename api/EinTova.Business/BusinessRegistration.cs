@@ -4,6 +4,7 @@ using EinTova.Business.Content;
 using EinTova.Business.Game;
 using EinTova.Business.Leaderboard;
 using EinTova.Business.Media;
+using EinTova.Business.Phone;
 using EinTova.Business.Photos;
 using EinTova.Business.SaveTheDate;
 using EinTova.Business.Show;
@@ -44,6 +45,7 @@ public static class BusinessRegistration
         services.AddSingleton<TokenService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGameService, GameService>();
+        services.AddScoped<IPhoneGameService, PhoneGameService>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
         services.AddScoped<IContentService, ContentService>();
         services.AddScoped<ISettingsService, SettingsService>();

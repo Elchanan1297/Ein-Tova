@@ -13,6 +13,7 @@ internal static class StoredProcedures
     public const string NextQuestion = "usp_NextQuestion";
     public const string SubmitAnswer = "usp_SubmitAnswer";
     public const string TimeoutQuestion = "usp_TimeoutQuestion";
+    public const string PhoneJoinAttempt = "usp_PhoneJoinAttempt";
     public const string GetVoiceClip = "usp_GetVoiceClip";
     public const string GetLeaderboard = "usp_GetLeaderboard";
 

@@ -55,6 +55,11 @@
         <input type="number" min="5" max="300" inputmode="numeric" [value]="f.secondsPerQuestion"
                (input)="set('secondsPerQuestion', $any($event.target).valueAsNumber || 0)" />
       </label>
+      <label>זמן נוסף בטלפון (שניות)
+        <input type="number" min="0" max="300" inputmode="numeric" [value]="f.ivrExtraSec"
+               (input)="set('ivrExtraSec', $any($event.target).valueAsNumber || 0)" />
+        <small>למי שמשחק מטלפון כשר: השאלה והתשובות מוקראות, וזה לוקח זמן</small>
+      </label>
     </div>
   </section>
 

@@ -13,6 +13,7 @@ interface Form {
   questionCount: number;
   factsLabelCount: string;
   secondsPerQuestion: number;
+  ivrExtraSec: number;
   graceMs: number;
   voicePct: number;
   leaderboardRank: Settings['leaderboardRank'];
@@ -24,6 +25,7 @@ const FIELD_ERRORS: Partial<Record<keyof Settings, string>> = {
   questionCount: 'מספר השאלות לא תקין.',
   factsLabelCount: 'המספר בכותרת חייב להיות 1 ומעלה, או ריק.',
   secondsPerQuestion: 'זמן לשאלה: בין 5 ל־300 שניות.',
+  ivrExtraSec: 'זמן נוסף בטלפון: בין 0 ל־300 שניות.',
   graceMs: 'מרווח הרשת לא תקין.',
   voiceChance: 'הסתברות הקול לא תקינה.',
 };
@@ -156,6 +158,7 @@ function toForm(s: Settings): Form {
     questionCount: Number(s.questionCount) || 0,
     factsLabelCount: s.factsLabelCount ?? '',
     secondsPerQuestion: Number(s.secondsPerQuestion) || 20,
+    ivrExtraSec: s.ivrExtraSec == null ? 30 : Number(s.ivrExtraSec) || 0,
     graceMs: Number(s.graceMs) || 0,
     voicePct: Math.round((Number(s.voiceChance) || 0) * 100),
     leaderboardRank: s.leaderboardRank,
@@ -170,6 +173,7 @@ function toSettings(f: Form): Settings {
     questionCount: String(f.questionCount),
     factsLabelCount: f.factsLabelCount.trim() || null,
     secondsPerQuestion: String(f.secondsPerQuestion),
+    ivrExtraSec: String(f.ivrExtraSec),
     graceMs: String(f.graceMs),
     voiceChance: String(f.voicePct / 100),
     leaderboardRank: f.leaderboardRank,

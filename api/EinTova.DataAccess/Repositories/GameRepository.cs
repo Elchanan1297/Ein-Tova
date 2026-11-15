@@ -25,6 +25,10 @@ internal sealed class GameRepository(SqlConnection db) : RepositoryBase(db)
     public Task<dynamic> TimeoutAsync(int guestId) =>
         Db.QueryFirstAsync(StoredProcedures.TimeoutQuestion, new { GuestId = guestId }, commandType: Sp);
 
+    /// <summary>הניסיון עובר לטלפון: זמן נוסף לכל שאלה (ההקראה)</summary>
+    public Task<int> PhoneJoinAttemptAsync(int guestId) =>
+        Db.ExecuteScalarAsync<int>(StoredProcedures.PhoneJoinAttempt, new { GuestId = guestId }, commandType: Sp);
+
     public Task<dynamic?> GetVoiceClipAsync(string eventType) =>
         Db.QueryFirstOrDefaultAsync(StoredProcedures.GetVoiceClip, new { EventType = eventType }, commandType: Sp);
 

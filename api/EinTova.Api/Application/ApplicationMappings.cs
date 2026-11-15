@@ -11,6 +11,7 @@ public static class ApplicationMappings
         app.MapPublicEndpoints();
         app.MapLoginEndpoints();
         app.MapGameEndpoints();
+        app.MapPhoneEndpoints();
 
         app.MapAdminSettingsEndpoints();
         app.MapQuestionsEndpoints();

@@ -31,6 +31,8 @@ public sealed class SaveTheDateMiddleware(RequestDelegate next)
         var p = req.Path;
         if (!p.StartsWithSegments("/api")) return true;
         if (p.StartsWithSegments("/api/config") || p.StartsWithSegments("/api/admin")) return true;
+        // קו הטלפון מקריא בעצמו "המשחק עוד לא נפתח" (ימות לא מבינה 423)
+        if (p.StartsWithSegments("/api/ivr")) return true;
         // /api/photos/{guid}/{size}?k=..&e=..&s=.. (קובץ חתום, לא הרשימה)
         var parts = p.Value!.Split('/', StringSplitOptions.RemoveEmptyEntries);
         return HttpMethods.IsGet(req.Method) && parts.Length == 4 && parts[1] == "photos"

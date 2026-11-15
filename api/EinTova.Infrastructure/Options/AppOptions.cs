@@ -29,6 +29,16 @@ public sealed class PhotosOptions
     public string Root { get; set; } = "";
 }
 
+/// <summary>
+/// קו הטלפון (ימות המשיח). Ivr__Key: מפתח סודי שמופיע בכתובת ששלוחת ה־API קוראת לה.
+/// ריק = הקו כבוי (/api/ivr מחזיר 404).
+/// </summary>
+public sealed class IvrOptions
+{
+    public const string Section = "Ivr";
+    public string Key { get; set; } = "";
+}
+
 /// <summary>ערכי פיתוח שאסור שיגיעו לייצור</summary>
 public static class DevDefaults
 {

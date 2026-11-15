@@ -10,6 +10,8 @@ export interface Settings {
   questionCount: string;
   factsLabelCount: string | null;
   secondsPerQuestion: string;
+  /** שניות נוספות לשאלה למי שמשחק בטלפון כשר */
+  ivrExtraSec: string;
   graceMs: string;
   voiceChance: string;
   leaderboardRank: 'Total' | 'Average';
