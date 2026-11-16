@@ -1,0 +1,199 @@
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DashboardPlayer, PlayerStatus } from '../../../dashboard/data/dashboard-models';
+import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
+import { familyColors } from './chart-theme';
+import { CountUp } from './count-up';
+import {
+  bubbleOption,
+  hardestOption,
+  heatmapOption,
+  histogramOption,
+  scatterOption,
+  sparkOption,
+  stackOption,
+  timelineOption,
+} from './dash-options';
+import { DashStore } from './dash-store';
+import { EChart } from './echart';
+
+type Tab = 'summary' | 'families' | 'players' | 'questions';
+type PlayerSort = 'rank' | 'speed' | 'progress' | 'name';
+type StatusFilter = 'all' | PlayerStatus;
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'summary', label: 'סיכום' },
+  { id: 'families', label: 'משפחות' },
+  { id: 'players', label: 'שחקנים' },
+  { id: 'questions', label: 'שאלות' },
+];
+
+/** היקף טבעת ההתקדמות (r=40) */
+const RING = 2 * Math.PI * 40;
+
+const pct = (part: number, whole: number) => (whole > 0 ? Math.round((100 * part) / whole) : 0);
+
+/**
+ * הדשבורד המתקדם (גרפים, לפי dashboard-spec.md): סיכום, משפחות, שחקנים ושאלות.
+ * אותם מספרים כמו הדשבורד הרגיל (usp_GetDashboard), ועוד נתוני הגרפים (usp_GetDashboardCharts).
+ * הגרפים של כל טאב נבנים רק כשהטאב נפתח.
+ */
+@Component({
+  selector: 'app-dash-v2',
+  imports: [EChart, CountUp, EyeLoader],
+  providers: [DashStore],
+  templateUrl: './dash-v2.html',
+  styleUrl: './dash-v2.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DashV2 {
+  protected readonly store = inject(DashStore);
+  protected readonly tabs = TABS;
+  protected readonly tab = signal<Tab>('summary');
+  protected readonly tabIndex = computed(() => TABS.findIndex((t) => t.id === this.tab()));
+  protected readonly ring = RING;
+
+  // סינון השחקנים (כמו בדשבורד הרגיל)
+  protected readonly familyId = signal<number | null>(null);
+  protected readonly playerSort = signal<PlayerSort>('rank');
+  protected readonly status = signal<StatusFilter>('all');
+  protected readonly search = signal('');
+
+  private readonly full = computed(() => this.store.data());
+  protected readonly d = computed(() => this.full()?.data ?? null);
+  protected readonly c = computed(() => this.full()?.charts ?? null);
+  protected readonly empty = computed(() => (this.d()?.summary.started ?? 0) === 0);
+
+  protected readonly colors = computed(() => familyColors((this.d()?.families ?? []).map((f) => f.familyId)));
+  private readonly extra = computed(() => new Map((this.c()?.families ?? []).map((f) => [f.familyId, f])));
+  private readonly wrong = computed(() => new Map((this.c()?.topWrong ?? []).map((w) => [w.questionId, w])));
+
+  // ===== סיכום =====
+  protected readonly kpi = computed(() => {
+    const s = this.d()!.summary;
+    const g = this.c()!.general;
+    return {
+      started: s.started,
+      guests: s.guests,
+      startedRing: pct(s.started, s.guests) / 100,
+      startedChange: g.startedLastHour > 0 ? `▲ ${g.startedLastHour} בשעה האחרונה` : 'אין חדשים בשעה האחרונה',
+      finished: s.finished,
+      finishedRing: pct(s.finished, s.started) / 100,
+      finishedChange: `${pct(s.finished, s.started)}% מהמתחילים`,
+      correct: s.correctPct,
+      avgSec: s.avgSec,
+      median: g.medianSec,
+    };
+  });
+
+  protected readonly race = computed(() => {
+    const fams = this.d()!.families;
+    const max = Math.max(1, ...fams.map((f) => f.displayScore));
+    return fams.map((f) => ({ ...f, width: (100 * f.displayScore) / max, color: this.colors().get(f.familyId)! }));
+  });
+  protected readonly byAverage = computed(() => this.d()?.families[0]?.rankBy === 'Average');
+
+  /** שלושת המובילים, בסדר של פודיום: שני, ראשון, שלישי */
+  protected readonly podium = computed(() => {
+    const top = this.d()!.players.filter((p) => p.rnk !== null).sort((a, b) => a.rnk! - b.rnk!).slice(0, 3);
+    const order = [top[1], top[0], top[2]];
+    const heights = [130, 170, 100];
+    return order.map((p, i) => (p ? { p, h: heights[i], place: i === 1 ? 1 : i === 0 ? 2 : 3 } : null)).filter((x) => x !== null);
+  });
+
+  protected readonly timeline = computed(() => timelineOption(this.c()!.timeline));
+  protected readonly spark = computed(() => sparkOption(this.c()!.timeline));
+  protected readonly hasSpark = computed(() => this.c()!.timeline.filter((p) => p.avgSec !== null).length > 1);
+  protected readonly histogram = computed(() => histogramOption(this.c()!.responseTimes, this.c()!.general.medianSec));
+
+  // ===== משפחות =====
+  protected readonly awards = computed(() => {
+    const fams = this.d()!.families;
+    const ex = this.extra();
+    const color = this.colors();
+    const pick = <T>(list: T[], key: (t: T) => number, dir: 1 | -1) =>
+      list.reduce<T | null>((best, t) => (best === null || dir * key(t) > dir * key(best) ? t : best), null);
+    const played = fams.filter((f) => f.answered > 0);
+    const accurate = pick(played, (f) => f.correctPct, 1);
+    const fastest = pick(played.filter((f) => f.avgSec !== null), (f) => f.avgSec!, -1);
+    const active = pick(fams.filter((f) => f.guests > 0 && f.players > 0), (f) => f.players / f.guests, 1);
+    const streak = pick(fams.filter((f) => (ex.get(f.familyId)?.maxStreak ?? 0) > 0), (f) => ex.get(f.familyId)!.maxStreak, 1);
+    return [
+      { icon: '🎯', title: 'הכי מדויקת', f: accurate, value: accurate ? `${Math.round(accurate.correctPct)}%` : '', note: 'תשובות נכונות' },
+      { icon: '⚡', title: 'הכי מהירה', f: fastest, value: fastest ? `${fastest.avgSec} שנ׳` : '', note: 'זמן ממוצע לתשובה' },
+      { icon: '🙌', title: 'הכי משתתפת', f: active, value: active ? `${pct(active.players, active.guests)}%` : '', note: 'מהמשפחה שיחקו' },
+      { icon: '🔥', title: 'רצף הכי ארוך', f: streak, value: streak ? String(ex.get(streak.familyId)!.maxStreak) : '', note: 'תשובות נכונות ברצף' },
+    ].map((a) => ({ ...a, color: a.f ? color.get(a.f.familyId)! : '#9AA3C4' }));
+  });
+  protected readonly stack = computed(() => stackOption(this.d()!.families, this.extra()));
+  protected readonly stackHeight = computed(() => 80 + 44 * Math.max(1, this.d()!.families.filter((f) => f.answered > 0).length));
+  protected readonly heatmap = computed(() => heatmapOption(this.d()!.families, this.d()!.questions, this.c()!.heatmap));
+  protected readonly heatHeight = computed(() => 110 + 40 * Math.max(1, this.d()!.families.filter((f) => f.answered > 0).length));
+
+  // ===== שחקנים =====
+  protected readonly scatter = computed(() => scatterOption(this.d()!.players, this.colors(), this.d()!.summary));
+  protected readonly players = computed(() => {
+    const term = this.search().trim();
+    const fam = this.familyId();
+    const status = this.status();
+    const list = this.d()!.players.filter(
+      (p) =>
+        (fam === null || p.familyId === fam) &&
+        (status === 'all' || p.status === status) &&
+        (!term || p.fullName.includes(term) || p.familyName.includes(term)),
+    );
+    return [...list].sort(SORTS[this.playerSort()]);
+  });
+
+  // ===== שאלות =====
+  protected readonly hardest = computed(() => hardestOption(this.d()!.questions, this.wrong()));
+  protected readonly hardestHeight = computed(() => 40 + 34 * Math.min(12, Math.max(1, this.d()!.questions.filter((q) => q.answered > 0).length)));
+  protected readonly bubble = computed(() => bubbleOption(this.d()!.questions));
+
+  // תקצירים לקוראי מסך
+  protected readonly labels = computed(() => {
+    const d = this.d()!;
+    const top = d.families[0];
+    return {
+      timeline: `קצב המשחק: ${d.summary.started} התחילו ו־${d.summary.finished} סיימו עד עכשיו.`,
+      histogram: `חציון זמן התשובה ${this.c()!.general.medianSec?.toFixed(1) ?? 'לא ידוע'} שניות.`,
+      stack: `נכון, שגוי ופג הזמן לכל משפחה. ${top ? `במקום הראשון ${top.name}.` : ''}`,
+      heatmap: 'אחוז התשובות הנכונות לכל משפחה בכל שאלה.',
+      scatter: `מהירות מול דיוק לכל שחקן. ממוצע הדיוק ${Math.round(d.summary.correctPct)}%.`,
+      hardest: 'השאלות שהכי מעט ענו עליהן נכון.',
+      bubble: 'כל שאלה לפי זמן מענה ממוצע ואחוז נכון.',
+    };
+  });
+
+  protected select(tab: Tab): void {
+    this.tab.set(tab);
+  }
+
+  protected showFamily(familyId: number): void {
+    this.familyId.set(familyId);
+    this.tab.set('players');
+  }
+
+  protected toggleFamily(familyId: number): void {
+    this.familyId.update((f) => (f === familyId ? null : familyId));
+  }
+
+  protected progress(p: DashboardPlayer): number {
+    return pct(p.answered, p.total);
+  }
+
+  protected statusLabel(s: PlayerStatus): string {
+    return s === 'done' ? 'סיים' : s === 'playing' ? 'משחק עכשיו' : 'לא התחיל';
+  }
+
+  protected dash(ratio: number): number {
+    return RING * (1 - Math.min(1, Math.max(0, ratio)));
+  }
+}
+
+const bySpeed = (a: DashboardPlayer, b: DashboardPlayer) => (a.avgSec ?? 1e9) - (b.avgSec ?? 1e9);
+const SORTS: Record<PlayerSort, (a: DashboardPlayer, b: DashboardPlayer) => number> = {
+  rank: (a, b) => (a.rnk ?? 1e9) - (b.rnk ?? 1e9) || a.fullName.localeCompare(b.fullName, 'he'),
+  speed: (a, b) => bySpeed(a, b) || b.score - a.score,
+  progress: (a, b) => b.answered / Math.max(1, b.total) - a.answered / Math.max(1, a.total) || b.score - a.score,
+  name: (a, b) => a.fullName.localeCompare(b.fullName, 'he'),
+};

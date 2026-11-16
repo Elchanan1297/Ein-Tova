@@ -1,5 +1,6 @@
 using EinTova.Api.Hubs;
 using EinTova.Business;
+using EinTova.Business.Dashboard;
 using EinTova.Business.SaveTheDate;
 using EinTova.Business.Show;
 
@@ -18,6 +19,7 @@ public static class ApplicationBusinessServices
         builder.Services.AddBusinessServices();
         builder.Services.AddSingleton<IShowNotifier, HubShowNotifier>();
         builder.Services.AddSingleton<ILockNotifier, HubLockNotifier>();
+        builder.Services.AddSingleton<IDashboardNotifier, HubDashboardNotifier>();
         return builder;
     }
 }

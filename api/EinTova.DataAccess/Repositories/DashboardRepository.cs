@@ -18,6 +18,18 @@ internal sealed class DashboardRepository(SqlConnection db) : RepositoryBase(db)
         return new DashboardData(summary, families, players, questions);
     }
 
+    public async Task<DashboardCharts> GetChartsAsync()
+    {
+        using var m = await Db.QueryMultipleAsync(StoredProcedures.GetDashboardCharts, commandType: Sp);
+        var general = await m.ReadFirstAsync<ChartsGeneral>();
+        var families = (await m.ReadAsync<ChartsFamily>()).ToList();
+        var timeline = (await m.ReadAsync<ChartsTimelinePoint>()).ToList();
+        var bins = (await m.ReadAsync<ChartsBin>()).ToList();
+        var heat = (await m.ReadAsync<ChartsHeatCell>()).ToList();
+        var wrong = (await m.ReadAsync<ChartsTopWrong>()).ToList();
+        return new DashboardCharts(general, families, timeline, bins, heat, wrong);
+    }
+
     public Task SetPublishedAsync(bool publish) =>
         Db.ExecuteAsync(StoredProcedures.AdminSetResultsPublished, new { Publish = publish }, commandType: Sp);
 }

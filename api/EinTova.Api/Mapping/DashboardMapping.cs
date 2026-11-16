@@ -13,6 +13,8 @@ public static class DashboardMapping
     {
         var admin = app.MapGroup("/api/admin").RequireAuthorization(AuthPolicies.Admin);
         admin.MapGet("/dashboard", async (IDashboardService svc) => Results.Ok(await svc.GetAdminAsync()));
+        // הדשבורד המתקדם: המספרים והגרפים בטעינה אחת
+        admin.MapGet("/dash", async (IDashboardService svc) => Results.Ok(await svc.GetAdminFullAsync()));
 
         // סיום המשחק: סוגר לכולם ומפרסם את הדשבורדים (או מבטל את הפרסום)
         admin.MapPost("/game/results", async (PublishRequest r, IDashboardService svc) =>

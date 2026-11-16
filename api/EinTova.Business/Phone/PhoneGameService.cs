@@ -1,3 +1,4 @@
+using EinTova.Business.Dashboard;
 using EinTova.Business.SaveTheDate;
 using EinTova.DataAccess.Repositories;
 using EinTova.Models.Auth;
@@ -17,7 +18,7 @@ public interface IPhoneGameService
 }
 
 internal sealed class PhoneGameService(
-    AuthRepository auth, GameRepository game, SettingsRepository settings, SaveTheDateGate gate, IMemoryCache cache)
+    AuthRepository auth, GameRepository game, SettingsRepository settings, SaveTheDateGate gate, IMemoryCache cache, DashboardSignal dashboard)
     : IPhoneGameService
 {
     const int PhoneTries = 3;
@@ -31,6 +32,7 @@ internal sealed class PhoneGameService(
 
         var (guest, ask) = await IdentifyAsync(p);
         if (guest is null) return ask!;
+        dashboard.Touch(); // שחקן בטלפון: התחלה, תשובה או סיום
 
         if (await gate.IsLockedAsync())
             return Yemot.Bye(["המשחק עוד לא נפתח", "נשמח לשמוע אתכם בערב עצמו", Thanks]);

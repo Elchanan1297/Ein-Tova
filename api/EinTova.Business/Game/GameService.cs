@@ -1,3 +1,4 @@
+using EinTova.Business.Dashboard;
 using EinTova.DataAccess.Repositories;
 using EinTova.Models.Game;
 
@@ -14,9 +15,13 @@ public interface IGameService
     Task<dynamic?> VoiceClipAsync(string eventType);
 }
 
-internal sealed class GameService(GameRepository repo) : IGameService
+internal sealed class GameService(GameRepository repo, DashboardSignal dashboard) : IGameService
 {
-    public Task<dynamic> StartAsync(int guestId) => repo.StartAttemptAsync(guestId);
+    public Task<dynamic> StartAsync(int guestId)
+    {
+        dashboard.Touch();
+        return repo.StartAttemptAsync(guestId);
+    }
 
     public async Task<object> NextAsync(int guestId)
     {
@@ -24,9 +29,17 @@ internal sealed class GameService(GameRepository repo) : IGameService
         return new { head, options };
     }
 
-    public Task<dynamic> AnswerAsync(int guestId, int optionId) => repo.SubmitAnswerAsync(guestId, optionId);
+    public Task<dynamic> AnswerAsync(int guestId, int optionId)
+    {
+        dashboard.Touch();
+        return repo.SubmitAnswerAsync(guestId, optionId);
+    }
 
-    public Task<dynamic> TimeoutAsync(int guestId) => repo.TimeoutAsync(guestId);
+    public Task<dynamic> TimeoutAsync(int guestId)
+    {
+        dashboard.Touch();
+        return repo.TimeoutAsync(guestId);
+    }
 
     public bool IsVoiceEvent(string eventType) => VoiceEvents.All.Contains(eventType);
 

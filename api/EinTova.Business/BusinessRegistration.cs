@@ -49,6 +49,9 @@ public static class BusinessRegistration
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IPhoneGameService, PhoneGameService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        // "הדשבורד השתנה" למסכי הניהול (IDashboardNotifier נרשם ב־Api)
+        services.AddSingleton<DashboardSignal>();
+        services.AddHostedService<DashboardPulse>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
         services.AddScoped<IContentService, ContentService>();
         services.AddScoped<ISettingsService, SettingsService>();

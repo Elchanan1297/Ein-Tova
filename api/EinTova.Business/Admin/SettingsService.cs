@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EinTova.Business.Dashboard;
 using EinTova.Business.Leaderboard;
 using EinTova.DataAccess.Repositories;
 using EinTova.Models.Admin;
@@ -15,7 +16,7 @@ public interface ISettingsService
     Task<dynamic> ResetAllAttemptsAsync();
 }
 
-internal sealed class SettingsService(SettingsRepository repo, ILeaderboardService leaderboard) : ISettingsService
+internal sealed class SettingsService(SettingsRepository repo, ILeaderboardService leaderboard, DashboardSignal dashboard) : ISettingsService
 {
     public Task<dynamic> GetPublicConfigAsync() => repo.GetPublicConfigAsync();
 
@@ -41,6 +42,7 @@ internal sealed class SettingsService(SettingsRepository repo, ILeaderboardServi
     public async Task<dynamic> ResetAllAttemptsAsync()
     {
         var res = await repo.ResetAllAttemptsAsync();
+        dashboard.Touch();
         leaderboard.Invalidate();
         return res;
     }

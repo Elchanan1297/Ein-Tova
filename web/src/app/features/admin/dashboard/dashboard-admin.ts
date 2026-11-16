@@ -4,6 +4,9 @@ import { firstValueFrom } from 'rxjs';
 import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 import { ADMIN_DASHBOARD, DASHBOARD_SOURCE, DashboardStore } from '../../dashboard/data/dashboard-store';
 import { DashboardView } from '../../dashboard/ui/dashboard-view';
+import { DashV2 } from './v2/dash-v2';
+
+const V2_KEY = 'eintova.dashV2';
 
 /**
  * דשבורד בזמן אמת למנהל (רענון כל 3 שניות), וסיום המשחק:
@@ -11,7 +14,7 @@ import { DashboardView } from '../../dashboard/ui/dashboard-view';
  */
 @Component({
   selector: 'app-dashboard-admin',
-  imports: [DashboardView, EyeLoader],
+  imports: [DashboardView, DashV2, EyeLoader],
   providers: [DashboardStore, { provide: DASHBOARD_SOURCE, useValue: ADMIN_DASHBOARD }],
   template: `
     <header class="head">
@@ -23,6 +26,11 @@ import { DashboardView } from '../../dashboard/ui/dashboard-view';
           @if (updated(); as t) { · עודכן ב־{{ t }} }
         </p>
       </div>
+      <!-- מתג: הדשבורד המתקדם (גרפים) או הרגיל. נשמר בדפדפן הזה -->
+      <label class="flag">
+        <input type="checkbox" role="switch" [checked]="v2()" (change)="setV2($any($event.target).checked)" />
+        <span>דשבורד גרפים (חדש)</span>
+      </label>
     </header>
 
     @if (store.data(); as d) {
@@ -47,7 +55,11 @@ import { DashboardView } from '../../dashboard/ui/dashboard-view';
         <p class="msg" role="alert">{{ error() }}</p>
       }
 
-      <app-dashboard-view [data]="d" [admin]="true" />
+      @if (v2()) {
+        <app-dash-v2 />
+      } @else {
+        <app-dashboard-view [data]="d" [admin]="true" />
+      }
     } @else if (store.failed()) {
       <p class="note">לא הצלחנו לטעון. <button type="button" class="b link" (click)="store.reload()">נסו שוב</button></p>
     } @else {
@@ -71,6 +83,9 @@ import { DashboardView } from '../../dashboard/ui/dashboard-view';
   `,
   styles: `
     :host { display: grid; gap: 14px; }
+    .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .flag { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); font-size: 13px; font-weight: 600; cursor: pointer; }
+    .flag input { width: 18px; height: 18px; accent-color: var(--color-gold); }
     .head h1 { margin: 0; font: 700 28px var(--font-display); color: var(--color-gold); }
     .live-line { margin: 2px 0 0; display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(248, 243, 234, 0.65); }
     .live { width: 9px; height: 9px; border-radius: 50%; background: #6fd98b; animation: pulse 1.6s infinite; }
@@ -113,12 +128,23 @@ export default class DashboardAdmin {
   private readonly http = inject(HttpClient);
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>("endDialog");
   protected readonly busy = signal(false);
+  /** הדשבורד המתקדם (גרפים): נבחר כאן, נשמר בדפדפן */
+  protected readonly v2 = signal(readV2());
   protected readonly error = signal<string | null>(null);
 
   protected readonly updated = computed(() =>
     this.store.updatedAt()?.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) ?? null,
   );
   protected readonly playing = computed(() => this.store.data()?.players.filter((p) => p.status === 'playing').length ?? 0);
+
+  protected setV2(on: boolean): void {
+    this.v2.set(on);
+    try {
+      localStorage.setItem(V2_KEY, on ? '1' : '0');
+    } catch {
+      // בלי אחסון: נשאר רק עד הרענון
+    }
+  }
 
   protected close(): void {
     this.dialog()?.nativeElement.close();
@@ -140,5 +166,13 @@ export default class DashboardAdmin {
     } finally {
       this.busy.set(false);
     }
+  }
+}
+
+function readV2(): boolean {
+  try {
+    return localStorage.getItem(V2_KEY) === '1';
+  } catch {
+    return false;
   }
 }

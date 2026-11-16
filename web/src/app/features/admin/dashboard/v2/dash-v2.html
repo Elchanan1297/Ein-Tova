@@ -1,0 +1,254 @@
+<svg width="0" height="0" aria-hidden="true" class="defs">
+  <defs>
+    <linearGradient id="dash-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6DFA0" /><stop offset="1" stop-color="#B08A48" /></linearGradient>
+    <linearGradient id="dash-mint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B6F0D8" /><stop offset="1" stop-color="#4FB38C" /></linearGradient>
+  </defs>
+</svg>
+
+@if (d(); as d) {
+  <div class="tabs" role="tablist" aria-label="תצוגה">
+    <span class="lens" [style.--i]="tabIndex()" aria-hidden="true"></span>
+    @for (t of tabs; track t.id) {
+      <button type="button" role="tab" [class.on]="tab() === t.id" [attr.aria-selected]="tab() === t.id" (click)="select(t.id)">{{ t.label }}</button>
+    }
+  </div>
+
+  @if (empty()) {
+    <section class="card empty">
+      <app-eye-loader [size]="96" label="מחכים לשחקנים" />
+      <h3>עוד אין משחקים</h3>
+      <p>הדשבורד יתמלא ברגע שמישהו יתחיל לשחק, בלי לרענן.</p>
+    </section>
+  } @else {
+    @switch (tab()) {
+      <!-- ===== סיכום ===== -->
+      @case ('summary') {
+        <section class="panel">
+          @if (kpi(); as k) {
+            <div class="g k4">
+              <div class="card kpi">
+                <div class="t">
+                  <div class="lbl">התחילו לשחק</div>
+                  <div class="num"><app-count-up [value]="k.started" /><small>מתוך {{ k.guests }}</small></div>
+                  <div class="chg">{{ k.startedChange }}</div>
+                </div>
+                <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle class="bg" cx="50" cy="50" r="40" />
+                  <circle class="fg" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" [attr.stroke-dasharray]="ring" [style.stroke-dashoffset]="dash(k.startedRing)" />
+                </svg>
+              </div>
+              <div class="card kpi">
+                <div class="t">
+                  <div class="lbl">סיימו את המשחק</div>
+                  <div class="num"><app-count-up [value]="k.finished" /></div>
+                  <div class="chg">{{ k.finishedChange }}</div>
+                </div>
+                <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle class="bg" cx="50" cy="50" r="40" />
+                  <circle class="fg" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" [attr.stroke-dasharray]="ring" [style.stroke-dashoffset]="dash(k.finishedRing)" />
+                </svg>
+              </div>
+              <div class="card kpi">
+                <div class="t">
+                  <div class="lbl">תשובות נכונות</div>
+                  <div class="num"><app-count-up [value]="k.correct" /><small>%</small></div>
+                  <div class="chg">{{ d.summary.answers }} תשובות עד עכשיו</div>
+                </div>
+                <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle class="bg" cx="50" cy="50" r="40" />
+                  <circle class="fg mint" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" [attr.stroke-dasharray]="ring" [style.stroke-dashoffset]="dash(k.correct / 100)" />
+                </svg>
+              </div>
+              <div class="card kpi">
+                <div class="t">
+                  <div class="lbl">זמן ממוצע לתשובה</div>
+                  <div class="num">
+                    @if (k.avgSec !== null) { <app-count-up [value]="k.avgSec" [decimals]="1" /><small>שנ׳</small> } @else { - }
+                  </div>
+                  <div class="chg">@if (k.median !== null) { חציון {{ k.median.toFixed(1) }} שנ׳ } @else { עוד אין מדידה }</div>
+                </div>
+                @if (hasSpark()) {
+                  <app-echart class="spark" [option]="spark()" label="זמן התשובה הממוצע לאורך הערב" />
+                }
+              </div>
+            </div>
+          }
+
+          <div class="g c21">
+            <div class="card">
+              <h3>מרוץ המשפחות</h3>
+              <div class="sub">{{ byAverage() ? 'ממוצע נקודות לשחקן' : 'סך הנקודות' }}. בשוויון, המהיר עולה. לחיצה מציגה את השחקנים</div>
+              <ol class="race" role="list">
+                @for (f of race(); track f.familyId) {
+                  <li>
+                    <button type="button" class="rr" (click)="showFamily(f.familyId)" [attr.aria-label]="'מקום ' + f.rnk + ', ' + f.name + ', ' + f.displayScore">
+                      <span class="rk">{{ f.rnk }}</span>
+                      <span class="rn"><b>{{ f.name }}</b><i>שיחקו {{ f.players }} מתוך {{ f.guests }}</i></span>
+                      <span class="trk"><span class="fl" [style.width.%]="f.width" [style.--c]="f.color"></span></span>
+                      <span class="sc">{{ byAverage() ? f.displayScore.toFixed(1) : f.displayScore }}</span>
+                    </button>
+                  </li>
+                }
+              </ol>
+            </div>
+            <div class="card">
+              <h3>הפודיום</h3>
+              <div class="sub">שלושת המובילים כרגע</div>
+              <div class="pod">
+                @for (x of podium(); track x.p.guestId) {
+                  <div class="pc" [attr.data-place]="x.place">
+                    <div class="av" [style.--c]="colors().get(x.p.familyId)">{{ x.p.fullName.charAt(0) }}</div>
+                    <b>{{ x.p.fullName }}</b>
+                    <i>{{ x.p.familyName }}</i>
+                    <div class="bar" [style.height.px]="x.h">{{ x.p.score }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="g c21">
+            <div class="card">
+              <h3>קצב המשחק לאורך הערב</h3>
+              <div class="sub">מצטבר: התחילו מול סיימו</div>
+              <app-echart [option]="timeline()" [label]="labels().timeline" />
+            </div>
+            <div class="card">
+              <h3>כמה זמן לוקח לענות</h3>
+              <div class="sub">התפלגות זמני תשובה בשניות (באפליקציה)</div>
+              <app-echart [option]="histogram()" [label]="labels().histogram" />
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ===== משפחות ===== -->
+      @case ('families') {
+        <section class="panel">
+          <div class="g c11">
+            <div class="card">
+              <h3>מי מצטיין במה</h3>
+              <div class="sub">המשפחה המובילה בכל קטגוריה</div>
+              <div class="awards">
+                @for (a of awards(); track a.title) {
+                  <div class="aw" [style.--c]="a.color">
+                    <div class="e" aria-hidden="true">{{ a.icon }}</div>
+                    <div class="k">{{ a.title }}</div>
+                    @if (a.f; as f) {
+                      <b>{{ f.name }}</b>
+                      <div class="v">{{ a.value }}</div>
+                      <small>{{ a.note }}</small>
+                    } @else {
+                      <small>עוד אין נתונים</small>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="card">
+              <h3>מה ענו המשפחות</h3>
+              <div class="sub">נכון, שגוי ופג הזמן</div>
+              <app-echart [option]="stack()" [label]="labels().stack" [style.--chart-h.px]="stackHeight()" />
+            </div>
+          </div>
+          <div class="g">
+            <div class="card">
+              <h3>מפת חום: משפחה מול שאלה</h3>
+              <div class="sub">אחוז תשובות נכונות. בהיר = נכון יותר. המספרים למטה הם מספרי השאלות לפי הסדר</div>
+              <app-echart [option]="heatmap()" [label]="labels().heatmap" [style.--chart-h.px]="heatHeight()" />
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ===== שחקנים ===== -->
+      @case ('players') {
+        <section class="panel">
+          <div class="g c12">
+            <div class="card">
+              <h3>מהירות מול דיוק</h3>
+              <div class="sub">כל נקודה היא שחקן, בצבע המשפחה. למעלה ומשמאל: מהירים ומדויקים</div>
+              <app-echart class="tall" [option]="scatter()" [label]="labels().scatter" />
+            </div>
+            <div class="card">
+              <h3>דירוג שחקנים</h3>
+              <div class="sub">חיפוש, סינון לפי משפחה ומצב</div>
+
+              <div class="chips" role="group" aria-label="סינון לפי משפחה">
+                <button type="button" class="chip" [class.on]="familyId() === null" (click)="familyId.set(null)">כל המשפחות</button>
+                @for (f of d.families; track f.familyId) {
+                  <button type="button" class="chip" [class.on]="familyId() === f.familyId" [style.--c]="colors().get(f.familyId)" (click)="toggleFamily(f.familyId)">{{ f.name }}</button>
+                }
+              </div>
+              <div class="tools">
+                <input type="search" placeholder="חיפוש שם" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="חיפוש שם" />
+                <select [value]="playerSort()" (change)="playerSort.set($any($event.target).value)" aria-label="מיון">
+                  <option value="rank">לפי דירוג</option>
+                  <option value="speed">הכי מהירים</option>
+                  <option value="progress">לפי התקדמות</option>
+                  <option value="name">לפי שם</option>
+                </select>
+                <select [value]="status()" (change)="status.set($any($event.target).value)" aria-label="מצב">
+                  <option value="all">כל המצבים</option>
+                  <option value="playing">משחקים עכשיו</option>
+                  <option value="done">סיימו</option>
+                  <option value="none">לא התחילו</option>
+                </select>
+              </div>
+
+              <div class="scroll">
+                <table>
+                  <thead>
+                    <tr><th>#</th><th>שחקן</th><th>משפחה</th><th>נקודות</th><th>דיוק</th><th>זמן</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (p of players(); track p.guestId) {
+                      <tr [attr.data-status]="p.status">
+                        <td>{{ p.rnk ?? '' }}</td>
+                        <td>
+                          <b>{{ p.fullName }}</b>
+                          <small class="st">{{ statusLabel(p.status) }}@if (p.viaPhone) { · טלפון כשר }</small>
+                        </td>
+                        <td><span class="fc" [style.--c]="colors().get(p.familyId)">{{ p.familyName }}</span></td>
+                        <td><b>{{ p.score }}</b><small>/{{ p.total }}</small></td>
+                        <td>
+                          <div class="mini" [attr.aria-label]="p.correctPct + '% נכון'"><i [style.width.%]="p.correctPct"></i></div>
+                          <small class="pg">{{ p.answered }}/{{ p.total }} נענו</small>
+                        </td>
+                        <td class="tm">{{ p.avgSec !== null ? p.avgSec.toFixed(1) + ' שנ׳' : '-' }}</td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="6" class="none">אין שחקנים להצגה.</td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ===== שאלות ===== -->
+      @case ('questions') {
+        <section class="panel">
+          <div class="g c11">
+            <div class="card">
+              <h3>אילו שאלות היו קשות</h3>
+              <div class="sub">אחוז תשובות נכונות. במעבר על עמודה: מה רוב הטועים בחרו</div>
+              <app-echart [option]="hardest()" [label]="labels().hardest" [style.--chart-h.px]="hardestHeight()" />
+            </div>
+            <div class="card">
+              <h3>מפת קושי</h3>
+              <div class="sub">זמן מענה מול דיוק. גודל הבועה = כמה ענו. המספר = מספר השאלה</div>
+              <app-echart class="tall" [option]="bubble()" [label]="labels().bubble" />
+            </div>
+          </div>
+        </section>
+      }
+    }
+  }
+} @else if (store.failed()) {
+  <p class="note">לא הצלחנו לטעון. <button type="button" class="b link" (click)="store.load()">נסו שוב</button></p>
+} @else {
+  <div class="note"><app-eye-loader [size]="56" /></div>
+}

@@ -24,6 +24,7 @@ public static class ApplicationMappings
 
         app.MapHub<ShowHub>("/hubs/show");
         app.MapHub<StateHub>("/hubs/state");
+        app.MapHub<DashboardHub>("/hubs/dashboard");
 
         // כתובת API שלא קיימת: 404 (ולא דף האפליקציה)
         app.MapFallback("/api/{**rest}", () => Results.NotFound());
