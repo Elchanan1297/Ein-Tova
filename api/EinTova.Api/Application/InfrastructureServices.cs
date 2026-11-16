@@ -1,3 +1,4 @@
+using EinTova.Infrastructure.Ai;
 using EinTova.Infrastructure.Options;
 using EinTova.Infrastructure.Storage;
 
@@ -19,6 +20,13 @@ public static class InfrastructureServices
             new DiskMediaStorage(sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<MediaOptions>>().Value.Root));
         builder.Services.AddSingleton<IPhotoStorage>(sp =>
             new DiskPhotoStorage(sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PhotosOptions>>().Value.Root));
+        // תובנות AI: הספק לפי AI__Provider (gemini | fake | ריק = כבוי). המפתח רק ממשתני סביבה
+        builder.Services.AddOptions<AiOptions>().Bind(builder.Configuration.GetSection(AiOptions.Section));
+        builder.Services.AddSingleton(sp => sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AiOptions>>().Value);
+        var provider = builder.Configuration[$"{AiOptions.Section}:Provider"]?.Trim().ToLowerInvariant();
+        if (provider == "gemini") builder.Services.AddHttpClient<IInsightsClient, GeminiInsightsClient>();
+        else if (provider == "fake") builder.Services.AddSingleton<IInsightsClient, FakeInsightsClient>();
+        else builder.Services.AddSingleton<IInsightsClient, DisabledInsightsClient>();
         return builder;
     }
 

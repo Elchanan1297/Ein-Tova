@@ -119,6 +119,13 @@
               <app-echart [option]="histogram()" [label]="labels().histogram" />
             </div>
           </div>
+
+          <!-- תובנות AI: מנהל (מלא) או אורחים (רק מה שאושר) -->
+          @if (admin()) {
+            <app-ai-insights />
+          } @else {
+            <app-ai-published />
+          }
         </section>
       }
 

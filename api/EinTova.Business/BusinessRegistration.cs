@@ -1,4 +1,5 @@
 using EinTova.Business.Admin;
+using EinTova.Business.Ai;
 using EinTova.Business.Auth;
 using EinTova.Business.Content;
 using EinTova.Business.Dashboard;
@@ -37,6 +38,7 @@ public static class BusinessRegistration
         services.AddScoped<SaveTheDateRepository>();
         services.AddScoped<ShowRepository>();
         services.AddScoped<DashboardRepository>();
+        services.AddScoped<AiRepository>();
         return services;
     }
 
@@ -49,6 +51,7 @@ public static class BusinessRegistration
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IPhoneGameService, PhoneGameService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IInsightsService, InsightsService>();
         // "הדשבורד השתנה" למסכי הניהול (IDashboardNotifier נרשם ב־Api)
         services.AddSingleton<DashboardSignal>();
         services.AddHostedService<DashboardPulse>();

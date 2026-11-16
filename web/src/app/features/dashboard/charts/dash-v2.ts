@@ -13,6 +13,8 @@ import {
   stackOption,
   timelineOption,
 } from './dash-options';
+import { AiInsights } from './ai-insights';
+import { AiPublished } from './ai-published';
 import { awardsOf, pct, podiumOf, raceRows } from './dash-model';
 import { DashStore } from './dash-store';
 import { EChart } from './echart';
@@ -39,7 +41,7 @@ const RING = 2 * Math.PI * 40;
  */
 @Component({
   selector: 'app-dash-v2',
-  imports: [EChart, CountUp, EyeLoader],
+  imports: [EChart, CountUp, EyeLoader, AiInsights, AiPublished],
   providers: [DashStore],
   templateUrl: './dash-v2.html',
   styleUrl: './dash-v2.scss',

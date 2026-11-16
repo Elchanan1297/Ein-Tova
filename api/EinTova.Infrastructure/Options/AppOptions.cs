@@ -39,6 +39,21 @@ public sealed class IvrOptions
     public string Key { get; set; } = "";
 }
 
+/// <summary>
+/// תובנות AI (שלב ב׳). הכול מהקונפיג, כדי להחליף ספק/מודל בלי קוד:
+/// AI__Provider (gemini | fake | ריק = כבוי), AI__ApiKey (סוד, רק במשתני סביבה), AI__Model, AI__FallbackModel, AI__BaseUrl.
+/// </summary>
+public sealed class AiOptions
+{
+    public const string Section = "AI";
+    public string Provider { get; set; } = "";
+    public string ApiKey { get; set; } = "";
+    public string Model { get; set; } = "";
+    public string FallbackModel { get; set; } = "";
+    public string BaseUrl { get; set; } = "https://generativelanguage.googleapis.com/v1beta";
+    public int TimeoutSec { get; set; } = 20;
+}
+
 /// <summary>ערכי פיתוח שאסור שיגיעו לייצור</summary>
 public static class DevDefaults
 {

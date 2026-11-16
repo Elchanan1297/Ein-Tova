@@ -21,6 +21,7 @@ public static class ApplicationMappings
         app.MapShowEndpoints();
         app.MapSaveTheDateEndpoints();
         app.MapDashboardEndpoints();
+        app.MapAiEndpoints();
 
         app.MapHub<ShowHub>("/hubs/show");
         app.MapHub<StateHub>("/hubs/state");

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { AiApi, Insight } from '../../dashboard/charts/ai-api';
 import { CountUp } from '../../dashboard/charts/count-up';
 import { familyColors } from '../../dashboard/charts/chart-theme';
 import { awardsOf, podiumOf, raceRows } from '../../dashboard/charts/dash-model';
@@ -6,17 +7,19 @@ import { hardestOption, scaleFonts } from '../../dashboard/charts/dash-options';
 import { DashStore } from '../../dashboard/charts/dash-store';
 import { EChart } from '../../dashboard/charts/echart';
 
-type Slide = 'families' | 'leaders' | 'questions';
+type Slide = 'families' | 'leaders' | 'questions' | 'insights';
 const SLIDES: { id: Slide; title: string }[] = [
   { id: 'families', title: 'מרוץ המשפחות' },
   { id: 'leaders', title: 'המובילים' },
   { id: 'questions', title: 'השאלות' },
+  { id: 'insights', title: 'תובנות' },
 ];
 const SLIDE_MS = 14000;
 
 /**
  * הדשבורד במסך הגדול (אחרי סיום המשחק): שלוש שקופיות שמתחלפות לבד, עם נתונים חיים.
- * 1) מרוץ המשפחות והמספרים של הערב 2) הפודיום ומי מצטיין במה 3) השאלות הקשות.
+ * 1) מרוץ המשפחות והמספרים של הערב 2) הפודיום ומי מצטיין במה 3) השאלות הקשות
+ * 4) תובנות AI שהמנהל אישר (רק אם יש).
  * המצגת רצה כמנהל, ולכן קוראת את הדשבורד של המנהל (עם עדכון חי).
  */
 @Component({
@@ -28,7 +31,7 @@ const SLIDE_MS = 14000;
       <header class="top">
         <h1>המספרים של הערב</h1>
         <nav class="dots" aria-label="שקופיות">
-          @for (s of slides; track s.id; let i = $index) {
+          @for (s of slides(); track s.id; let i = $index) {
             <span [class.on]="i === index()">{{ s.title }}</span>
           }
         </nav>
@@ -82,6 +85,21 @@ const SLIDE_MS = 14000;
                   </div>
                 }
               </div>
+            }
+            @case ('insights') {
+              <div class="insights">
+                @for (i of insights(); track i.id; let n = $index) {
+                  <article class="panel lg ins" [attr.data-sev]="i.severity" [style.--i]="n">
+                    <span class="e" aria-hidden="true">{{ i.icon }}</span>
+                    <b>{{ i.title }}</b>
+                    <p>{{ i.body }}</p>
+                    @if (i.evidence.length) {
+                      <div class="ev">@for (e of i.evidence; track e) { <span>{{ e }}</span> }</div>
+                    }
+                  </article>
+                }
+              </div>
+              <p class="ai-note">✦ נוצר באמצעות AI על בסיס התוצאות</p>
             }
             @case ('questions') {
               <div class="panel lg chart">
@@ -215,17 +233,40 @@ const SLIDE_MS = 14000;
     .q { display: grid; gap: 1vh; .k { font-size: 2.2vh; color: #e58a9b; font-weight: 700; } p { margin: 0; font-size: 3.2vh; font-weight: 600; line-height: 1.35; } b { font-size: 2.8vh; color: var(--color-gold); } }
     .q.easy .k { color: #7fd1b0; }
 
+    /* תובנות */
+    .insights { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(28vw, 1fr)); gap: 2vw; align-content: center; }
+    .ins {
+      --c: #7fd1b0;
+      position: relative;
+      display: grid;
+      align-content: start;
+      gap: 1.2vh;
+      overflow: hidden;
+      animation: slide-in 0.8s calc(0.2s + var(--i) * 0.15s) both;
+      &::before { content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; width: 0.6vh; background: var(--c); }
+      &[data-sev='positive'] { --c: #d9b66f; }
+      &[data-sev='warning'] { --c: #e58a9b; }
+      .e { font-size: 5vh; }
+      b { font: 700 3.4vh var(--font-display); color: var(--color-cream); }
+      p { margin: 0; font-size: 2.6vh; line-height: 1.45; color: #d5daee; }
+    }
+    .ev { display: flex; flex-wrap: wrap; gap: 0.8vw; span { font-size: 1.8vh; padding: 0.5vh 1vw; border-radius: 99px; background: rgba(255, 255, 255, 0.08); color: #9aa3c4; } }
+    .ai-note { grid-column: 1 / -1; margin: 0; text-align: center; font-size: 1.8vh; color: #9aa3c4; }
+
     @media (prefers-reduced-motion: reduce) {
-      .slide, .rr, .fl, .bar, .aw { animation: none; }
+      .slide, .rr, .fl, .bar, .aw, .ins { animation: none; }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatsScene {
   protected readonly store = inject(DashStore);
-  protected readonly slides = SLIDES;
+  /** תובנות שהמנהל אישר (אם אין, אין שקופית תובנות) */
+  protected readonly insights = signal<Insight[]>([]);
+  protected readonly slides = computed(() => SLIDES.filter((s) => s.id !== 'insights' || this.insights().length > 0));
   protected readonly index = signal(0);
-  protected readonly slide = computed(() => SLIDES[this.index()].id);
+  protected readonly slide = computed(() => this.slides()[this.index() % this.slides().length].id);
+  private readonly ai = inject(AiApi);
 
   private readonly d = computed(() => this.store.data()?.data ?? null);
   protected readonly colors = computed(() => familyColors((this.d()?.families ?? []).map((f) => f.familyId)));
@@ -249,7 +290,19 @@ export class StatsScene {
   });
 
   constructor() {
-    const timer = setInterval(() => this.index.update((i) => (i + 1) % SLIDES.length), SLIDE_MS);
-    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+    const timer = setInterval(() => this.index.update((i) => (i + 1) % this.slides().length), SLIDE_MS);
+    const load = async () => {
+      try {
+        this.insights.set((await this.ai.published('/api/admin/ai/published')).insights);
+      } catch {
+        // בלי תובנות: שלוש השקופיות הרגילות
+      }
+    };
+    void load();
+    const aiTimer = setInterval(() => void load(), 30000);
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(timer);
+      clearInterval(aiTimer);
+    });
   }
 }

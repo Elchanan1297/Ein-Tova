@@ -88,6 +88,23 @@
     </details>
   </section>
 
+  <section class="card lg">
+    <h2>תובנות AI</h2>
+    <label class="toggle">
+      <input type="checkbox" role="switch" [checked]="f.aiEnabled" (change)="set('aiEnabled', $any($event.target).checked)" />
+      <span>תובנות AI בדשבורד</span>
+    </label>
+    <small>
+      התובנות נוצרות בשרת (Gemini) מנתונים מצטברים בלבד: משפחות, שאלות ומספרים, בלי שמות שחקנים, טלפונים או קודים.
+      כשכבוי, אין שום קריאה חיצונית.
+    </small>
+    <label>קריאות מקסימום בשעה
+      <input type="number" min="1" max="1000" inputmode="numeric" [value]="f.aiMaxCallsPerHour"
+             (input)="set('aiMaxCallsPerHour', $any($event.target).valueAsNumber || 0)" />
+      <small>להתאים למכסה החינמית של Gemini (AI Studio → Rate limits)</small>
+    </label>
+  </section>
+
   <section class="card lg danger">
     <h2>איפוס המשחק</h2>
     <p>

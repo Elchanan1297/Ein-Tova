@@ -16,6 +16,10 @@ internal static class StoredProcedures
     public const string PhoneJoinAttempt = "usp_PhoneJoinAttempt";
     public const string GetDashboard = "usp_GetDashboard";
     public const string GetDashboardCharts = "usp_GetDashboardCharts";
+    public const string AiGetStatus = "usp_AiGetStatus";
+    public const string AiGetCached = "usp_AiGetCached";
+    public const string AiSave = "usp_AiSave";
+    public const string AiSetPublished = "usp_AiSetPublished";
     public const string AdminSetResultsPublished = "usp_AdminSetResultsPublished";
     public const string GetVoiceClip = "usp_GetVoiceClip";
     public const string GetLeaderboard = "usp_GetLeaderboard";

@@ -12,6 +12,9 @@ export interface Settings {
   secondsPerQuestion: string;
   /** שניות נוספות לשאלה למי שמשחק בטלפון כשר */
   ivrExtraSec: string;
+  /** תובנות AI: "1" פעיל */
+  aiEnabled?: string;
+  aiMaxCallsPerHour?: string;
   graceMs: string;
   voiceChance: string;
   leaderboardRank: 'Total' | 'Average';

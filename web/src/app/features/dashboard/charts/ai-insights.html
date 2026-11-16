@@ -1,0 +1,105 @@
+@if (status()?.enabled) {
+  <section class="ai" aria-labelledby="ai-title">
+    <div class="ai-in">
+      <div class="ai-h">
+        <div class="spark" aria-hidden="true">✦</div>
+        <h3 id="ai-title">תובנות AI</h3>
+        @if (players()) {
+          <span class="chip g">מבוסס על {{ players() }} משחקים</span>
+        }
+        @if (updated(); as t) {
+          <span class="chip">נוצר ב־{{ t }}</span>
+        }
+        <span class="grow"></span>
+        <button type="button" class="ghost" [disabled]="loading()" (click)="load(true)">רענון תובנות</button>
+      </div>
+
+      @if (loading() && !insights().length) {
+        <div class="ins" aria-busy="true" aria-label="יוצרים תובנות">
+          @for (k of [1, 2, 3]; track k) {
+            <div class="in skel"><i></i><i></i><i class="short"></i></div>
+          }
+        </div>
+      } @else if (insights().length) {
+        <div class="ins" [class.dim]="loading()">
+          @for (i of insights(); track i.id) {
+            <article class="in" [attr.data-sev]="i.severity" [class.picked]="picked().has(i.id)">
+              <div class="ic" aria-hidden="true">{{ i.icon }}</div>
+              <b>{{ i.title }}</b>
+              <p>{{ i.body }}</p>
+              @if (i.evidence.length) {
+                <div class="ev">
+                  @for (e of i.evidence; track e) { <span>{{ e }}</span> }
+                </div>
+              }
+              <label class="pick">
+                <input type="checkbox" [checked]="picked().has(i.id)" [disabled]="!picked().has(i.id) && picked().size >= maxPublish"
+                       (change)="toggle(i.id)" />
+                להציג לכולם בסוף
+              </label>
+            </article>
+          }
+        </div>
+      }
+      @if (message(); as m) {
+        <p class="msg">{{ m }} @if (code() === 'Busy' || code() === 'Unavailable') { <button type="button" class="link" (click)="load(true)">נסו שוב</button> }</p>
+      }
+
+      <!-- פרסום לאורחים ולמסך הגדול (אחרי סיום המשחק) -->
+      @if (picked().size || published().length) {
+        <div class="pub">
+          @if (picked().size) {
+            <span>נבחרו {{ picked().size }} מתוך {{ maxPublish }}. הן יוצגו לאורחים ובמסך הגדול אחרי סיום המשחק.</span>
+            <button type="button" class="btn" [disabled]="publishing()" (click)="publish()">אישור להצגה</button>
+          } @else {
+            <span>{{ published().length }} תובנות מאושרות להצגה לאורחים ובמסך הגדול.</span>
+            <button type="button" class="ghost" [disabled]="publishing()" (click)="unpublish()">ביטול ההצגה</button>
+          }
+        </div>
+      }
+
+      <!-- שאלו את הנתונים -->
+      <form class="ask" (submit)="$event.preventDefault(); ask()">
+        <label class="inp">
+          <span aria-hidden="true">✦</span>
+          <input type="text" maxlength="300" placeholder="שאלו את הנתונים, למשל: איזו משפחה הכי מדויקת?" [value]="question()"
+                 (input)="question.set($any($event.target).value)" aria-label="שאלה על הנתונים" />
+        </label>
+        <button type="submit" class="btn" [disabled]="asking() || !question().trim() || status()?.questionsLeft === 0">
+          {{ asking() ? 'חושב…' : 'שלחו' }}
+        </button>
+      </form>
+      <div class="sug">
+        @for (s of suggestions; track s) {
+          <button type="button" (click)="ask(s)" [disabled]="asking()">{{ s }}</button>
+        }
+      </div>
+      @if (asking()) {
+        <div class="answer"><app-eye-loader [size]="40" label="חושבים על תשובה" /></div>
+      } @else if (answer(); as a) {
+        <div class="answer" [class.err]="a.status !== 'OK'">
+          <p>{{ answerMessage(a) }}</p>
+          @if (a.evidence.length) {
+            <div class="ev">@for (e of a.evidence; track e) { <span>{{ e }}</span> }</div>
+          }
+        </div>
+      }
+
+      <!-- סכמו את הערב לברכה -->
+      <div class="bless">
+        <button type="button" class="ghost" [disabled]="blessingBusy()" (click)="makeBlessing()">
+          {{ blessingBusy() ? 'כותב…' : 'סכמו את הערב לברכה' }}
+        </button>
+        @if (blessingMsg(); as m) { <span class="msg">{{ m }}</span> }
+        @if (blessing(); as text) {
+          <div class="answer">
+            <p class="pre">{{ text }}</p>
+            <button type="button" class="link" (click)="copy()">{{ copied() ? 'הועתק' : 'העתקה' }}</button>
+          </div>
+        }
+      </div>
+
+      <div class="dis">נוצר באמצעות AI על בסיס התוצאות בלבד. ייתכנו אי־דיוקים, כדאי לוודא מול הנתונים.</div>
+    </div>
+  </section>
+}

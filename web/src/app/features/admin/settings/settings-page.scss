@@ -126,3 +126,5 @@ details label { margin-top: 10px; }
 
 .note { color: rgba(248, 243, 234, 0.7); }
 .link { color: var(--color-gold); text-decoration: underline; }
+
+.toggle { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; input { width: 20px; height: 20px; accent-color: var(--color-gold); } }
