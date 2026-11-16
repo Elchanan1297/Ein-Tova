@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { DashboardPlayer, PlayerStatus } from '../../../dashboard/data/dashboard-models';
-import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { DashboardPlayer, PlayerStatus } from '../data/dashboard-models';
+import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 import { familyColors } from './chart-theme';
 import { CountUp } from './count-up';
 import {
@@ -13,6 +13,7 @@ import {
   stackOption,
   timelineOption,
 } from './dash-options';
+import { awardsOf, pct, podiumOf, raceRows } from './dash-model';
 import { DashStore } from './dash-store';
 import { EChart } from './echart';
 
@@ -30,12 +31,11 @@ const TABS: { id: Tab; label: string }[] = [
 /** היקף טבעת ההתקדמות (r=40) */
 const RING = 2 * Math.PI * 40;
 
-const pct = (part: number, whole: number) => (whole > 0 ? Math.round((100 * part) / whole) : 0);
 
 /**
  * הדשבורד המתקדם (גרפים, לפי dashboard-spec.md): סיכום, משפחות, שחקנים ושאלות.
  * אותם מספרים כמו הדשבורד הרגיל (usp_GetDashboard), ועוד נתוני הגרפים (usp_GetDashboardCharts).
- * הגרפים של כל טאב נבנים רק כשהטאב נפתח.
+ * הגרפים של כל טאב נבנים רק כשהטאב נפתח. משותף למנהל (חי) ולאורחים אחרי הפרסום (CHARTS_SOURCE).
  */
 @Component({
   selector: 'app-dash-v2',
@@ -46,6 +46,11 @@ const pct = (part: number, whole: number) => (whole > 0 ? Math.round((100 * part
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashV2 {
+  /** מנהל: כולל מי שלא התחיל ומצב כל שחקן. אורחים: רק מי ששיחק */
+  readonly admin = input(false);
+  /** המשפחה של האורח (להדגשה) */
+  readonly myFamilyId = input<number | null>(null);
+
   protected readonly store = inject(DashStore);
   protected readonly tabs = TABS;
   protected readonly tab = signal<Tab>('summary');
@@ -85,20 +90,11 @@ export class DashV2 {
     };
   });
 
-  protected readonly race = computed(() => {
-    const fams = this.d()!.families;
-    const max = Math.max(1, ...fams.map((f) => f.displayScore));
-    return fams.map((f) => ({ ...f, width: (100 * f.displayScore) / max, color: this.colors().get(f.familyId)! }));
-  });
+  protected readonly race = computed(() => raceRows(this.d()!.families, this.colors(), !this.admin()));
   protected readonly byAverage = computed(() => this.d()?.families[0]?.rankBy === 'Average');
 
-  /** שלושת המובילים, בסדר של פודיום: שני, ראשון, שלישי */
-  protected readonly podium = computed(() => {
-    const top = this.d()!.players.filter((p) => p.rnk !== null).sort((a, b) => a.rnk! - b.rnk!).slice(0, 3);
-    const order = [top[1], top[0], top[2]];
-    const heights = [130, 170, 100];
-    return order.map((p, i) => (p ? { p, h: heights[i], place: i === 1 ? 1 : i === 0 ? 2 : 3 } : null)).filter((x) => x !== null);
-  });
+  protected readonly podium = computed(() => podiumOf(this.d()!.players));
+  protected readonly podiumHeight = { 1: 170, 2: 130, 3: 100 } as const;
 
   protected readonly timeline = computed(() => timelineOption(this.c()!.timeline));
   protected readonly spark = computed(() => sparkOption(this.c()!.timeline));
@@ -106,24 +102,7 @@ export class DashV2 {
   protected readonly histogram = computed(() => histogramOption(this.c()!.responseTimes, this.c()!.general.medianSec));
 
   // ===== משפחות =====
-  protected readonly awards = computed(() => {
-    const fams = this.d()!.families;
-    const ex = this.extra();
-    const color = this.colors();
-    const pick = <T>(list: T[], key: (t: T) => number, dir: 1 | -1) =>
-      list.reduce<T | null>((best, t) => (best === null || dir * key(t) > dir * key(best) ? t : best), null);
-    const played = fams.filter((f) => f.answered > 0);
-    const accurate = pick(played, (f) => f.correctPct, 1);
-    const fastest = pick(played.filter((f) => f.avgSec !== null), (f) => f.avgSec!, -1);
-    const active = pick(fams.filter((f) => f.guests > 0 && f.players > 0), (f) => f.players / f.guests, 1);
-    const streak = pick(fams.filter((f) => (ex.get(f.familyId)?.maxStreak ?? 0) > 0), (f) => ex.get(f.familyId)!.maxStreak, 1);
-    return [
-      { icon: '🎯', title: 'הכי מדויקת', f: accurate, value: accurate ? `${Math.round(accurate.correctPct)}%` : '', note: 'תשובות נכונות' },
-      { icon: '⚡', title: 'הכי מהירה', f: fastest, value: fastest ? `${fastest.avgSec} שנ׳` : '', note: 'זמן ממוצע לתשובה' },
-      { icon: '🙌', title: 'הכי משתתפת', f: active, value: active ? `${pct(active.players, active.guests)}%` : '', note: 'מהמשפחה שיחקו' },
-      { icon: '🔥', title: 'רצף הכי ארוך', f: streak, value: streak ? String(ex.get(streak.familyId)!.maxStreak) : '', note: 'תשובות נכונות ברצף' },
-    ].map((a) => ({ ...a, color: a.f ? color.get(a.f.familyId)! : '#9AA3C4' }));
-  });
+  protected readonly awards = computed(() => awardsOf(this.d()!.families, this.extra(), this.colors()));
   protected readonly stack = computed(() => stackOption(this.d()!.families, this.extra()));
   protected readonly stackHeight = computed(() => 80 + 44 * Math.max(1, this.d()!.families.filter((f) => f.answered > 0).length));
   protected readonly heatmap = computed(() => heatmapOption(this.d()!.families, this.d()!.questions, this.c()!.heatmap));

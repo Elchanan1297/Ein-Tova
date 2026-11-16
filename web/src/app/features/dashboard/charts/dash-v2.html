@@ -80,7 +80,7 @@
               <div class="sub">{{ byAverage() ? 'ממוצע נקודות לשחקן' : 'סך הנקודות' }}. בשוויון, המהיר עולה. לחיצה מציגה את השחקנים</div>
               <ol class="race" role="list">
                 @for (f of race(); track f.familyId) {
-                  <li>
+                  <li [class.mine]="f.familyId === myFamilyId()">
                     <button type="button" class="rr" (click)="showFamily(f.familyId)" [attr.aria-label]="'מקום ' + f.rnk + ', ' + f.name + ', ' + f.displayScore">
                       <span class="rk">{{ f.rnk }}</span>
                       <span class="rn"><b>{{ f.name }}</b><i>שיחקו {{ f.players }} מתוך {{ f.guests }}</i></span>
@@ -96,11 +96,11 @@
               <div class="sub">שלושת המובילים כרגע</div>
               <div class="pod">
                 @for (x of podium(); track x.p.guestId) {
-                  <div class="pc" [attr.data-place]="x.place">
+                  <div class="pc" [attr.data-place]="x.place" [class.mine]="x.p.familyId === myFamilyId()">
                     <div class="av" [style.--c]="colors().get(x.p.familyId)">{{ x.p.fullName.charAt(0) }}</div>
                     <b>{{ x.p.fullName }}</b>
                     <i>{{ x.p.familyName }}</i>
-                    <div class="bar" [style.height.px]="x.h">{{ x.p.score }}</div>
+                    <div class="bar" [style.height.px]="podiumHeight[x.place]">{{ x.p.score }}</div>
                   </div>
                 }
               </div>
@@ -172,7 +172,7 @@
             </div>
             <div class="card">
               <h3>דירוג שחקנים</h3>
-              <div class="sub">חיפוש, סינון לפי משפחה ומצב</div>
+              <div class="sub">{{ admin() ? 'חיפוש, סינון לפי משפחה ומצב' : 'חיפוש וסינון לפי משפחה' }}</div>
 
               <div class="chips" role="group" aria-label="סינון לפי משפחה">
                 <button type="button" class="chip" [class.on]="familyId() === null" (click)="familyId.set(null)">כל המשפחות</button>
@@ -188,12 +188,14 @@
                   <option value="progress">לפי התקדמות</option>
                   <option value="name">לפי שם</option>
                 </select>
-                <select [value]="status()" (change)="status.set($any($event.target).value)" aria-label="מצב">
-                  <option value="all">כל המצבים</option>
-                  <option value="playing">משחקים עכשיו</option>
-                  <option value="done">סיימו</option>
-                  <option value="none">לא התחילו</option>
-                </select>
+                @if (admin()) {
+                  <select [value]="status()" (change)="status.set($any($event.target).value)" aria-label="מצב">
+                    <option value="all">כל המצבים</option>
+                    <option value="playing">משחקים עכשיו</option>
+                    <option value="done">סיימו</option>
+                    <option value="none">לא התחילו</option>
+                  </select>
+                }
               </div>
 
               <div class="scroll">
@@ -203,11 +205,11 @@
                   </thead>
                   <tbody>
                     @for (p of players(); track p.guestId) {
-                      <tr [attr.data-status]="p.status">
+                      <tr [attr.data-status]="p.status" [class.mine]="p.familyId === myFamilyId()">
                         <td>{{ p.rnk ?? '' }}</td>
                         <td>
                           <b>{{ p.fullName }}</b>
-                          <small class="st">{{ statusLabel(p.status) }}@if (p.viaPhone) { · טלפון כשר }</small>
+                          <small class="st">@if (admin()) { {{ statusLabel(p.status) }} }@if (p.viaPhone) { @if (admin()) { · }טלפון כשר }</small>
                         </td>
                         <td><span class="fc" [style.--c]="colors().get(p.familyId)">{{ p.familyName }}</span></td>
                         <td><b>{{ p.score }}</b><small>/{{ p.total }}</small></td>
@@ -247,6 +249,11 @@
       }
     }
   }
+} @else if (store.notPublished()) {
+  <section class="card empty">
+    <h3>התוצאות יפורסמו בסוף המשחק</h3>
+    <p>בינתיים, לוח התוצאות מתעדכן חי.</p>
+  </section>
 } @else if (store.failed()) {
   <p class="note">לא הצלחנו לטעון. <button type="button" class="b link" (click)="store.load()">נסו שוב</button></p>
 } @else {

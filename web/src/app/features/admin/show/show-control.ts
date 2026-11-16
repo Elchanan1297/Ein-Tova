@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ConfigStore } from '../../../core/config/config-store';
 import { Icon, IconName } from '../../../shared/ui/icon/icon';
 import { Scene, ShowApi, ShowState } from '../../show/data/show-api';
 
@@ -22,6 +23,9 @@ const SCENES: { scene: Exclude<Scene, 'winner'>; label: string; icon: IconName }
 })
 export default class ShowControl {
   private readonly api = inject(ShowApi);
+  private readonly config = inject(ConfigStore);
+  /** הסטטיסטיקות במסך נפתחות רק אחרי "סיום המשחק ופרסום" */
+  protected readonly published = this.config.resultsPublished;
 
   protected readonly scenes = SCENES;
   protected readonly state = signal<ShowState | null>(null);
@@ -50,6 +54,10 @@ export default class ShowControl {
 
   constructor() {
     void this.refresh();
+    this.config.reload();
+    // אם המשחק הסתיים ופורסם ממסך אחר: כפתור הסטטיסטיקות נפתח תוך כמה שניות
+    const configTimer = setInterval(() => this.config.reload(), 8000);
+    inject(DestroyRef).onDestroy(() => clearInterval(configTimer));
     // אם מישהו אחר (או המקלדת במחשב של המצגת, או הטיימר בחידון) שינה משהו
     const timer = setInterval(() => void this.refresh(), 2000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));

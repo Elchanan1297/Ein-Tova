@@ -1,5 +1,5 @@
 import type { EChartsCoreOption } from 'echarts/core';
-import { DashboardFamily, DashboardPlayer, DashboardQuestion, DashboardSummary, utc } from '../../../dashboard/data/dashboard-models';
+import { DashboardFamily, DashboardPlayer, DashboardQuestion, DashboardSummary, utc } from '../data/dashboard-models';
 import { FONT, MINT, ROSE, TEXT, TEXT_STRONG, TOOLTIP, accuracyColor, axis, hGrad, vGrad } from './chart-theme';
 import { ChartsBin, ChartsFamily, ChartsHeatCell, ChartsTimelinePoint, ChartsTopWrong } from './dash-store';
 
@@ -217,7 +217,7 @@ export function scatterOption(players: DashboardPlayer[], colors: Map<number, st
 }
 
 /** אילו שאלות היו קשות: 12 הכי קשות, צבע לפי אחוז נכון */
-export function hardestOption(questions: DashboardQuestion[], wrong: Map<number, ChartsTopWrong>): EChartsCoreOption {
+export function hardestOption(questions: DashboardQuestion[], wrong: Map<number, ChartsTopWrong>, scale = 1): EChartsCoreOption {
   const rows = questions.filter((q) => q.answered > 0).sort((a, b) => a.correctPct - b.correctPct).slice(0, 12);
   const short = (t: string) => (t.length > 26 ? t.slice(0, 25) + '…' : t);
   return {
@@ -244,7 +244,7 @@ export function hardestOption(questions: DashboardQuestion[], wrong: Map<number,
     series: [
       {
         type: 'bar',
-        barWidth: 16,
+        barWidth: 16 * scale,
         data: rows.map((q) => ({ value: Math.round(q.correctPct), itemStyle: { color: accuracyColor(q.correctPct), borderRadius: [10, 0, 0, 10] } })),
         showBackground: true,
         backgroundStyle: { color: 'rgba(255,255,255,.05)', borderRadius: 10 },
@@ -292,4 +292,21 @@ export function bubbleOption(questions: DashboardQuestion[]): EChartsCoreOption 
       },
     ],
   };
+}
+
+/**
+ * הגדלת כל הטקסטים בגרף (למסך הגדול): כל fontSize מוכפל, ולתוויות בלי גודל נקבע 12×factor.
+ * עובר רק על אובייקטים רגילים ומערכים (לא על פונקציות או גרדיאנטים).
+ */
+export function scaleFonts<T>(option: T, factor: number): T {
+  const keys = new Set(['axisLabel', 'label', 'textStyle', 'nameTextStyle']);
+  const walk = (v: unknown, key?: string): unknown => {
+    if (Array.isArray(v)) return v.map((x) => walk(x));
+    if (!v || typeof v !== 'object' || Object.getPrototypeOf(v) !== Object.prototype) return v;
+    const out: Record<string, unknown> = {};
+    for (const [k, x] of Object.entries(v)) out[k] = k === 'fontSize' && typeof x === 'number' ? x * factor : walk(x, k);
+    if (key && keys.has(key) && out['fontSize'] === undefined) out['fontSize'] = 12 * factor;
+    return out;
+  };
+  return walk(option) as T;
 }

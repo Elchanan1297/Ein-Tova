@@ -23,6 +23,11 @@ public static class DashboardMapping
             return Results.Ok(new { published = r.Publish });
         });
 
+        // התוצאות עם הגרפים, לאורחים אחרי הפרסום
+        app.MapGet("/api/results/full", async (IDashboardService svc) =>
+            await svc.GetPublicFullAsync() is { } full ? Results.Ok(full) : Results.NotFound(new { status = "NotPublished" }))
+            .RequireAuthorization(AuthPolicies.Guest);
+
         app.MapGet("/api/results", async (IDashboardService svc) =>
             await svc.GetPublicAsync() is { } data ? Results.Ok(data) : Results.NotFound(new { status = "NotPublished" }))
             .RequireAuthorization(AuthPolicies.Guest);

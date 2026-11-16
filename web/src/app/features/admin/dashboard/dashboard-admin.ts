@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
 import { ADMIN_DASHBOARD, DASHBOARD_SOURCE, DashboardStore } from '../../dashboard/data/dashboard-store';
 import { DashboardView } from '../../dashboard/ui/dashboard-view';
-import { DashV2 } from './v2/dash-v2';
+import { DashV2 } from '../../dashboard/charts/dash-v2';
 
 const V2_KEY = 'eintova.dashV2';
 
@@ -56,7 +56,7 @@ const V2_KEY = 'eintova.dashV2';
       }
 
       @if (v2()) {
-        <app-dash-v2 />
+        <app-dash-v2 [admin]="true" />
       } @else {
         <app-dashboard-view [data]="d" [admin]="true" />
       }

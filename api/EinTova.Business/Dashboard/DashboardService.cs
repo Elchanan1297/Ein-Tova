@@ -16,6 +16,8 @@ public interface IDashboardService
     Task<DashboardFull> GetAdminFullAsync();
     /// <summary>null = עוד לא פורסם</summary>
     Task<DashboardData?> GetPublicAsync();
+    /// <summary>הגרפים לאורחים ולמסך אחרי הפרסום (רק מי ששיחק). null = עוד לא פורסם</summary>
+    Task<DashboardFull?> GetPublicFullAsync();
     /// <summary>true: סוגר את המשחק ומפרסם. false: מבטל את הפרסום</summary>
     Task SetPublishedAsync(bool publish);
 }
@@ -25,6 +27,7 @@ internal sealed class DashboardService(DashboardRepository repo, ILeaderboardSer
     const string AdminKey = "dashboard:admin";
     const string PublicKey = "dashboard:public";
     const string FullKey = "dashboard:full";
+    const string PublicFullKey = "dashboard:public-full";
 
     public async Task<DashboardData> GetAdminAsync() =>
         (await cache.GetOrCreateAsync(AdminKey, e =>
@@ -51,12 +54,24 @@ internal sealed class DashboardService(DashboardRepository repo, ILeaderboardSer
         return data.Summary.Published ? data : null;
     }
 
+    public async Task<DashboardFull?> GetPublicFullAsync()
+    {
+        var full = (await cache.GetOrCreateAsync(PublicFullKey, async e =>
+        {
+            e.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5);
+            var data = await repo.GetAsync(includeAll: false);
+            return new DashboardFull(data, await repo.GetChartsAsync());
+        }))!;
+        return full.Data.Summary.Published ? full : null;
+    }
+
     public async Task SetPublishedAsync(bool publish)
     {
         await repo.SetPublishedAsync(publish);
         cache.Remove(AdminKey);
         cache.Remove(PublicKey);
         cache.Remove(FullKey);
+        cache.Remove(PublicFullKey);
         signal.Touch();
         leaderboard.Invalidate();
     }

@@ -11,12 +11,22 @@
   <h2>מוצג עכשיו: <span class="now">{{ currentLabel() }}</span></h2>
   <div class="scenes">
     @for (s of scenes; track s.scene) {
-      <button type="button" class="b lg press scene" [class.gs]="state()?.scene === s.scene" [disabled]="busy()" (click)="setScene(s.scene)">
+      <button type="button" class="b lg press scene" [class.gs]="state()?.scene === s.scene"
+              [disabled]="busy() || (s.scene === 'stats' && !published())" (click)="setScene(s.scene)">
         <app-icon [name]="s.icon" />
         {{ s.label }}
+        @if (s.scene === 'stats' && !published()) {
+          <small>אחרי סיום המשחק</small>
+        }
       </button>
     }
   </div>
+  @if (!published()) {
+    <p class="note-stats">הסטטיסטיקות במסך הגדול נפתחות אחרי "סיום המשחק ופרסום" (ניהול → דשבורד).</p>
+  }
+  @if (message(); as m) {
+    <p class="error" role="alert">{{ m.text }}</p>
+  }
 </section>
 
 <section class="card lg quiz">
@@ -70,8 +80,4 @@
   }
 </section>
 
-@if (message(); as m) {
-  <p class="error" role="alert">{{ m.text }}</p>
-}
-
-<p class="hint">במחשב של המצגת אפשר גם במקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · 4 חידון · W זוכה · F מסך מלא. בחידון: ← הבאה · → הקודמת · Enter חשיפה · A אוטומטי</p>
+<p class="hint">במחשב של המצגת אפשר גם במקלדת: 1 פתיחה · 2 תוצאות · 3 ברכות · 4 חידון · 5 סטטיסטיקות · W זוכה · F מסך מלא. בחידון: ← הבאה · → הקודמת · Enter חשיפה · A אוטומטי</p>

@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { DOCUMENT, DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { DOCUMENT, DestroyRef, Injectable, InjectionToken, inject, signal } from '@angular/core';
 import type { HubConnection } from '@microsoft/signalr';
 import { firstValueFrom } from 'rxjs';
-import { AdminSession } from '../../../../core/auth/admin-session';
-import { Dashboard } from '../../../dashboard/data/dashboard-models';
+import { AdminSession } from '../../../core/auth/admin-session';
+import { Dashboard } from '../data/dashboard-models';
 
 export interface ChartsGeneral {
   medianSec: number | null;
@@ -55,7 +55,16 @@ export interface DashboardFull {
 }
 
 const DEBOUNCE_MS = 1500;
-const FALLBACK_POLL_MS = 20000;
+
+/** מאיפה הנתונים: מנהל (חי, עם SignalR) או אורחים אחרי הפרסום (משיכה קבועה בלבד) */
+export interface ChartsSource {
+  url: string;
+  live: boolean;
+  pollMs: number;
+}
+export const ADMIN_CHARTS: ChartsSource = { url: '/api/admin/dash', live: true, pollMs: 20000 };
+export const PUBLIC_CHARTS: ChartsSource = { url: '/api/results/full', live: false, pollMs: 15000 };
+export const CHARTS_SOURCE = new InjectionToken<ChartsSource>('CHARTS_SOURCE', { factory: () => ADMIN_CHARTS });
 
 /**
  * הדשבורד המתקדם: טעינה אחת של /api/admin/dash, ואחר כך עדכון חי:
@@ -67,8 +76,11 @@ export class DashStore {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AdminSession);
   private readonly document = inject(DOCUMENT);
+  private readonly source = inject(CHARTS_SOURCE);
 
   readonly data = signal<DashboardFull | null>(null);
+  /** אורחים: 404 = עוד לא פורסם */
+  readonly notPublished = signal(false);
   readonly failed = signal(false);
   readonly updatedAt = signal<Date | null>(null);
   /** החיבור החי עובד (אחרת רק המשיכה הקבועה) */
@@ -81,12 +93,12 @@ export class DashStore {
 
   constructor() {
     void this.load();
-    void this.connect();
+    if (this.source.live) void this.connect();
 
     const onVisible = () => {
       if (this.document.visibilityState === 'visible') void this.load();
     };
-    const timer = setInterval(onVisible, FALLBACK_POLL_MS);
+    const timer = setInterval(onVisible, this.source.pollMs);
     this.document.addEventListener('visibilitychange', onVisible);
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
@@ -101,10 +113,17 @@ export class DashStore {
     if (this.loading) return;
     this.loading = true;
     try {
-      this.data.set(await firstValueFrom(this.http.get<DashboardFull>('/api/admin/dash')));
+      this.data.set(await firstValueFrom(this.http.get<DashboardFull>(this.source.url)));
       this.updatedAt.set(new Date());
       this.failed.set(false);
-    } catch {
+      this.notPublished.set(false);
+    } catch (e) {
+      if (e instanceof HttpErrorResponse && e.status === 404) {
+        // הפרסום בוטל (או עוד לא היה): לא מציגים נתונים ישנים
+        this.notPublished.set(true);
+        this.data.set(null);
+        return;
+      }
       // נשארים עם הנתונים האחרונים; שגיאה רק אם אין בכלל מה להציג
       this.failed.set(this.data() === null);
     } finally {
