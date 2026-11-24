@@ -1,6 +1,6 @@
 # עין טובה — אפליקציית משחק משפחתית ליום הולדת 70 של אבא
 
-הוראות לעבודה בפרויקט הזה. **לענות למשתמש בעברית.** המשתמש הוא מפתח Angular מנוסה. עבד על Windows (SQL Server Express `ELCHANAN\SQLEXPRESS`, SSMS) ועובר ל־Mac (SQL מקומי בקונטיינר Docker, ראה `docs/production.md`). הוא מעדיף הוראות קצרות, צעד אחר צעד, ושאלה אחת בין שלב לשלב. לא לכתוב הסברים ארוכים.
+הוראות לעבודה בפרויקט הזה. **לענות למשתמש בעברית.** המשתמש הוא מפתח Angular מנוסה. עבד על Windows (SQL Server Express `ELCHANAN\SQLEXPRESS`, SSMS) ועבר ל־Mac (ראה "פיתוח במק" למטה). הוא מעדיף הוראות קצרות, צעד אחר צעד, ושאלה אחת בין שלב לשלב. לא לכתוב הסברים ארוכים.
 
 ## מה בונים
 PWA בעברית (RTL) שכל מוזמן פותח בטלפון: משחק "70 עובדות שלא ידעתם על אבא" (חידון), לוח תוצאות חי לפי משפחות, ברכות מצולמות, תוכנית הערב, קולות של אבא (קליפים מוכנים), ומצגת למסך גדול. מסך ניהול דינמי. חייב לעבוד טוב בטלפון, ב־iPad mini ובטאבלטי סמסונג.
@@ -66,6 +66,12 @@ PWA בעברית (RTL) שכל מוזמן פותח בטלפון: משחק "70 ע�
 
 ## מצב נוכחי ומה הבא
 ראה `docs/roadmap.md`. ניהול נבנה בפרוסות: 1) כניסה + הגדרות + מצב משחק (קיים, `/admin`, סיסמת פיתוח `dev-admin`, בייצור `Admin__Password`). 2) שאלות (קיים). 3) מוזמנים ומשפחות (קיים). 4) תוכן + העלאות (קיים). 5) מצגת `/show` + שלט `/admin/show` (קיים). האפליקציה באוויר (ראה `docs/production.md`, כולל המצב העדכני). הצעד הבא: בדיקות בטלפונים אמיתיים.
+
+## פיתוח במק
+- SQL Server 2025 (מופע ברירת מחדל) רץ במכונה וירטואלית של Parallels בשם "Windows 11": `10.211.55.3,1433`, TCP פעיל, אותנטיקציה משולבת, כלל חומת אש "SQL Server 1433". משתמש פיתוח `eintova_dev` (db_owner על `EinTova`).
+- מחרוזת החיבור ב־user-secrets (`UserSecretsId` = `eintova-api-dev` ב־`EinTova.Api.csproj`), לא ב־`appsettings.Development.json` (שם נשארה ההגדרה של Windows).
+- במק מותקן רק .NET 11, לכן מריצים: `ASPNETCORE_ENVIRONMENT=Development DOTNET_ROLL_FORWARD=Major dotnet run --project api/EinTova.Api --no-launch-profile --urls http://localhost:5080`. האפליקציה: `cd web && npm start`.
+- אין sqlcmd במק. סקריפטים רצים בתוך המכונה: `prlctl exec "Windows 11" --current-user` עם ה־sqlcmd שלה, והקבצים מ־`\\Mac\Home\Documents\Ein-Tova\db\`.
 
 ## כללים
 - Git ופריסה: commit/push רק כשהמשתמש מבקש, ה־push כ־`Elchanan1297` מהטרמינל שלו. אחרי push ל־ACR המשתמש עושה Restart בפורטל, ואז בודקים `/health`. פרטים ב־`docs/production.md`.
