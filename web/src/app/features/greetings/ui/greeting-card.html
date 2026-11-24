@@ -2,8 +2,11 @@
 
 @switch (g.kind) {
   @case ('image') {
+    <!-- התמונה תמיד שלמה (contain). את שאר המסגרת ממלאת גרסה מטושטשת שלה, כמו בסטוריז -->
     <div class="media">
+      <img class="backdrop" [src]="g.mediaUrl" [attr.srcset]="srcset()" sizes="160px" alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <img
+        class="photo"
         [src]="g.mediaUrl"
         [attr.srcset]="srcset()"
         sizes="(min-width: 744px) 680px, 100vw"

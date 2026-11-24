@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Collections.Concurrent;
+using EinTova.Business.Dashboard;
 using EinTova.DataAccess.Repositories;
 using EinTova.Infrastructure.Ai;
 using EinTova.Models.Ai;
@@ -30,10 +32,11 @@ public interface IInsightsService
 }
 
 internal sealed class InsightsService(
-    AiRepository repo, DashboardRepository dashboard, IInsightsClient client, ILogger<InsightsService> log) : IInsightsService
+    AiRepository repo, IDashboardService dashboard, IInsightsClient client, ILogger<InsightsService> log) : IInsightsService
 {
     const int MaxQuestionLength = 300;
-    static readonly SemaphoreSlim Gate = new(1, 1);
+    /// <summary>קריאה אחת בכל רגע לכל סוג (לחיצה כפולה לא שורפת מכסה, ושאלה לא מחכה לתובנות)</summary>
+    static readonly ConcurrentDictionary<string, SemaphoreSlim> Gates = new();
     static readonly JsonSerializerOptions Json = new()
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -74,7 +77,7 @@ internal sealed class InsightsService(
         if (!refresh && await repo.GetCachedAsync("insights", null) is { } last)
             return FromStored(last, cached: true, players); // הנתונים זזו מאז: מציגים את האחרונות עד "רענון"
 
-        var result = await CallAsync(s, payload, InsightsTask, InsightsSchema);
+        var result = await CallAsync("insights", s, payload, InsightsTask, InsightsSchema);
         if (result.Status != AiStatus.Ok) return Empty(result.Status);
 
         var insights = ValidateInsights(result.Json!, facts);
@@ -106,7 +109,7 @@ internal sealed class InsightsService(
             אם אי אפשר לענות מהנתונים, אמור זאת בפשטות. הוסף עד 3 מזהי עובדות ב־evidence.
             השאלה: «{q}»
             """;
-        var result = await CallAsync(s, payload, task, AskSchema);
+        var result = await CallAsync("ask", s, payload, task, AskSchema);
         if (result.Status != AiStatus.Ok) return new AskResponse(result.Status, null, []);
         var node = Parse(result.Json!);
         var answer = Clip(node?["answer"]?.GetValue<string>(), 600);
@@ -131,7 +134,7 @@ internal sealed class InsightsService(
             עם 2 או 3 פרטים מעניינים מהנתונים (משפחה מובילה, שאלה שהפתיעה, השתתפות), וברכה לאבא ליום ההולדת ה־70.
             בלי שמות של שחקנים בודדים. בלי מקפים ארוכים.
             """;
-        var result = await CallAsync(s, payload, task, BlessingSchema);
+        var result = await CallAsync("blessing", s, payload, task, BlessingSchema);
         if (result.Status != AiStatus.Ok) return new BlessingResponse(result.Status, null);
         var text = Clip(Parse(result.Json!)?["text"]?.GetValue<string>(), 1200);
         if (text.Length == 0) return new BlessingResponse(AiStatus.Unavailable, null);
@@ -162,8 +165,8 @@ internal sealed class InsightsService(
 
     async Task<(string Payload, Dictionary<string, string> Facts, int Players)> BuildPayloadAsync(bool includeNames)
     {
-        var data = await dashboard.GetAsync(includeAll: false);
-        var charts = await dashboard.GetChartsAsync();
+        // אותם נתונים שהדשבורד כבר טען (מטמון 3 שניות): בלי קריאות נוספות ל־DB
+        var (data, charts) = await dashboard.GetAdminFullAsync();
         var facts = new Dictionary<string, string>();
         string F(string id, string text) { facts[id] = text; return id; }
         string N(decimal? v, int dec = 1) => v is null ? "-" : v.Value.ToString(dec == 0 ? "0" : "0.0", CultureInfo.InvariantCulture);
@@ -234,12 +237,12 @@ internal sealed class InsightsService(
 
     sealed record Call(string Status, string? Json = null, string? Model = null, int? TokensIn = null, int? TokensOut = null);
 
-    async Task<Call> CallAsync(AiStatusRow s, string payload, string task, JsonObject schema)
+    async Task<Call> CallAsync(string kind, AiStatusRow s, string payload, string task, JsonObject schema)
     {
         if (!client.Configured) return new Call(AiStatus.Unavailable);
         if (s.CallsLastHour >= s.MaxCallsPerHour) return new Call(AiStatus.Busy);
-        // קריאה אחת בכל רגע (לחיצות כפולות לא שורפות מכסה)
-        if (!await Gate.WaitAsync(TimeSpan.FromSeconds(30))) return new Call(AiStatus.Busy);
+        var gate = Gates.GetOrAdd(kind, _ => new SemaphoreSlim(1, 1));
+        if (!await gate.WaitAsync(TimeSpan.FromSeconds(30))) return new Call(AiStatus.Busy);
         try
         {
             var r = await client.GenerateAsync(new AiRequest(System, payload, task, schema));
@@ -252,7 +255,7 @@ internal sealed class InsightsService(
             log.LogWarning("AI call failed: {Type} {Message}", e.GetType().Name, e.Message);
             return new Call(AiStatus.Unavailable);
         }
-        finally { Gate.Release(); }
+        finally { gate.Release(); }
     }
 
     // ===== ולידציה =====

@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Icon, IconName } from '../../../../shared/ui/icon/icon';
+import { GlassSelect, SelectOption } from '../../../../shared/ui/select/glass-select';
 import { AdminProgramItem, ContentApi } from '../../data/content-api';
 import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
 
@@ -22,7 +23,7 @@ const ERRORS: Record<string, string> = {
 /** תוכנית הערב: עריכה בשורה. הסדר נקבע לפי השעה. */
 @Component({
   selector: 'app-program-admin',
-  imports: [EyeLoader, Icon],
+  imports: [EyeLoader, Icon, GlassSelect],
   templateUrl: './program-admin.html',
   styleUrl: './program-admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,7 +31,7 @@ const ERRORS: Record<string, string> = {
 export default class ProgramAdmin {
   private readonly api = inject(ContentApi);
 
-  protected readonly icons = ICONS;
+  protected readonly icons: SelectOption<string>[] = ICONS.map((i) => ({ value: i.value, label: i.label, icon: i.icon }));
   protected readonly items = signal<AdminProgramItem[] | null>(null);
   /** שורות שהשתנו ועוד לא נשמרו (לפי אינדקס) */
   protected readonly dirty = signal<Set<number>>(new Set());

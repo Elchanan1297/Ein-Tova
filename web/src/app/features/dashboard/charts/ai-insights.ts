@@ -57,18 +57,18 @@ export class AiInsights {
   }
 
   private async init(): Promise<void> {
+    // הסטטוס, התובנות האחרונות והמאושרות במקביל (כשה־AI כבוי השרת עונה מיד "Disabled", בלי קריאה חיצונית)
+    void this.loadPublished();
+    const insights = this.load(false, false);
     try {
-      const s = await this.api.status();
-      this.status.set(s);
-      if (!s.enabled) return;
-      void this.loadPublished();
-      await this.load(false);
+      this.status.set(await this.api.status());
+      await insights;
     } catch {
       this.code.set('Unavailable');
     }
   }
 
-  protected async load(refresh: boolean): Promise<void> {
+  protected async load(refresh: boolean, updateStatus = true): Promise<void> {
     this.loading.set(true);
     try {
       const r = await this.api.insights(refresh);
@@ -82,7 +82,7 @@ export class AiInsights {
       this.code.set('Unavailable');
     } finally {
       this.loading.set(false);
-      void this.refreshStatus();
+      if (updateStatus) void this.refreshStatus();
     }
   }
 

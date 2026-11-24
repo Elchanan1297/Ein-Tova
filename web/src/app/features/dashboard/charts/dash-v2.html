@@ -189,19 +189,9 @@
               </div>
               <div class="tools">
                 <input type="search" placeholder="חיפוש שם" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="חיפוש שם" />
-                <select [value]="playerSort()" (change)="playerSort.set($any($event.target).value)" aria-label="מיון">
-                  <option value="rank">לפי דירוג</option>
-                  <option value="speed">הכי מהירים</option>
-                  <option value="progress">לפי התקדמות</option>
-                  <option value="name">לפי שם</option>
-                </select>
+                <app-select label="מיון" [options]="playerSortOptions" [(value)]="playerSort" />
                 @if (admin()) {
-                  <select [value]="status()" (change)="status.set($any($event.target).value)" aria-label="מצב">
-                    <option value="all">כל המצבים</option>
-                    <option value="playing">משחקים עכשיו</option>
-                    <option value="done">סיימו</option>
-                    <option value="none">לא התחילו</option>
-                  </select>
+                  <app-select label="מצב" [options]="statusOptions" [(value)]="status" />
                 }
               </div>
 

@@ -1,4 +1,6 @@
 :root{
+  /* האפליקציה כהה: פסי גלילה, שדות תאריך ושאר רכיבי הדפדפן בגרסה הכהה */
+  color-scheme: dark;
   --color-midnight: #1E2235;
   --color-midnight-light: #2F3659;
   --color-gold: #D9B66F;

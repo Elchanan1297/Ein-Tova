@@ -1,0 +1,50 @@
+/* מראה משותף לכל דפי הניהול (רק בתוך מעטפת הניהול, לא במסכי המוזמנים).
+   מסך עבודה ארוך: זכוכית רגועה יותר, בלי ברק שרץ על כל כרטיס, כותרות אחידות.
+
+   חשוב: העטיפה ב־:where() לא מוסיפה ספציפיות. כך הכללים כאן גוברים על הבסיס הגלובלי (.lg)
+   אבל לא על עיצוב מקומי של קומפוננטה: מסגרת אדומה של אזור מסוכן, אזהרות, רקע של פס שמירה וכו'. */
+
+:where(app-admin-shell main) {
+  /* הגלובלי .page הוא למסכי המוזמנים (560px עם ריווח). במעטפת הרוחב נקבע במעטפת */
+  .page { padding-inline: 0; }
+
+  /* כותרת דף: זהב, Frank Ruhl, גדולה ושקטה */
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 2.2vw, 34px);
+    line-height: 1.15;
+    color: var(--color-gold);
+    letter-spacing: 0;
+  }
+
+  /* כרטיסים: משטח כהה ועדין במקום זכוכית מבריקה, מסגרת דקה וברק עליון רך */
+  .lg:not(.gs) {
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.035) 55%, rgba(255, 255, 255, 0.05) 100%);
+    border-color: rgba(255, 255, 255, 0.11);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(3, 10, 25, 0.3),
+      0 12px 32px rgba(3, 10, 25, 0.28);
+  }
+  .lg:not(.gs)::before {
+    background: radial-gradient(120% 70% at 85% -20%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 55%);
+  }
+  /* הברק החולף מתאים לכפתור זהב אחד, לא לעשרות כרטיסים */
+  .lg::after { animation: none; opacity: 0; }
+
+  /* כפתורים משניים: מסגרת בולטת יותר בריחוף, כדי שייראו לחיצים */
+  button.lg:not(.gs):hover, a.lg:not(.gs):hover { border-color: rgba(217, 182, 111, 0.45); }
+
+  /* כותרות כרטיס */
+  .card h2, section > h2 { font-family: var(--font-display); color: var(--color-gold); letter-spacing: 0; }
+
+  /* שדות טקסט אחידים */
+  input:is([type='text'], [type='number'], [type='datetime-local'], [type='time'], [type='search']):not(.b) {
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  input:is([type='text'], [type='number'], [type='datetime-local'], [type='time'], [type='search']):hover {
+    border-color: rgba(217, 182, 111, 0.35);
+  }
+
+  ::selection { background: rgba(217, 182, 111, 0.35); color: var(--color-cream); }
+}

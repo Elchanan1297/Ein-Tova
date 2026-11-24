@@ -1,9 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild, viewChildren } from '@angular/core';
 import { ConfigStore } from '../../../core/config/config-store';
 import { AdminApi, SaveError, Settings } from '../data/admin-api';
 import { GameStatsPanel } from './ui/game-stats';
 import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
+import { Icon, IconName } from '../../../shared/ui/icon/icon';
 
 /** ערכי הטופס בצורה נוחה לעריכה (מספרים, זמן מקומי, אחוזים) */
 interface Form {
@@ -33,10 +34,43 @@ const FIELD_ERRORS: Partial<Record<keyof Settings, string>> = {
   voiceChance: 'הסתברות הקול לא תקינה.',
 };
 
-/** הגדרות המשחק ומצב בזמן אמת. השמירה שולחת רק את מה שהשתנה. */
+type Tab = 'game' | 'questions' | 'voices' | 'ai' | 'maintenance';
+
+const TABS: { id: Tab; label: string; icon: IconName }[] = [
+  { id: 'game', label: 'זמינות המשחק', icon: 'play' },
+  { id: 'questions', label: 'הגדרות שאלות', icon: 'question' },
+  { id: 'voices', label: 'קולות ולוח תוצאות', icon: 'volume' },
+  { id: 'ai', label: 'תובנות AI', icon: 'sparkles' },
+  { id: 'maintenance', label: 'תחזוקה', icon: 'trash' },
+];
+
+/** באיזה טאב נמצא כל שדה (לשגיאת שמירה ולסימון שינויים שלא נשמרו) */
+const FIELD_TAB: Record<keyof Settings, Tab> = {
+  gameMode: 'game',
+  opensAt: 'game',
+  closesAt: 'game',
+  questionCount: 'questions',
+  factsLabelCount: 'questions',
+  secondsPerQuestion: 'questions',
+  ivrExtraSec: 'questions',
+  voiceChance: 'voices',
+  leaderboardRank: 'voices',
+  graceMs: 'voices',
+  aiEnabled: 'ai',
+  aiMaxCallsPerHour: 'ai',
+};
+
+/** שם השדה בטופס לפי שם ההגדרה (לחיבור שגיאה לשדה) */
+const FORM_TO_SETTING: Partial<Record<keyof Form, keyof Settings>> = { voicePct: 'voiceChance' };
+
+/**
+ * הגדרות המשחק ומצב בזמן אמת, בחמישה טאבים עם טיוטה אחת: מעבר בין טאבים לא שומר ולא מאפס.
+ * השמירה שולחת רק את מה שהשתנה בכל הטופס. כל הלוחות נשארים טעונים (מוסתרים), כך שנתוני המשחק החיים
+ * ממשיכים להתעדכן גם כשנמצאים בטאב אחר.
+ */
 @Component({
   selector: 'app-settings-page',
-  imports: [EyeLoader, GameStatsPanel],
+  imports: [EyeLoader, GameStatsPanel, Icon],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +110,89 @@ export default class SettingsPage {
   protected readonly started = computed(() => this.statsPanel()?.started() ?? null);
   protected readonly confirmReset = signal(false);
 
+  // ===== טאבים =====
+  protected readonly tabs = TABS;
+  protected readonly tab = signal<Tab>('game');
+  private readonly tabButtons = viewChildren<ElementRef<HTMLButtonElement>>('tabBtn');
+  /** "מתקדם" בטאב הקולות (נפתח לבד כשיש שגיאה במרווח הרשת) */
+  protected readonly advancedOpen = signal(false);
+  /** השדה שנכשל בשמירה (מסומן בטאב ובשדה עד שעורכים אותו) */
+  protected readonly errorField = signal<keyof Settings | null>(null);
+  protected readonly errorText = computed(() => {
+    const f = this.errorField();
+    return f ? (FIELD_ERRORS[f] ?? null) : null;
+  });
+  protected readonly errorTab = computed(() => {
+    const f = this.errorField();
+    return f ? FIELD_TAB[f] : null;
+  });
+  /** טאבים עם שינויים שלא נשמרו */
+  protected readonly dirtyTabs = computed(() => new Set((Object.keys(this.changes()) as (keyof Settings)[]).map((k) => FIELD_TAB[k])));
+  protected readonly dirtyLabels = computed(() =>
+    TABS.filter((t) => this.dirtyTabs().has(t.id)).map((t) => t.label).join(', '),
+  );
+
+  protected selectTab(t: Tab): void {
+    // יציאה מ"תחזוקה" מבטלת אישור איפוס שהתחיל, כדי שלא יישאר "דרוך"
+    if (this.tab() === 'maintenance' && t !== 'maintenance') this.confirmReset.set(false);
+    this.tab.set(t);
+  }
+
+  /** חיצים לפי הסדר החזותי מימין לשמאל: שמאלה = הטאב הבא */
+  protected tabKey(e: KeyboardEvent, index: number): void {
+    const n = TABS.length;
+    let next: number;
+    switch (e.key) {
+      case 'ArrowLeft':
+        next = (index + 1) % n;
+        break;
+      case 'ArrowRight':
+        next = (index - 1 + n) % n;
+        break;
+      case 'Home':
+        next = 0;
+        break;
+      case 'End':
+        next = n - 1;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    this.selectTab(TABS[next].id);
+    const btn = this.tabButtons()[next]?.nativeElement;
+    btn?.focus();
+    btn?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  protected isErr(field: keyof Settings): boolean {
+    return this.errorField() === field;
+  }
+
+  /** שגיאה בשדה מטאב אחר: עוברים לטאב, פותחים את "מתקדם" אם צריך, וממקדים את השדה */
+  private revealField(field: keyof Settings): void {
+    const tab = FIELD_TAB[field];
+    this.selectTab(tab);
+    if (field === 'graceMs') this.advancedOpen.set(true);
+    setTimeout(() => {
+      // בטלפון פס הטאבים נגלל לרוחב: קודם מביאים את הטאב עם ה־⚠ לתצוגה (לרוחב בלבד, מיידי),
+      // ואחר כך גוללים את הדף אל השדה
+      const btn = this.tabButtons()[TABS.findIndex((t) => t.id === tab)]?.nativeElement;
+      const strip = btn?.parentElement;
+      if (btn && strip) {
+        const b = btn.getBoundingClientRect();
+        const s = strip.getBoundingClientRect();
+        if (b.left < s.left) strip.scrollLeft -= s.left - b.left + 16;
+        else if (b.right > s.right) strip.scrollLeft += b.right - s.right + 16;
+      }
+      // לגובה: פס הטאבים דביק, אז הוא נשאר גלוי. השדה עצמו במרכז המסך
+      const el = document.getElementById(`set-${field}`);
+      if (!el) return;
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.focus({ preventScroll: true });
+    });
+  }
+
   constructor() {
     void this.load();
   }
@@ -113,6 +230,24 @@ export default class SettingsPage {
   protected set<K extends keyof Form>(key: K, value: Form[K]): void {
     this.form.update((f) => (f ? { ...f, [key]: value } : f));
     this.message.set(null);
+    if (this.errorField() === (FORM_TO_SETTING[key] ?? key)) this.errorField.set(null);
+  }
+
+  /** בחירת מצב משחק. "לפי חלון זמן" פותח אזור חדש מתחת לאריחים: מביאים אותו לתצוגה כדי שיראו שנפתח */
+  protected setMode(mode: Form['gameMode']): void {
+    const opening = mode === 'Window' && this.form()?.gameMode !== 'Window';
+    this.set('gameMode', mode);
+    if (!opening) return;
+    // אחרי שהאנימציה נגמרה (הגובה הסופי ידוע): אם האזור מוסתר מתחת לפס השמירה או לתחתית המסך,
+    // גוללים בדיוק כדי שייראה במלואו מעל הפס
+    setTimeout(() => {
+      const el = document.getElementById('window-tile');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const bar = document.querySelector<HTMLElement>('.savebar');
+      const limit = (bar ? bar.getBoundingClientRect().top : window.innerHeight) - 16;
+      if (r.bottom > limit) window.scrollBy({ top: Math.min(r.bottom - limit, r.top - stickyTop()), behavior: 'smooth' });
+    }, 480);
   }
 
   protected async save(): Promise<void> {
@@ -129,6 +264,7 @@ export default class SettingsPage {
   protected revert(): void {
     this.form.set(this.saved());
     this.message.set(null);
+    this.errorField.set(null);
   }
 
   private async send(changes: Partial<Settings>, okText: string): Promise<boolean> {
@@ -136,6 +272,7 @@ export default class SettingsPage {
     this.busy.set(true);
     try {
       await this.api.saveSettings(changes);
+      this.errorField.set(null);
       const s = this.saved();
       if (s) this.saved.set({ ...s, ...toForm({ ...toSettings(s), ...changes }) });
       this.message.set({ ok: true, text: okText });
@@ -144,8 +281,11 @@ export default class SettingsPage {
       return true;
     } catch (e) {
       const err = e instanceof HttpErrorResponse && e.status === 400 ? (e.error as SaveError) : null;
-      const text = (err?.field && FIELD_ERRORS[err.field]) || 'השמירה נכשלה. נסו שוב.';
+      const field = err?.field && err.field in FIELD_TAB ? err.field : null;
+      const text = (field && FIELD_ERRORS[field]) || 'השמירה נכשלה. נסו שוב.';
       this.message.set({ ok: false, text });
+      this.errorField.set(field);
+      if (field) this.revealField(field);
       return false;
     } finally {
       this.busy.set(false);
@@ -198,4 +338,11 @@ function toLocalInput(iso: string | null): string {
 
 function fromLocalInput(value: string): string | null {
   return value ? new Date(value).toISOString() : null;
+}
+
+
+/** התחתית של פס הטאבים הדביק: גלילה לא תסתיר תחתיו את ראש האזור */
+function stickyTop(): number {
+  const tabs = document.querySelector<HTMLElement>('app-settings-page .tabs, .tabs');
+  return (tabs?.getBoundingClientRect().bottom ?? 0) + 12;
 }

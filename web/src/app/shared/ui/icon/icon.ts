@@ -26,6 +26,16 @@ const PATHS = {
   heart: 'M12 20s-7.5-4.6-9.2-9.2C1.6 7.5 3.8 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.2 0 5.4 3 4.2 6.3C19.5 15.4 12 20 12 20z',
   'chevron-left': 'M15 5l-7 7 7 7',
   'chevron-right': 'M9 5l7 7-7 7',
+  'chevron-down': 'M5 9l7 7 7-7',
+  sliders: 'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',
+  chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  question: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  panel: 'M4 4h16v16H4zM15 4v16',
+  logout: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11',
+  monitor: 'M3 4h18v12H3zM8 20h8M12 16v4',
+  alert: 'M12 3 2 20h20zM12 10v4M12 17h.01',
+  'check-circle': 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.7 2.7L16 10',
 } as const;
 
 export type IconName = keyof typeof PATHS;

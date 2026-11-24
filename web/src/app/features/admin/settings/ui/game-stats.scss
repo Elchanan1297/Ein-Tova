@@ -6,20 +6,25 @@
   gap: 10px;
 }
 
+// כמו כפתורי המצגת: התוכן ממורכז באריח, המספר הוא העיקר והתווית מעליו
 .tile {
   display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 104px;
+  padding: 16px;
+  border-radius: 20px;
+  text-align: center;
   &::after { content: none; }
 
-  .label { font-size: 13px; color: rgba(248, 243, 234, 0.7); }
-  strong { font: 700 28px / 1.1 var(--font-display); color: var(--color-gold); }
+  .label { font-size: 14px; font-weight: 600; color: rgba(248, 243, 234, 0.7); }
+  strong { font: 700 clamp(28px, 2.4vw, 36px) / 1.05 var(--font-display); color: var(--color-gold); font-variant-numeric: tabular-nums; }
 }
 
 .tile strong.state {
-  color: #f4a493;
-  &.open { color: #7fd6a0; }
+  color: var(--status-error, #f4a493);
+  &.open { color: var(--status-ok, #7fd1b0); }
 }
 
 .questions {

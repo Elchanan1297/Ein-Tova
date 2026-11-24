@@ -9,14 +9,10 @@
       <input type="text" maxlength="100" autocomplete="off" [value]="fullName()" (input)="fullName.set($any($event.target).value)" />
     </label>
 
-    <label>משפחה
-      <select [value]="familyId()" (change)="familyId.set($any($event.target).value === 'new' ? 'new' : +$any($event.target).value)">
-        @for (f of families(); track f.familyId) {
-          <option [value]="f.familyId" [selected]="familyId() === f.familyId">{{ f.name }}</option>
-        }
-        <option value="new" [selected]="familyId() === 'new'">+ משפחה חדשה…</option>
-      </select>
-    </label>
+    <div class="field">
+      <span>משפחה</span>
+      <app-select label="משפחה" [options]="familyOptions()" [(value)]="familyId" />
+    </div>
     @if (familyId() === 'new') {
       <label>שם המשפחה החדשה
         <input type="text" maxlength="100" placeholder="למשל: משפחת כהן" [value]="newFamily()" (input)="newFamily.set($any($event.target).value)" />

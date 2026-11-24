@@ -13,6 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Icon } from '../../../../shared/ui/icon/icon';
+import { GlassSelect, SelectOption } from '../../../../shared/ui/select/glass-select';
 import { AdminFamily, AdminGuest, GuestsApi } from '../../data/guests-api';
 import { inviteText, personalLink, whatsAppUrl } from '../../data/invite';
 import { EyeLoader } from '../../../../shared/ui/eye-loader/eye-loader';
@@ -28,7 +29,7 @@ const ERRORS: Record<string, string> = {
 /** הוספה/עריכה של מוזמן, כולל משפחה חדשה, קישור אישי וקוד חדש. */
 @Component({
   selector: 'app-guest-editor',
-  imports: [EyeLoader, Icon],
+  imports: [EyeLoader, Icon, GlassSelect],
   templateUrl: './guest-editor.html',
   styleUrl: './guest-editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,10 @@ export class GuestEditor {
   protected readonly phone = linkedSignal(() => this.guest()?.phone ?? '');
   protected readonly isActive = linkedSignal(() => this.guest()?.isActive ?? true);
   /** מזהה משפחה, או 'new' למשפחה חדשה */
+  protected readonly familyOptions = computed<SelectOption<number | 'new' | ''>[]>(() => [
+    ...this.families().map((f) => ({ value: f.familyId, label: f.name })),
+    { value: 'new', label: '+ משפחה חדשה…', action: true },
+  ]);
   protected readonly familyId = linkedSignal<number | 'new' | ''>(() => this.guest()?.familyId ?? this.families()[0]?.familyId ?? 'new');
   protected readonly newFamily = signal('');
   protected readonly code = linkedSignal(() => this.guest()?.code ?? null);

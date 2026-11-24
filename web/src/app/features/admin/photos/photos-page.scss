@@ -156,14 +156,14 @@
 .bulk {
   position: fixed;
   bottom: calc(14px + env(safe-area-inset-bottom));
-  left: 50%;
+  left: calc((100% - var(--admin-nav-w, 0px)) / 2);
   translate: -50% 0;
   z-index: 30;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 14px;
-  width: min(calc(100% - 24px), 940px);
+  width: min(calc(100% - var(--admin-nav-w, 0px) - 24px), 940px);
   padding: 10px 16px;
   border-radius: 20px;
   background-color: rgba(30, 34, 53, 0.92);
@@ -198,7 +198,7 @@
 .toast {
   position: fixed;
   top: 80px;
-  left: 50%;
+  left: calc((100% - var(--admin-nav-w, 0px)) / 2);
   translate: -50% 0;
   z-index: 40;
   margin: 0;

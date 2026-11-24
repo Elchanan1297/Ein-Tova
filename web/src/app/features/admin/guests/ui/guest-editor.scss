@@ -23,14 +23,14 @@ header {
 
 form { display: grid; gap: 14px; padding: 16px 20px 20px; }
 
-label {
+label, .field {
   display: grid;
   gap: 6px;
   font-weight: 600;
   small { font-weight: 400; color: rgba(248, 243, 234, 0.6); }
 }
 
-input[type='text'], input[type='tel'], select {
+input[type='text'], input[type='tel'] {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--glass-border);

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { DashboardPlayer, PlayerStatus } from '../data/dashboard-models';
 import { EyeLoader } from '../../../shared/ui/eye-loader/eye-loader';
+import { GlassSelect, SelectOption } from '../../../shared/ui/select/glass-select';
 import { familyColors } from './chart-theme';
 import { CountUp } from './count-up';
 import {
@@ -39,9 +40,22 @@ const RING = 2 * Math.PI * 40;
  * אותם מספרים כמו הדשבורד הרגיל (usp_GetDashboard), ועוד נתוני הגרפים (usp_GetDashboardCharts).
  * הגרפים של כל טאב נבנים רק כשהטאב נפתח. משותף למנהל (חי) ולאורחים אחרי הפרסום (CHARTS_SOURCE).
  */
+const PLAYER_SORT_OPTIONS: SelectOption<PlayerSort>[] = [
+  { value: 'rank', label: 'לפי דירוג' },
+  { value: 'speed', label: 'הכי מהירים' },
+  { value: 'progress', label: 'לפי התקדמות' },
+  { value: 'name', label: 'לפי שם' },
+];
+const STATUS_OPTIONS: SelectOption<StatusFilter>[] = [
+  { value: 'all', label: 'כל המצבים' },
+  { value: 'playing', label: 'משחקים עכשיו' },
+  { value: 'done', label: 'סיימו' },
+  { value: 'none', label: 'לא התחילו' },
+];
+
 @Component({
   selector: 'app-dash-v2',
-  imports: [EChart, CountUp, EyeLoader, AiInsights, AiPublished],
+  imports: [EChart, CountUp, EyeLoader, AiInsights, AiPublished, GlassSelect],
   providers: [DashStore],
   templateUrl: './dash-v2.html',
   styleUrl: './dash-v2.scss',
@@ -61,6 +75,8 @@ export class DashV2 {
 
   // סינון השחקנים (כמו בדשבורד הרגיל)
   protected readonly familyId = signal<number | null>(null);
+  protected readonly playerSortOptions = PLAYER_SORT_OPTIONS;
+  protected readonly statusOptions = STATUS_OPTIONS;
   protected readonly playerSort = signal<PlayerSort>('rank');
   protected readonly status = signal<StatusFilter>('all');
   protected readonly search = signal('');

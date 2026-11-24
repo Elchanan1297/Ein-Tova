@@ -261,7 +261,7 @@ tr.mine td { background: rgba(217, 182, 111, 0.08); }
   &.on { border-color: var(--c, var(--color-gold)); background: color-mix(in srgb, var(--c, #d9b66f) 22%, transparent); color: var(--c, var(--color-gold)); }
 }
 .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.tools input, .tools select {
+.tools input {
   flex: 1 1 130px;
   min-width: 0;
   padding: 9px 12px;
@@ -272,7 +272,7 @@ tr.mine td { background: rgba(217, 182, 111, 0.08); }
   font: inherit;
   font-size: 16px;
 }
-.tools select option { color: #1e2235; }
+.tools app-select { flex: 1 1 130px; --sel-bg: rgba(0, 0, 0, 0.22); --sel-border: rgba(255, 255, 255, 0.14); --sel-pad: 7px 12px; }
 .scroll { max-height: 520px; overflow: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { position: sticky; top: 0; z-index: 1; padding: 8px 10px; font-size: 12px; font-weight: 600; color: var(--mut); text-align: start; background: rgba(27, 31, 51, 0.95); }

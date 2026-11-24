@@ -1,125 +1,323 @@
-:host { display: grid; gap: 16px; padding-bottom: 80px; }
+// מרווחים: בין קבוצות 20px, בין כותרת/שדה/הסבר 6px. צבעי מצב מהמעטפת (--status-*)
+:host { display: grid; gap: 18px; }
 
-h1 { font-size: 28px; }
+h1 { margin: 0; font-size: 28px; }
 
+// ===== טאבים מקומיים (שונים מהתפריט: קו זהב מתחת, לא רקע) =====
+.tabs {
+  // דביק מתחת לפס העליון: הטאב הפעיל (וה־⚠ של שגיאה) תמיד גלוי, גם בגלילה בטלפון
+  position: sticky;
+  top: var(--admin-top-h, 0px);
+  z-index: 15;
+  margin-inline: -4px;
+  padding-inline: 8px;
+  // ההתכהות נשארת, בלי מלבן: פינות מעוגלות, קצוות שנמסים ברקע (צל רך באותו גוון),
+  // וקו תחתון שדועך בשני הקצוות במקום קו חד לכל הרוחב
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09) 18%, rgba(255, 255, 255, 0.09) 82%, transparent) bottom / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(24, 28, 45, 0.78), rgba(24, 28, 45, 0.9));
+  box-shadow: 0 0 22px 6px rgba(24, 28, 45, 0.55);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px 12px 0 0;
+  background: none;
+  color: rgba(248, 243, 234, 0.72);
+  font: 600 15px var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  app-icon { width: 18px; height: 18px; flex: none; }
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline: 10px;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: transparent;
+  }
+  &:hover { color: var(--color-cream); background: rgba(255, 255, 255, 0.04); }
+  &[aria-selected='true'] {
+    color: var(--color-gold);
+    &::after { background: var(--color-gold); }
+  }
+  &:focus-visible { outline: 2px solid var(--color-gold); outline-offset: -2px; }
+
+  .mark { display: inline-grid; place-items: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-gold); }
+  .err { color: var(--status-error); app-icon { width: 16px; height: 16px; } }
+}
+
+.panel { display: grid; gap: 20px; }
+.panel[hidden] { display: none; }
+
+// ===== כרטיס: כותרת עם שורת הסבר, ומתחתיה אריחים =====
 .card {
   display: grid;
-  gap: 14px;
-  padding: 18px 20px;
-  border-radius: 22px;
+  gap: 18px;
+  padding: clamp(18px, 2vw, 26px);
+  border-radius: 24px;
   &::after { content: none; }
+}
+.card-head {
+  display: grid;
+  gap: 4px;
+  h2 { margin: 0; font-size: 22px; }
+  p { margin: 0; max-width: 70ch; color: rgba(248, 243, 234, 0.66); line-height: 1.5; }
+}
 
-  h2 { margin: 0; font-size: 20px; }
+// אריחים: ממלאים את השורה באופן שווה, כמו כפתורי המצגת. בטלפון אחד מתחת לשני
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 14px;
+}
+.tile {
+  display: grid;
+  // שם והסבר למעלה, הפקד צמוד לתחתית: באריחים באותה שורה הפקדים מיושרים זה לזה
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px 20px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  background: rgba(10, 13, 28, 0.28);
+  transition: border-color 0.2s;
+  &:hover, &:focus-within { border-color: rgba(217, 182, 111, 0.28); }
+  &.wide { grid-column: 1 / -1; }
+}
+.meta {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  .name { font-weight: 700; font-size: 16px; color: var(--color-cream); }
+  small { font-weight: 400; font-size: 14px; color: rgba(248, 243, 234, 0.62); line-height: 1.45; }
+}
+.control {
+  display: grid;
+  align-content: end;
+  gap: 8px;
+  min-width: 0;
+}
+
+// הסבר עם מצב: אייקון + טקסט, לא רק צבע
+small.warn, small.err {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-weight: 600;
+  app-icon { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+}
+small.warn { color: var(--status-warn); }
+small.err { color: var(--status-error); font-size: 14px; }
+
+// ===== פקדים: ממלאים את רוחב האריח =====
+input[type='number'], input[type='datetime-local'] {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--color-cream);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+  &:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+  &[aria-invalid='true'] { border-color: var(--status-error); }
 }
 
 .now {
-  display: flex;
-  gap: 10px;
-
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   button {
-    flex: 1;
-    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 10px 12px;
     border-radius: var(--radius-pill);
     font-weight: 700;
-    text-align: center;
+    app-icon { width: 17px; height: 17px; }
     &:disabled { opacity: 0.6; }
   }
 }
 
 .segmented {
-  display: inline-flex;
-  flex-wrap: wrap;
+  display: flex;
   gap: 4px;
   padding: 4px;
   border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  &:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
 
   button {
-    padding: 8px 16px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 10px;
     border-radius: var(--radius-pill);
     font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
     color: rgba(248, 243, 234, 0.75);
-
+    &:hover { color: var(--color-cream); }
     &[aria-checked='true'] { background: rgba(217, 182, 111, 0.28); color: var(--color-gold); }
   }
 }
 
-.row {
+// ===== חלון הזמן: נפתח בהחלקה מתחת לאריחים ומודגש לרגע, כדי שיראו שנוסף משהו =====
+.reveal {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-rows: 1fr;
+  // בלי קפיצה של מרווח הכרטיס: המרווח נמצא בתוך החלק שנפתח
+  margin-top: -18px;
+  animation: reveal-rows 0.42s var(--motion-ease-out, ease) both;
+}
+.reveal-in { min-height: 0; overflow: hidden; }
+.reveal-in > .tile { margin-top: 18px; }
+@keyframes reveal-rows {
+  from { grid-template-rows: 0fr; opacity: 0; }
+  to { grid-template-rows: 1fr; opacity: 1; }
+}
+
+.tile.window {
+  // פס זהב בצד הקרוב, כמו היעד הפעיל בתפריט: שייך לבחירה "לפי חלון זמן"
+  border-inline-start: 3px solid var(--color-gold);
+  animation: window-glow 1.8s ease-out 0.15s backwards;
+}
+@keyframes window-glow {
+  0%, 35% { border-color: rgba(217, 182, 111, 0.8); background-color: rgba(217, 182, 111, 0.1); box-shadow: 0 0 0 4px rgba(217, 182, 111, 0.14); }
+  100% { border-color: rgba(255, 255, 255, 0.07); border-inline-start-color: var(--color-gold); background-color: rgba(10, 13, 28, 0.28); box-shadow: 0 0 0 0 rgba(217, 182, 111, 0); }
+}
+.name.with-icon { display: flex; align-items: center; gap: 8px; app-icon { width: 18px; height: 18px; color: var(--color-gold); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .tile.window { animation: none; }
+}
+
+.pair {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 14px;
 }
-
-label, .field {
+.field {
   display: grid;
-  // בשורה עם שדות שיש להם הסבר מתחת: הכותרת והשדה צמודים למעלה, בלי למתוח את השדה
   align-content: start;
   gap: 6px;
-  font-weight: 600;
-
-  small { font-weight: 400; color: rgba(248, 243, 234, 0.6); }
-  small.warn { color: var(--color-gold); }
-  strong { color: var(--color-gold); }
+  label { font-weight: 600; }
 }
 
-input[type='number'], input[type='datetime-local'] {
-  padding: 10px 12px;
+// ערך גדול מעל הסליידר (ובכרטיס התחזוקה)
+.big-value {
+  font: 700 clamp(30px, 2.6vw, 38px) / 1 var(--font-display);
+  color: var(--color-gold);
+  font-variant-numeric: tabular-nums;
+}
+input[type='range'] { width: 100%; height: 28px; margin: 0; accent-color: var(--color-gold); }
+
+// מתג (checkbox עם role=switch)
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.switch-state { font-weight: 700; color: rgba(248, 243, 234, 0.75); }
+input.switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 60px;
+  height: 34px;
+  margin: 0;
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-cream);
-  font: inherit;
-  font-size: 16px;
-  color-scheme: dark;
-  &:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: background-color 0.25s;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    inset-inline-start: 3px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--color-cream);
+    transition: inset-inline-start 0.3s var(--motion-ease-out, ease);
+  }
+  &:checked { background: var(--color-gold); &::before { inset-inline-start: 29px; background: #1e2235; } }
+  &:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 3px; }
 }
+.tile:has(input.switch:checked) .switch-state { color: var(--status-ok); }
 
-input[type='range'] { accent-color: var(--color-gold); }
-
+details { display: grid; gap: 14px; }
 details summary { cursor: pointer; font-weight: 600; color: rgba(248, 243, 234, 0.75); }
-details label { margin-top: 10px; }
+details summary:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; border-radius: 6px; }
+details[open] summary { margin-bottom: 14px; }
 
-// פס שמירה צף בתחתית
-.savebar {
-  position: fixed;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  left: 50%;
-  translate: -50% 0;
-  z-index: 20;
+// ===== תחזוקה (פעולה הרסנית) =====
+.danger {
+  border-color: color-mix(in srgb, var(--status-error) 40%, transparent);
+  .tile { border-color: color-mix(in srgb, var(--status-error) 18%, transparent); }
+}
+.tile.stat {
+  grid-template-rows: auto auto 1fr;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+  .name { font-weight: 600; color: rgba(248, 243, 234, 0.75); }
+  small { align-self: end; color: rgba(248, 243, 234, 0.6); line-height: 1.45; }
+}
+.tile.action {
+  grid-template-rows: auto;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.irreversible {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: min(calc(100% - 32px), 560px);
-  padding: 10px 12px 10px 18px;
-  border-radius: var(--radius-pill);
-  background-color: rgba(30, 34, 53, 0.85);
-  animation: rise 0.4s var(--motion-ease-out) both;
-  &::after { content: none; }
-
-  span { flex: 1; font-weight: 600; }
-  .error { color: #f4a493; }
-  button { padding: 9px 18px; border-radius: var(--radius-pill); font-weight: 700; }
+  gap: 6px;
+  margin: 0;
+  color: var(--status-error);
+  font-weight: 700;
+  app-icon { width: 18px; height: 18px; }
 }
-
-.danger {
-  border-color: rgba(244, 164, 147, 0.35);
-  p { margin: 0; line-height: 1.5; color: rgba(248, 243, 234, 0.8); }
-  small { color: rgba(248, 243, 234, 0.6); }
-}
-
 .reset {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 12px;
 
   button:first-child {
-    padding: 11px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 11px 22px;
     border-radius: var(--radius-pill);
-    color: #f4a493;
+    color: var(--status-error);
     font-weight: 700;
+    app-icon { width: 18px; height: 18px; }
     &::after { content: none; }
-    &.armed { background-color: rgba(232, 130, 111, 0.3); color: #fff; }
+    &.armed { background-color: color-mix(in srgb, var(--status-error) 32%, transparent); color: #fff; }
     &:disabled { opacity: 0.6; }
   }
 }
@@ -127,4 +325,40 @@ details label { margin-top: 10px; }
 .note { color: rgba(248, 243, 234, 0.7); }
 .link { color: var(--color-gold); text-decoration: underline; }
 
-.toggle { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; input { width: 20px; height: 20px; accent-color: var(--color-gold); } }
+// ===== פס שמירה: צמוד לתחתית אזור התוכן (לא מכסה את התפריט), ושומר לעצמו מקום בסוף הדף =====
+.savebar {
+  position: sticky;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 8px;
+  padding: 10px 12px 10px 16px;
+  padding-inline-start: 18px;
+  border-radius: 22px;
+  background-color: rgba(30, 34, 53, 0.92);
+  animation: rise 0.4s var(--motion-ease-out) both;
+  &::after { content: none; }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 220px;
+    min-width: 0;
+    font-weight: 600;
+    line-height: 1.4;
+    app-icon { width: 19px; height: 19px; flex: none; }
+    &.ok { color: var(--status-ok); }
+    &.error { color: var(--status-error); }
+  }
+  .pending .dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--color-gold); }
+  .actions { display: flex; gap: 8px; margin-inline-start: auto; }
+  button { padding: 9px 18px; border-radius: var(--radius-pill); font-weight: 700; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .savebar { animation: none; }
+}

@@ -20,6 +20,9 @@ public sealed class AiBusyException(string message) : Exception(message);
 /// <summary>הספק לא זמין, לא הוגדר, או החזיר תשובה לא תקינה</summary>
 public sealed class AiUnavailableException(string message, Exception? inner = null) : Exception(message, inner);
 
+/// <summary>400 מהספק (למשל הגדרה שהמודל לא מכיר). פנימי ללקוח</summary>
+sealed class AiBadRequestException() : Exception("400");
+
 /// <summary>ספק ה־AI. ממשק, כדי שאפשר יהיה להחליף ספק (למשל Claude) בקונפיג ובמחלקה אחת</summary>
 public interface IInsightsClient
 {
@@ -42,18 +45,22 @@ public sealed class GeminiInsightsClient(HttpClient http, AiOptions options) : I
         Exception? last = null;
         foreach (var model in models)
         {
-            for (var attempt = 0; attempt < 2; attempt++) // ניסיון חוזר יחיד
+            var thinking = options.ThinkingLevel.Length > 0;
+            for (var attempt = 0; attempt < 2; attempt++) // ניסיון חוזר יחיד, רק בשגיאת שרת רגעית
             {
-                try { return await CallAsync(model, request, ct); }
+                try { return await CallAsync(model, request, thinking, ct); }
                 catch (AiBusyException e) { last = e; break; }                 // מכסה: ישר למודל הגיבוי
+                catch (AiBadRequestException e) when (thinking) { last = e; thinking = false; } // מודל שלא מכיר thinkingLevel: שוב בלי
+                catch (AiBadRequestException e) { last = e; break; }
                 catch (AiUnavailableException e) { last = e; }
-                catch (TaskCanceledException e) when (!ct.IsCancellationRequested) { last = new AiUnavailableException("timeout", e); }
+                // timeout: לא מחכים שוב לאותו מודל, עוברים לגיבוי
+                catch (TaskCanceledException e) when (!ct.IsCancellationRequested) { last = new AiUnavailableException("timeout", e); break; }
             }
         }
         throw last is AiBusyException ? last : new AiUnavailableException("AI לא זמין כרגע", last);
     }
 
-    async Task<AiResult> CallAsync(string model, AiRequest request, CancellationToken ct)
+    async Task<AiResult> CallAsync(string model, AiRequest request, bool thinking, CancellationToken ct)
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(Math.Max(5, options.TimeoutSec)));
@@ -76,6 +83,9 @@ public sealed class GeminiInsightsClient(HttpClient http, AiOptions options) : I
                 ["maxOutputTokens"] = 2048,
             },
         };
+        // פחות "חשיבה" = תשובה מהירה יותר. המשימות כאן פשוטות (סיכום מספרים), אין צורך בחשיבה עמוקה
+        if (thinking)
+            body["generationConfig"]!["thinkingConfig"] = new JsonObject { ["thinkingLevel"] = options.ThinkingLevel };
 
         using var msg = new HttpRequestMessage(HttpMethod.Post, $"{options.BaseUrl.TrimEnd('/')}/models/{Uri.EscapeDataString(model)}:generateContent")
         {
@@ -85,6 +95,7 @@ public sealed class GeminiInsightsClient(HttpClient http, AiOptions options) : I
 
         using var res = await http.SendAsync(msg, timeout.Token);
         if (res.StatusCode == HttpStatusCode.TooManyRequests) throw new AiBusyException("quota");
+        if (res.StatusCode == HttpStatusCode.BadRequest) throw new AiBadRequestException();
         if ((int)res.StatusCode >= 500 || res.StatusCode == HttpStatusCode.NotFound) throw new AiUnavailableException($"{(int)res.StatusCode}");
         if (!res.IsSuccessStatusCode) throw new AiUnavailableException($"{(int)res.StatusCode}");
 

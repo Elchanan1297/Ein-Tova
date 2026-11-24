@@ -24,14 +24,17 @@
       @case ('image') {
         <div class="media">
           @if (imageUrl()) {
-            <img [src]="imageUrl()" alt="תצוגה מקדימה" />
+            <div class="frame">
+              <img class="backdrop" [src]="imageUrl()" alt="" aria-hidden="true" />
+              <img class="photo" [src]="imageUrl()" alt="תצוגה מקדימה" />
+            </div>
           }
           <label class="b lg press upload">
             <app-icon name="upload" />
             {{ uploading() ? 'מעלה ומקטין…' : imageUrl() ? 'החלפת תמונה' : 'בחירת תמונה' }}
             <input type="file" accept="image/*" [disabled]="uploading()" (change)="pickImage($event)" />
           </label>
-          <small>התמונה מוקטנת אוטומטית ונשמרת בלי פרטי מיקום.</small>
+          <small>כל צורה מתאימה (לאורך, לרוחב או ריבוע): התמונה תמיד מוצגת שלמה, בלי חיתוך. היא מוקטנת אוטומטית ונשמרת בלי פרטי מיקום.</small>
         </div>
       }
       @case ('video') {

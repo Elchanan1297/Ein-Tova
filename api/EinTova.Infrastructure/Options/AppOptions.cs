@@ -52,6 +52,8 @@ public sealed class AiOptions
     public string FallbackModel { get; set; } = "";
     public string BaseUrl { get; set; } = "https://generativelanguage.googleapis.com/v1beta";
     public int TimeoutSec { get; set; } = 20;
+    /// <summary>כמה המודל "חושב" לפני התשובה (Gemini 3: minimal/low/medium/high). נמוך = מהיר. ריק = ברירת המחדל של המודל</summary>
+    public string ThinkingLevel { get; set; } = "low";
 }
 
 /// <summary>ערכי פיתוח שאסור שיגיעו לייצור</summary>

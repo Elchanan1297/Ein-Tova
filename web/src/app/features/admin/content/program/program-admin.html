@@ -8,11 +8,7 @@
         <input class="time" type="time" [value]="it.timeText" aria-label="שעה" (input)="edit(i, 'timeText', $any($event.target).value)" />
         <input class="title" type="text" maxlength="100" placeholder="שם הפריט" [value]="it.title" aria-label="שם הפריט"
                (input)="edit(i, 'title', $any($event.target).value)" />
-        <select [value]="it.icon ?? 'clock'" aria-label="אייקון" (change)="edit(i, 'icon', $any($event.target).value)">
-          @for (ic of icons; track ic.value) {
-            <option [value]="ic.value" [selected]="(it.icon ?? 'clock') === ic.value">{{ ic.label }}</option>
-          }
-        </select>
+        <app-select class="icon-sel" label="אייקון" [options]="icons" [value]="it.icon ?? 'clock'" (valueChange)="edit(i, 'icon', $event)" />
         <label class="check" title="מוצג בתוכנית">
           <input type="checkbox" [checked]="it.isActive" (change)="edit(i, 'isActive', $any($event.target).checked)" /> מוצג
         </label>

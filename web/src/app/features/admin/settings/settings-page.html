@@ -1,138 +1,323 @@
 <h1>הגדרות ומשחק</h1>
 
-<app-game-stats />
-
 @if (form(); as f) {
-  <section class="card lg">
-    <h2>פתיחת המשחק</h2>
-    <div class="now">
-      <button type="button" class="b lg gs press" [disabled]="busy()" (click)="setGameNow('Always')">פתח עכשיו</button>
-      <button type="button" class="b lg press" [disabled]="busy()" (click)="setGameNow('Closed')">סגור עכשיו</button>
-    </div>
-    <div class="segmented" role="radiogroup" aria-label="מצב המשחק">
-      @for (m of [['Always', 'פתוח תמיד'], ['Window', 'לפי חלון זמן'], ['Closed', 'סגור']]; track m[0]) {
-        <button
-          type="button"
-          role="radio"
-          class="b"
-          [attr.aria-checked]="f.gameMode === m[0]"
-          (click)="set('gameMode', $any(m[0]))"
-        >{{ m[1] }}</button>
-      }
-    </div>
-    @if (f.gameMode === 'Window') {
-      <div class="row">
-        <label>נפתח ב־
-          <input type="datetime-local" [value]="f.opensAt" (change)="set('opensAt', $any($event.target).value)" />
-        </label>
-        <label>נסגר ב־
-          <input type="datetime-local" [value]="f.closesAt" (change)="set('closesAt', $any($event.target).value)" />
-        </label>
-      </div>
-    }
-  </section>
-
-  <section class="card lg">
-    <h2>שאלות</h2>
-    <div class="row">
-      <label>שאלות במשחק
-        <input type="number" min="0" inputmode="numeric" [value]="f.questionCount"
-               (input)="set('questionCount', $any($event.target).valueAsNumber || 0)" />
-        @if (played() !== null) {
-          <small [class.warn]="f.questionCount > active()!">
-            יש {{ active() }} שאלות פעילות, אז ישוחקו {{ played() }}.
-          </small>
-        } @else {
-          <small>0 = כל השאלות הפעילות</small>
+  <div class="tabs" role="tablist" aria-label="אזורי ההגדרות">
+    @for (t of tabs; track t.id; let i = $index) {
+      <button
+        #tabBtn
+        type="button"
+        role="tab"
+        class="tab"
+        [id]="'tab-' + t.id"
+        [attr.aria-selected]="tab() === t.id"
+        [attr.aria-controls]="'panel-' + t.id"
+        [tabindex]="tab() === t.id ? 0 : -1"
+        (click)="selectTab(t.id)"
+        (keydown)="tabKey($event, i)"
+      >
+        <app-icon [name]="t.icon" />
+        <span>{{ t.label }}</span>
+        @if (errorTab() === t.id) {
+          <span class="mark err" aria-label="יש שגיאה"><app-icon name="alert" /></span>
+        } @else if (dirtyTabs().has(t.id)) {
+          <span class="mark dot" aria-label="יש שינויים שלא נשמרו"></span>
         }
-      </label>
-      <label>המספר בכותרת
-        <input type="number" min="1" inputmode="numeric" [placeholder]="played() !== null ? played() + ' (כמו מספר השאלות)' : 'כמספר השאלות'"
-               [value]="f.factsLabelCount" (input)="set('factsLabelCount', $any($event.target).value)" />
-        <small>מה שיופיע ב"X עובדות שלא ידעתם על אבא". ריק = {{ played() ?? 'כמספר השאלות' }}</small>
-      </label>
-      <label>שניות לשאלה
-        <input type="number" min="5" max="300" inputmode="numeric" [value]="f.secondsPerQuestion"
-               (input)="set('secondsPerQuestion', $any($event.target).valueAsNumber || 0)" />
-      </label>
-      <label>זמן נוסף בטלפון (שניות)
-        <input type="number" min="0" max="300" inputmode="numeric" [value]="f.ivrExtraSec"
-               (input)="set('ivrExtraSec', $any($event.target).valueAsNumber || 0)" />
-        <small>למי שמשחק מטלפון כשר: השאלה והתשובות מוקראות, וזה לוקח זמן</small>
-      </label>
-    </div>
-  </section>
-
-  <section class="card lg">
-    <h2>קולות ולוח תוצאות</h2>
-    <label>סיכוי לקול של אבא אחרי תשובה: <strong>{{ f.voicePct }}%</strong>
-      <input type="range" min="0" max="100" step="5" [value]="f.voicePct"
-             (input)="set('voicePct', $any($event.target).valueAsNumber)" />
-    </label>
-    <div class="field">
-      <span>דירוג המשפחות לפי</span>
-      <div class="segmented" role="radiogroup" aria-label="דירוג המשפחות">
-        @for (r of [['Total', 'סך הכול'], ['Average', 'ממוצע לשחקן']]; track r[0]) {
-          <button type="button" role="radio" class="b" [attr.aria-checked]="f.leaderboardRank === r[0]"
-                  (click)="set('leaderboardRank', $any(r[0]))">{{ r[1] }}</button>
-        }
-      </div>
-    </div>
-    <details>
-      <summary>מתקדם</summary>
-      <label>מרווח חסד לרשת (אלפיות שנייה)
-        <input type="number" min="0" inputmode="numeric" [value]="f.graceMs"
-               (input)="set('graceMs', $any($event.target).valueAsNumber || 0)" />
-        <small>זמן נוסף שמקבלת תשובה שנשלחה ברגע האחרון</small>
-      </label>
-    </details>
-  </section>
-
-  <section class="card lg">
-    <h2>תובנות AI</h2>
-    <label class="toggle">
-      <input type="checkbox" role="switch" [checked]="f.aiEnabled" (change)="set('aiEnabled', $any($event.target).checked)" />
-      <span>תובנות AI בדשבורד</span>
-    </label>
-    <small>
-      התובנות נוצרות בשרת (Gemini) מנתונים מצטברים בלבד: משפחות, שאלות ומספרים, בלי שמות שחקנים, טלפונים או קודים.
-      כשכבוי, אין שום קריאה חיצונית.
-    </small>
-    <label>קריאות מקסימום בשעה
-      <input type="number" min="1" max="1000" inputmode="numeric" [value]="f.aiMaxCallsPerHour"
-             (input)="set('aiMaxCallsPerHour', $any($event.target).valueAsNumber || 0)" />
-      <small>להתאים למכסה החינמית של Gemini (AI Studio → Rate limits)</small>
-    </label>
-  </section>
-
-  <section class="card lg danger">
-    <h2>איפוס המשחק</h2>
-    <p>
-      מוחק את כל התוצאות ומאפס את לוח התוצאות, וכל המוזמנים יכולים לשחק מחדש. שימושי אחרי חזרה גנרלית.
-      @if (started()) { כרגע {{ started() }} התחילו לשחק. }
-      אי אפשר לבטל את זה.
-    </p>
-    <div class="reset">
-      <button type="button" class="b lg press" [class.armed]="confirmReset()" [disabled]="busy()" (click)="resetAll()">
-        {{ confirmReset() ? 'בטוח? לחצו שוב כדי למחוק את כל התוצאות' : 'איפוס המשחק לכולם' }}
       </button>
-      @if (confirmReset()) {
-        <button type="button" class="b link" (click)="confirmReset.set(false)">ביטול</button>
-      }
-    </div>
-    <small>לאיפוס של מוזמן אחד בלבד: מוזמנים, "איפוס" בשורה שלו.</small>
-  </section>
+    }
+  </div>
 
+  <!-- כל הגדרה היא אריח בגריד שממלא את השורה (כמו מסך המצגת): שם והסבר למעלה, הפקד ממלא את רוחב האריח בתחתית -->
+
+  <!-- זמינות המשחק: הנתונים החיים נשארים טעונים גם כשהטאב מוסתר (ספירת שאלות ומשחקים לטאבים האחרים) -->
+  <div class="panel" role="tabpanel" id="panel-game" aria-labelledby="tab-game" [hidden]="tab() !== 'game'">
+    <app-game-stats />
+
+    <section class="card lg">
+      <header class="card-head">
+        <h2>פתיחת המשחק</h2>
+        <p>מתי מוזמנים יכולים להיכנס למשחק.</p>
+      </header>
+      <div class="tiles">
+        <div class="tile">
+          <div class="meta">
+            <span class="name" id="now-label">פתיחה או סגירה מיידית</span>
+            <small>נשמר מיד, בלי לגעת בשאר השינויים בטופס.</small>
+          </div>
+          <div class="control now" role="group" aria-labelledby="now-label">
+            <button type="button" class="b lg gs press" [disabled]="busy()" (click)="setGameNow('Always')">
+              <app-icon name="play" />פתח עכשיו
+            </button>
+            <button type="button" class="b lg press" [disabled]="busy()" (click)="setGameNow('Closed')">
+              <app-icon name="x" />סגור עכשיו
+            </button>
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="meta">
+            <span class="name" id="mode-label">מצב המשחק</span>
+            <small>פתוח תמיד, לפי חלון זמן או סגור. נשמר עם כפתור השמירה.</small>
+          </div>
+          <div class="control">
+            <div class="segmented" role="radiogroup" aria-labelledby="mode-label" id="set-gameMode" tabindex="-1">
+              @for (m of [['Always', 'פתוח תמיד'], ['Window', 'לפי חלון זמן'], ['Closed', 'סגור']]; track m[0]) {
+                <button type="button" role="radio" class="b" [attr.aria-checked]="f.gameMode === m[0]" (click)="setMode($any(m[0]))">
+                  {{ m[1] }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- חלון הזמן: מחוץ לגריד האריחים (אחרת אריח ברוחב מלא מכווץ את השניים שמעליו), נפתח באנימציה -->
+      @if (f.gameMode === 'Window') {
+        <div class="reveal">
+          <div class="reveal-in">
+            <div class="tile window" id="window-tile">
+              <div class="meta">
+                <span class="name with-icon"><app-icon name="clock" />חלון הזמן</span>
+                <small>שעון ישראל. מחוץ לחלון המשחק סגור.</small>
+              </div>
+              <div class="control pair">
+                <div class="field">
+                  <label for="set-opensAt">נפתח ב־</label>
+                  <input id="set-opensAt" type="datetime-local" [value]="f.opensAt" (change)="set('opensAt', $any($event.target).value)"
+                         [attr.aria-invalid]="isErr('opensAt') || null" [attr.aria-describedby]="isErr('opensAt') ? 'err-field' : null" />
+                  @if (isErr('opensAt')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+                </div>
+                <div class="field">
+                  <label for="set-closesAt">נסגר ב־</label>
+                  <input id="set-closesAt" type="datetime-local" [value]="f.closesAt" (change)="set('closesAt', $any($event.target).value)"
+                         [attr.aria-invalid]="isErr('closesAt') || null" [attr.aria-describedby]="isErr('closesAt') ? 'err-field' : null" />
+                  @if (isErr('closesAt')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+
+  <!-- הגדרות שאלות -->
+  <div class="panel" role="tabpanel" id="panel-questions" aria-labelledby="tab-questions" [hidden]="tab() !== 'questions'">
+    <section class="card lg">
+      <header class="card-head">
+        <h2>שאלות</h2>
+        <p>כמה שאלות, כמה זמן לכל אחת, ומה כתוב בכותרת.</p>
+      </header>
+      <div class="tiles">
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-questionCount">שאלות במשחק</label>
+            @if (played() !== null && f.questionCount > active()!) {
+              <small class="warn" id="qc-help"><app-icon name="alert" />יש רק {{ active() }} שאלות פעילות, אז ישוחקו {{ played() }}.</small>
+            } @else if (played() !== null) {
+              <small id="qc-help">יש {{ active() }} שאלות פעילות, אז ישוחקו {{ played() }}. 0 = כולן.</small>
+            } @else {
+              <small id="qc-help">0 = כל השאלות הפעילות</small>
+            }
+          </div>
+          <div class="control">
+            <input id="set-questionCount" type="number" min="0" inputmode="numeric" [value]="f.questionCount"
+                   (input)="set('questionCount', $any($event.target).valueAsNumber || 0)"
+                   [attr.aria-invalid]="isErr('questionCount') || null"
+                   [attr.aria-describedby]="isErr('questionCount') ? 'err-field qc-help' : 'qc-help'" />
+            @if (isErr('questionCount')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-factsLabelCount">המספר בכותרת</label>
+            <small id="flc-help">מה שיופיע ב"X עובדות שלא ידעתם על אבא". ריק = {{ played() ?? 'כמספר השאלות' }}</small>
+          </div>
+          <div class="control">
+            <input id="set-factsLabelCount" type="number" min="1" inputmode="numeric"
+                   [placeholder]="played() !== null ? played() + ' (כמו מספר השאלות)' : 'כמספר השאלות'"
+                   [value]="f.factsLabelCount" (input)="set('factsLabelCount', $any($event.target).value)"
+                   [attr.aria-invalid]="isErr('factsLabelCount') || null"
+                   [attr.aria-describedby]="isErr('factsLabelCount') ? 'err-field flc-help' : 'flc-help'" />
+            @if (isErr('factsLabelCount')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-secondsPerQuestion">שניות לשאלה</label>
+            <small id="spq-help">בין 5 ל־300 שניות.</small>
+          </div>
+          <div class="control">
+            <input id="set-secondsPerQuestion" type="number" min="5" max="300" inputmode="numeric" [value]="f.secondsPerQuestion"
+                   (input)="set('secondsPerQuestion', $any($event.target).valueAsNumber || 0)"
+                   [attr.aria-invalid]="isErr('secondsPerQuestion') || null"
+                   [attr.aria-describedby]="isErr('secondsPerQuestion') ? 'err-field spq-help' : 'spq-help'" />
+            @if (isErr('secondsPerQuestion')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-ivrExtraSec">זמן נוסף בטלפון (שניות)</label>
+            <small id="ivr-help">למי שמשחק מטלפון כשר: השאלה והתשובות מוקראות, וזה לוקח זמן.</small>
+          </div>
+          <div class="control">
+            <input id="set-ivrExtraSec" type="number" min="0" max="300" inputmode="numeric" [value]="f.ivrExtraSec"
+                   (input)="set('ivrExtraSec', $any($event.target).valueAsNumber || 0)"
+                   [attr.aria-invalid]="isErr('ivrExtraSec') || null"
+                   [attr.aria-describedby]="isErr('ivrExtraSec') ? 'err-field ivr-help' : 'ivr-help'" />
+            @if (isErr('ivrExtraSec')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- קולות ולוח תוצאות -->
+  <div class="panel" role="tabpanel" id="panel-voices" aria-labelledby="tab-voices" [hidden]="tab() !== 'voices'">
+    <section class="card lg">
+      <header class="card-head">
+        <h2>קולות ולוח תוצאות</h2>
+        <p>מתי מתנגן הקול של אבא, ואיך מדורגות המשפחות.</p>
+      </header>
+      <div class="tiles">
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-voiceChance">סיכוי לקול של אבא אחרי תשובה</label>
+            <small id="voice-help">0% = אף פעם, 100% = אחרי כל תשובה.</small>
+          </div>
+          <div class="control">
+            <strong class="big-value" aria-hidden="true">{{ f.voicePct }}%</strong>
+            <input id="set-voiceChance" type="range" min="0" max="100" step="5" [value]="f.voicePct"
+                   (input)="set('voicePct', $any($event.target).valueAsNumber)"
+                   [attr.aria-invalid]="isErr('voiceChance') || null"
+                   [attr.aria-describedby]="isErr('voiceChance') ? 'err-field voice-help' : 'voice-help'" />
+            @if (isErr('voiceChance')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="meta">
+            <span class="name" id="rank-label">דירוג המשפחות לפי</span>
+            <small>"ממוצע לשחקן" הוגן יותר כשיש משפחות בגדלים שונים.</small>
+          </div>
+          <div class="control">
+            <div class="segmented" role="radiogroup" aria-labelledby="rank-label" id="set-leaderboardRank" tabindex="-1">
+              @for (r of [['Total', 'סך הכול'], ['Average', 'ממוצע לשחקן']]; track r[0]) {
+                <button type="button" role="radio" class="b" [attr.aria-checked]="f.leaderboardRank === r[0]"
+                        (click)="set('leaderboardRank', $any(r[0]))">{{ r[1] }}</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <details [open]="advancedOpen()" (toggle)="advancedOpen.set($any($event.target).open)">
+        <summary>מתקדם</summary>
+        <div class="tiles">
+          <div class="tile">
+            <div class="meta">
+              <label class="name" for="set-graceMs">מרווח חסד לרשת (אלפיות שנייה)</label>
+              <small id="grace-help">זמן נוסף שמקבלת תשובה שנשלחה ברגע האחרון.</small>
+            </div>
+            <div class="control">
+              <input id="set-graceMs" type="number" min="0" inputmode="numeric" [value]="f.graceMs"
+                     (input)="set('graceMs', $any($event.target).valueAsNumber || 0)"
+                     [attr.aria-invalid]="isErr('graceMs') || null"
+                     [attr.aria-describedby]="isErr('graceMs') ? 'err-field grace-help' : 'grace-help'" />
+              @if (isErr('graceMs')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <!-- תובנות AI -->
+  <div class="panel" role="tabpanel" id="panel-ai" aria-labelledby="tab-ai" [hidden]="tab() !== 'ai'">
+    <section class="card lg">
+      <header class="card-head">
+        <h2>תובנות AI</h2>
+        <p>התובנות נוצרות בשרת (Gemini) מנתונים מצטברים בלבד: משפחות, שאלות ומספרים, בלי שמות שחקנים, טלפונים או קודים.</p>
+      </header>
+      <div class="tiles">
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-aiEnabled">תובנות AI בדשבורד</label>
+            <small id="ai-help">כשכבוי, אין שום קריאה חיצונית.</small>
+          </div>
+          <div class="control switch-row">
+            <span class="switch-state" aria-hidden="true">{{ f.aiEnabled ? 'פעיל' : 'כבוי' }}</span>
+            <input id="set-aiEnabled" class="switch" type="checkbox" role="switch" aria-describedby="ai-help"
+                   [checked]="f.aiEnabled" (change)="set('aiEnabled', $any($event.target).checked)" />
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="meta">
+            <label class="name" for="set-aiMaxCallsPerHour">קריאות מקסימום בשעה</label>
+            <small id="aimax-help">להתאים למכסה החינמית של Gemini (AI Studio → Rate limits).</small>
+          </div>
+          <div class="control">
+            <input id="set-aiMaxCallsPerHour" type="number" min="1" max="1000" inputmode="numeric" [value]="f.aiMaxCallsPerHour"
+                   (input)="set('aiMaxCallsPerHour', $any($event.target).valueAsNumber || 0)"
+                   [attr.aria-invalid]="isErr('aiMaxCallsPerHour') || null"
+                   [attr.aria-describedby]="isErr('aiMaxCallsPerHour') ? 'err-field aimax-help' : 'aimax-help'" />
+            @if (isErr('aiMaxCallsPerHour')) { <small class="err" id="err-field"><app-icon name="alert" />{{ errorText() }}</small> }
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- תחזוקה -->
+  <div class="panel" role="tabpanel" id="panel-maintenance" aria-labelledby="tab-maintenance" [hidden]="tab() !== 'maintenance'">
+    <section class="card lg danger">
+      <header class="card-head">
+        <h2>איפוס המשחק</h2>
+        <p>מוחק את כל התוצאות ומאפס את לוח התוצאות, וכל המוזמנים יכולים לשחק מחדש. שימושי אחרי חזרה גנרלית.</p>
+      </header>
+      <div class="tiles">
+        <div class="tile stat">
+          <span class="name">התחילו לשחק עד עכשיו</span>
+          <strong class="big-value">{{ started() ?? '·' }}</strong>
+          <small>לאיפוס של מוזמן אחד בלבד: מוזמנים, "איפוס" בשורה שלו.</small>
+        </div>
+        <div class="tile action">
+          <p class="irreversible"><app-icon name="alert" />אי אפשר לבטל את זה.</p>
+          <div class="reset">
+            <button type="button" class="b lg press" [class.armed]="confirmReset()" [disabled]="busy()" (click)="resetAll()">
+              <app-icon name="trash" />
+              {{ confirmReset() ? 'בטוח? לחצו שוב כדי למחוק את כל התוצאות' : 'איפוס המשחק לכולם' }}
+            </button>
+            @if (confirmReset()) {
+              <button type="button" class="b link" (click)="confirmReset.set(false)">ביטול</button>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- פס שמירה: אחד לכל הטאבים, צמוד לתחתית אזור ההגדרות -->
   @if (dirty() || message()) {
-    <div class="savebar lg" role="status">
+    <div class="savebar lg" [class.has-actions]="dirty()">
       @if (message(); as m) {
-        <span [class.error]="!m.ok">{{ m.text }}</span>
+        <span class="status" [class.ok]="m.ok" [class.error]="!m.ok" [attr.role]="m.ok ? 'status' : 'alert'">
+          <app-icon [name]="m.ok ? 'check-circle' : 'alert'" />{{ m.text }}
+        </span>
       } @else {
-        <span>יש שינויים שלא נשמרו</span>
+        <span class="status pending" role="status">
+          <span class="dot" aria-hidden="true"></span>
+          <span>שינויים שלא נשמרו: {{ dirtyLabels() }}</span>
+        </span>
       }
       @if (dirty()) {
-        <button type="button" class="b press" (click)="revert()">ביטול</button>
-        <button type="button" class="b lg gs press" [disabled]="busy()" (click)="save()">שמירה</button>
+        <div class="actions">
+          <button type="button" class="b press" (click)="revert()">ביטול</button>
+          <button type="button" class="b lg gs press" [disabled]="busy()" (click)="save()">שמירה</button>
+        </div>
       }
     </div>
   }

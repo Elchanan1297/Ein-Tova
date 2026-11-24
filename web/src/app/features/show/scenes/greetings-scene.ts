@@ -12,7 +12,7 @@ const SLIDE_MS = 9000;
       @for (k of [index()]; track k) {
         <article class="slide rise" [class.text-only]="!image()">
           @if (image(); as src) {
-            <div class="media"><img [src]="src" alt="" /></div>
+            <div class="media"><img class="backdrop" [src]="src" alt="" /><img class="photo" [src]="src" alt="" /></div>
           }
           <div class="words">
             @if (g.body) {
@@ -37,8 +37,11 @@ const SLIDE_MS = 9000;
     :host { display: grid; grid-template-rows: 1fr auto; height: 100%; padding: 6vh 6vw 4vh; }
     .slide { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 5vw; min-height: 0; }
     .slide.text-only { grid-template-columns: 1fr; text-align: center; }
-    .media { height: 78vh; border-radius: 4vh; overflow: hidden; box-shadow: 0 3vh 6vh rgba(0, 0, 0, 0.45); }
-    .media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+    /* התמונה תמיד שלמה; שאר המסגרת מתמלא בגרסה מטושטשת שלה */
+    .media { position: relative; height: 78vh; border-radius: 4vh; overflow: hidden; box-shadow: 0 3vh 6vh rgba(0, 0, 0, 0.45); }
+    .media img { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .media .photo { object-fit: contain; }
+    .media .backdrop { object-fit: cover; filter: blur(4vh) brightness(0.55) saturate(1.25); transform: scale(1.2); }
     .words { display: grid; gap: 3vh; }
     .body { margin: 0; font: 700 5vh / 1.45 var(--font-display); color: var(--color-cream); }
     .text-only .body { font-size: 7vh; }

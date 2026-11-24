@@ -147,19 +147,9 @@
 
       <div class="tools">
         <input type="search" placeholder="חיפוש שם" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="חיפוש שם" />
-        <select [value]="playerSort()" (change)="playerSort.set($any($event.target).value)" aria-label="מיון">
-          <option value="rank">לפי דירוג</option>
-          <option value="speed">הכי מהירים</option>
-          <option value="progress">לפי התקדמות</option>
-          <option value="name">לפי שם</option>
-        </select>
+        <app-select label="מיון" [options]="playerSortOptions" [(value)]="playerSort" />
         @if (admin()) {
-          <select [value]="status()" (change)="status.set($any($event.target).value)" aria-label="מצב">
-            <option value="all">כל המצבים</option>
-            <option value="playing">משחקים עכשיו</option>
-            <option value="done">סיימו</option>
-            <option value="none">לא התחילו</option>
-          </select>
+          <app-select label="מצב" [options]="statusOptions" [(value)]="status" />
         }
       </div>
 
@@ -198,12 +188,7 @@
   @case ('questions') {
     <section class="card lg">
       <div class="tools">
-        <select [value]="questionSort()" (change)="questionSort.set($any($event.target).value)" aria-label="מיון">
-          <option value="order">לפי הסדר</option>
-          <option value="hard">הכי קשות</option>
-          <option value="easy">הכי קלות</option>
-          <option value="slow">הכי איטיות</option>
-        </select>
+        <app-select label="מיון" [options]="questionSortOptions" [(value)]="questionSort" />
       </div>
       <ol class="questions" role="list">
         @for (q of questions(); track q.questionId) {

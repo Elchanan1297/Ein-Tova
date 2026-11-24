@@ -6,6 +6,7 @@
 
 .media {
   position: relative;
+  overflow: hidden;
   width: 100%;
   aspect-ratio: 4 / 5;
   max-height: min(62dvh, 560px);
@@ -19,6 +20,15 @@
     border: 0;
     object-fit: cover;
     object-position: 50% 20%; // פנים בדרך כלל בחלק העליון
+  }
+
+  // תמונת ברכה: מוצגת שלמה בכל יחס (לאורך, לרוחב, ריבוע), בלי לחתוך פנים בקצוות
+  img.photo { object-fit: contain; object-position: center; }
+  img.backdrop {
+    object-fit: cover;
+    object-position: center;
+    filter: blur(28px) brightness(0.55) saturate(1.25);
+    transform: scale(1.2); // הטשטוש לא משאיר שוליים בהירים בקצוות
   }
 
   &.video { aspect-ratio: 16 / 9; }

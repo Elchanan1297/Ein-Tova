@@ -31,7 +31,7 @@ li {
   app-icon { width: 20px; height: 20px; }
 }
 
-input, select {
+input {
   padding: 8px 10px;
   border: 1px solid var(--glass-border);
   border-radius: 10px;
@@ -41,6 +41,8 @@ input, select {
   font-size: 16px;
   color-scheme: dark;
 }
+
+.icon-sel { min-width: 150px; --sel-radius: 10px; --sel-pad: 6px 10px; }
 
 .time { width: 110px; font-family: var(--font-display); font-weight: 700; color: var(--color-gold); }
 .title { flex: 1; min-width: 160px; }

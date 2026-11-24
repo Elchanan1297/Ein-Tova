@@ -82,6 +82,8 @@ h1 { margin: 0; font-size: 28px; }
 }
 
 .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+// הסבר קטן ליד כותרת לא מוריד את השדה: השדות בשורה מיושרים לתחתית
+.row label { align-content: end; }
 
 label, .field {
   display: grid;
@@ -117,13 +119,13 @@ input[type='text'], input[type='datetime-local'] {
 .savebar {
   position: fixed;
   bottom: calc(16px + env(safe-area-inset-bottom));
-  left: 50%;
+  left: calc((100% - var(--admin-nav-w, 0px)) / 2);
   translate: -50% 0;
   z-index: 20;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: min(calc(100% - 32px), 560px);
+  width: min(calc(100% - var(--admin-nav-w, 0px) - 32px), 560px);
   padding: 10px 12px 10px 18px;
   border-radius: var(--radius-pill);
   background-color: rgba(30, 34, 53, 0.85);
@@ -147,4 +149,11 @@ dialog {
   p { margin: 0; line-height: 1.5; color: rgba(248, 243, 234, 0.8); }
   .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
   button { padding: 10px 18px; border-radius: var(--radius-pill); font-weight: 700; }
+}
+
+// מסך רחב: שני טורים של כרטיסים (מתי | תאריך עברי, נוסח | פתיחה אוטומטית), הכותרת והנעילה לרוחב מלא
+@media (min-width: 1280px) {
+  :host { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-content: start; }
+  .head, .master, .card:last-of-type { grid-column: 1 / -1; }
+  .card { align-content: start; }
 }

@@ -98,7 +98,7 @@
 .toast {
   position: fixed;
   bottom: calc(16px + env(safe-area-inset-bottom));
-  left: 50%;
+  left: calc((100% - var(--admin-nav-w, 0px)) / 2);
   translate: -50% 0;
   z-index: 40;
   margin: 0;

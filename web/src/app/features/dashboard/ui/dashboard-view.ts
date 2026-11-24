@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { GlassSelect, SelectOption } from '../../../shared/ui/select/glass-select';
 import { Dashboard, DashboardPlayer, DashboardQuestion, PlayerStatus } from '../data/dashboard-models';
 
 export type DashboardTab = 'summary' | 'families' | 'players' | 'questions';
@@ -19,9 +20,28 @@ const TABS: { id: DashboardTab; label: string }[] = [
  * אינטראקטיבי: לחיצה על משפחה מסננת את השחקנים, מיון, חיפוש וסינון לפי מצב.
  * admin: גם מי שלא התחיל, מצב "משחק עכשיו" וסימון טלפון כשר.
  */
+const PLAYER_SORT_OPTIONS: SelectOption<PlayerSort>[] = [
+  { value: 'rank', label: 'לפי דירוג' },
+  { value: 'speed', label: 'הכי מהירים' },
+  { value: 'progress', label: 'לפי התקדמות' },
+  { value: 'name', label: 'לפי שם' },
+];
+const STATUS_OPTIONS: SelectOption<StatusFilter>[] = [
+  { value: 'all', label: 'כל המצבים' },
+  { value: 'playing', label: 'משחקים עכשיו' },
+  { value: 'done', label: 'סיימו' },
+  { value: 'none', label: 'לא התחילו' },
+];
+const QUESTION_SORT_OPTIONS: SelectOption<QuestionSort>[] = [
+  { value: 'order', label: 'לפי הסדר' },
+  { value: 'hard', label: 'הכי קשות' },
+  { value: 'easy', label: 'הכי קלות' },
+  { value: 'slow', label: 'הכי איטיות' },
+];
+
 @Component({
   selector: 'app-dashboard-view',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, GlassSelect],
   templateUrl: './dashboard-view.html',
   styleUrl: './dashboard-view.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +55,9 @@ export class DashboardView {
   protected readonly tabs = TABS;
   protected readonly tab = signal<DashboardTab>('summary');
   protected readonly familyId = signal<number | null>(null);
+  protected readonly playerSortOptions = PLAYER_SORT_OPTIONS;
+  protected readonly statusOptions = STATUS_OPTIONS;
+  protected readonly questionSortOptions = QUESTION_SORT_OPTIONS;
   protected readonly playerSort = signal<PlayerSort>('rank');
   protected readonly status = signal<StatusFilter>('all');
   protected readonly search = signal('');

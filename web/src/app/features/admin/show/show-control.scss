@@ -24,7 +24,8 @@
 
 .now { color: var(--color-cream); font-family: var(--font-body); }
 
-.scenes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.scenes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .scenes { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .scene {
   display: grid;
@@ -102,3 +103,11 @@
 
 .scene small { display: block; font-size: 11px; font-weight: 600; opacity: 0.8; }
 .note-stats { margin: 10px 0 0; font-size: 13px; color: rgba(248, 243, 234, 0.65); }
+
+// מסך רחב: הסצנות בשורה אחת לרוחב מלא, וחידון והכרזת זוכה זה לצד זה
+@media (min-width: 1100px) {
+  :host { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-content: start; }
+  .head, .hint, .card:first-of-type { grid-column: 1 / -1; }
+  .card { align-content: start; padding: 20px 24px; }
+  .winner { grid-template-rows: auto 1fr auto; .big { align-self: end; } }
+}
